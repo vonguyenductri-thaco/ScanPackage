@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+             x:Class="ScanPackage.BarcodeScanPage"
+             Title="Quét mã">
+
+    <Grid>
+        <zxing:CameraBarcodeReaderView
+            x:Name="cameraView"
+            BarcodesDetected="CameraView_BarcodesDetected"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill" />
+
+        <Label x:Name="ResultLabel"
+               Text="Đang quét..."
+               BackgroundColor="#80000000"
+               TextColor="White"
+               FontSize="18"
+               HorizontalOptions="Center"
+               VerticalOptions="End"
+               Padding="12" />
+    </Grid>
+</ContentPage>

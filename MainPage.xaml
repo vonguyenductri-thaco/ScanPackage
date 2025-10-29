@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.MainPage"
+             Title="Lịch sử tệp Excel">
+
+    <VerticalStackLayout Padding="16" Spacing="10">
+
+        <Label Text="Danh sách file Excel đã tạo"
+               FontAttributes="Bold"
+               FontSize="20"
+               HorizontalOptions="Center" />
+
+        <!-- Danh sách file -->
+        <CollectionView x:Name="FilesView"
+                        ItemsSource="{Binding Files}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnFileSelected">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="10" Margin="5"
+                           BorderColor="#ccc"
+                           HasShadow="True"
+                           CornerRadius="10">
+                        <Label Text="{Binding FileName}" FontSize="16" />
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Text="Tạo mới"
+                FontSize="18"
+                Clicked="OnCreateClicked"
+                BackgroundColor="#4CAF50"
+                TextColor="White"
+                CornerRadius="10"
+                Margin="0,20,0,0"/>
+
+    </VerticalStackLayout>
+</ContentPage>

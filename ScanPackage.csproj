@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Chỉ build Android với .NET 8 -->
+		<TargetFrameworks>net8.0-android</TargetFrameworks>
+		<TargetPlatformVersion>34</TargetPlatformVersion>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>ScanPackage</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<ApplicationTitle>ScanPackage</ApplicationTitle>
+		<ApplicationId>com.companyname.scanpackage</ApplicationId>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- ML Kit cần minSdk >= 23 -->
+		<SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
+
+		<!-- Cho phép restore/build mượt với MAUI .NET 8 -->
+		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+
+		<!-- FIX duplicate types -->
+		<AndroidDexTool>d8</AndroidDexTool>
+		<AndroidLinkTool>r8</AndroidLinkTool>
+		<AndroidEnableProguard>false</AndroidEnableProguard>
+		<_AndroidAllowDuplicateTypes>true</_AndroidAllowDuplicateTypes>
+
+		<!-- Bỏ qua warning downgrade -->
+		<NoWarn>NU1605</NoWarn>
+
+		<!-- Tắt AOT và linker để tránh lỗi runtime -->
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidLinkMode>None</AndroidLinkMode>
+
+		<!-- Tắt fast deployment cho Debug để tránh warning -->
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+	</PropertyGroup>
+
+	<!-- Tài nguyên MAUI -->
+	<ItemGroup>
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<MauiFont Include="Resources\Fonts\*" />
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<!-- Gói NuGet -->
+	<ItemGroup>
+		<!-- MAUI Controls nhánh .NET 8 -->
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+
+		<!-- CommunityToolkit cho .NET 8 -->
+		<PackageReference Include="CommunityToolkit.Maui" Version="8.0.0" />
+
+		<!-- Excel -->
+		<PackageReference Include="EPPlus" Version="8.2.1" />
+
+		<!-- ZXing .NET 8 -->
+		<PackageReference Include="ZXing.Net.Maui" Version="0.4.0" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
+
+		<!-- ML Kit: Comment tạm thời để test app trước -->
+		<!-- 
+		<PackageReference Include="Xamarin.Google.MLKit.TextRecognition" Version="116.0.1.5" />
+		<PackageReference Include="Xamarin.Google.MLKit.Vision.Common" Version="117.3.0.16" />
+		-->
+
+		<!-- AndroidX: VERSION TƯƠNG THÍCH VỚI MAUI 8.0.100 -->
+		<!-- Chỉ khai báo những package CẦN THIẾT, để MAUI tự resolve phần còn lại -->
+	</ItemGroup>
+
+	<!-- Biên dịch XAML -->
+	<ItemGroup>
+		<MauiXaml Update="App.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="BarcodeScanPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="DataEntryPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="SetupPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+	</ItemGroup>
+
+</Project>

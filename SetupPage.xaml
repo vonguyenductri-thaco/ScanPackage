@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.SetupPage"
+             Title="Thiết lập bảng">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16">
+
+        <!-- Tiêu đề và nội dung chính -->
+        <ScrollView Grid.Row="0" Grid.RowSpan="2">
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Tạo bảng mới"
+                       FontAttributes="Bold"
+                       FontSize="22"
+                       HorizontalOptions="Center"
+                       Margin="0,10,0,20"/>
+
+                <Label Text="Số hàng:"/>
+                <Entry x:Name="RowsEntry"
+                       Keyboard="Numeric"
+                       Placeholder="Nhập số hàng"
+                       Text="10"/>
+
+                <Label Text="Số cột:"/>
+                <Entry x:Name="ColsEntry"
+                       Keyboard="Numeric"
+                       Placeholder="Nhập số cột"
+                       Text="15"/>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Nút tạo bảng ở cuối cùng -->
+        <Button Grid.Row="2"
+                Text="Tạo bảng"
+                BackgroundColor="#2196F3"
+                TextColor="White"
+                FontSize="18"
+                CornerRadius="10"
+                HeightRequest="55"
+                Margin="0,15,0,10"
+                VerticalOptions="End"
+                Clicked="OnCreateClicked" />
+    </Grid>
+</ContentPage>
