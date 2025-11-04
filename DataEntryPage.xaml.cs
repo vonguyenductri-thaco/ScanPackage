@@ -164,8 +164,9 @@ public partial class DataEntryPage : ContentPage
             cellLabel.BackgroundColor = Colors.White;
             _highlightLabel = null;
 
-            if (_autoContinueScan)
-                _ = NextCellAndScan(rr, cc); // fire & forget
+            // Tắt tính năng auto continue scan - dừng lại ở ô vừa quét
+            // if (_autoContinueScan)
+            //     _ = NextCellAndScan(rr, cc); // fire & forget
         }));
     }
 
