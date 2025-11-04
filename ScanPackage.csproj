@@ -20,13 +20,15 @@
 		<!-- ML Kit cần minSdk >= 23 -->
 		<SupportedOSPlatformVersion>23.0</SupportedOSPlatformVersion>
 
-		<!-- Cho phép restore/build mượt với MAUI .NET 8 -->
-		<SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+		<!-- Cho phép MAUI tự quản lý AndroidX packages -->
+		<SkipValidateMauiImplicitPackageReferences>false</SkipValidateMauiImplicitPackageReferences>
 
-		<!-- FIX duplicate types -->
+		<!-- FIX duplicate types: Tắt R8 code shrinker trong Debug để tránh duplicate class errors -->
 		<AndroidDexTool>d8</AndroidDexTool>
-		<AndroidLinkTool>r8</AndroidLinkTool>
+		<AndroidLinkTool Condition="'$(Configuration)' == 'Release'">r8</AndroidLinkTool>
+		<AndroidLinkTool Condition="'$(Configuration)' == 'Debug'">d8</AndroidLinkTool>
 		<AndroidEnableProguard>false</AndroidEnableProguard>
+		<AndroidEnableCodeShrinking Condition="'$(Configuration)' == 'Debug'">false</AndroidEnableCodeShrinking>
 		<_AndroidAllowDuplicateTypes>true</_AndroidAllowDuplicateTypes>
 
 		<!-- Bỏ qua warning downgrade -->
@@ -36,8 +38,11 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 		<AndroidLinkMode>None</AndroidLinkMode>
 
-		<!-- Tắt fast deployment cho Debug để tránh warning -->
-		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<!-- Bật fast deployment để tránh lỗi signing -->
+		<EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
+
+		<!-- Keep AndroidX Startup để tránh lỗi InitializationProvider -->
+		<AndroidUseDesignerSupport>false</AndroidUseDesignerSupport>
 	</PropertyGroup>
 
 	<!-- Tài nguyên MAUI -->
@@ -46,13 +51,15 @@
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		<MauiFont Include="Resources\Fonts\*" />
+		<MauiFont Include="Resources\Fonts\OpenSans-Regular.ttf" Alias="OpenSansRegular" />
+		<MauiFont Include="Resources\Fonts\OpenSans-Semibold.ttf" Alias="OpenSansSemibold" />
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<!-- Gói NuGet -->
 	<ItemGroup>
 		<!-- MAUI Controls nhánh .NET 8 -->
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
 
 		<!-- CommunityToolkit cho .NET 8 -->
@@ -71,8 +78,10 @@
 		<PackageReference Include="Xamarin.Google.MLKit.Vision.Common" Version="117.3.0.16" />
 		-->
 
-		<!-- AndroidX: VERSION TƯƠNG THÍCH VỚI MAUI 8.0.100 -->
-		<!-- Chỉ khai báo những package CẦN THIẾT, để MAUI tự resolve phần còn lại -->
+		<!-- AndroidX: MAUI tự quản lý các package cần thiết -->
+		<!-- Chỉ giữ lại Startup nếu cần thiết -->
+		<PackageReference Include="Xamarin.AndroidX.Startup.StartupRuntime" Version="1.1.1.7" />
+		<!-- MAUI sẽ tự động resolve các AndroidX packages khác (Core, AppCompat, Material, etc.) -->
 	</ItemGroup>
 
 	<!-- Biên dịch XAML -->
