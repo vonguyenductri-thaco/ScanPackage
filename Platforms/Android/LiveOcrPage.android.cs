@@ -31,6 +31,7 @@ public partial class LiveOcrPage
     private dynamic? _textRecognizer;
     private bool _completed;
     private bool _acceptNextResult;
+    private System.Threading.CancellationTokenSource? _scanTimeoutCts;
 
     partial void OnAppearingPlatform()
     {
@@ -199,6 +200,9 @@ public partial class LiveOcrPage
         {
             System.Diagnostics.Debug.WriteLine("OnDisappearingPlatform: Cleaning up camera...");
             _completed = true;
+            _scanTimeoutCts?.Cancel();
+            _scanTimeoutCts?.Dispose();
+            _scanTimeoutCts = null;
             _cameraProvider?.UnbindAll();
             _cameraExecutor?.Shutdown();
             _textRecognizer?.Dispose();
@@ -218,6 +222,11 @@ public partial class LiveOcrPage
     {
         try
         {
+            // Hủy timeout cũ nếu có
+            _scanTimeoutCts?.Cancel();
+            _scanTimeoutCts?.Dispose();
+            _scanTimeoutCts = new System.Threading.CancellationTokenSource();
+
             _acceptNextResult = true;
             Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -227,6 +236,32 @@ public partial class LiveOcrPage
                     ResultLabel.TextColor = Microsoft.Maui.Graphics.Colors.Gray;
                     CheckmarkIcon.IsVisible = false;
                     ConfirmButton.IsEnabled = false;
+                }
+            });
+
+            // Set timeout 10 giây - nếu không quét được thì thông báo
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    await System.Threading.Tasks.Task.Delay(10000, _scanTimeoutCts.Token);
+                    // Nếu sau 10 giây vẫn chưa có kết quả
+                    if (_acceptNextResult && !_completed)
+                    {
+                        _acceptNextResult = false;
+                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            if (ResultLabel != null)
+                            {
+                                ResultLabel.Text = "Không tìm thấy. Thử lại?";
+                                ResultLabel.TextColor = Microsoft.Maui.Graphics.Colors.Orange;
+                            }
+                        });
+                    }
+                }
+                catch (System.Threading.Tasks.TaskCanceledException)
+                {
+                    // Timeout bị hủy vì đã có kết quả - OK
                 }
             });
         }
@@ -255,6 +290,13 @@ public partial class LiveOcrPage
         public void Analyze(IImageProxy image)
         {
             if (_page._completed || _page._textRecognizer == null)
+            {
+                image.Close();
+                return;
+            }
+
+            // Chỉ xử lý khi đang chờ kết quả (sau khi nhấn chụp)
+            if (!_page._acceptNextResult)
             {
                 image.Close();
                 return;
@@ -398,6 +440,8 @@ public partial class LiveOcrPage
                 if (!string.IsNullOrWhiteSpace(candidate) && _page._acceptNextResult)
                 {
                     _page._acceptNextResult = false;
+                    // Hủy timeout vì đã có kết quả
+                    _page._scanTimeoutCts?.Cancel();
                     Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                     {
                         _page.UpdateResult(candidate!);
