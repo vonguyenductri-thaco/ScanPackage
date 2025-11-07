@@ -9,7 +9,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        // Bọc MainPage trong NavigationPage
-        return new Window(new NavigationPage(new MainPage()));
+        // Bắt đầu bằng trang StartPage (logo), sau đó điều hướng sang MainPage
+        return new Window(new NavigationPage(new StartPage()));
     }
 }

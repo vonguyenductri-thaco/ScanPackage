@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.OcrCropPage"
+             Title="Chọn vùng quét">
+
+    <Grid RowDefinitions="*,Auto" ColumnDefinitions="*">
+        <!-- Container cho ảnh có thể pan -->
+        <Grid>
+            <!-- ScrollView cho phép pan hình ảnh -->
+            <ScrollView x:Name="ImageScrollView"
+                       Orientation="Both"
+                       HorizontalScrollBarVisibility="Never"
+                       VerticalScrollBarVisibility="Never">
+                <Image x:Name="PhotoView"
+                       Aspect="AspectFit"
+                       MinimumWidthRequest="400"
+                       MinimumHeightRequest="400"/>
+            </ScrollView>
+
+            <!-- Overlay vùng quét: hình chữ nhật ngang cố định ở giữa -->
+            <Grid x:Name="Overlay" 
+                  InputTransparent="True"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill">
+                <!-- Lớp mờ đen xung quanh -->
+                <BoxView BackgroundColor="Black" Opacity="0.35"/>
+                
+                <!-- Khung quét cố định ở giữa -->
+                <Grid x:Name="CropFrame"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center"
+                      WidthRequest="280"
+                      HeightRequest="120"
+                      BackgroundColor="Transparent">
+                    <Border Stroke="Lime" StrokeThickness="3" Background="Transparent"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Nút xác nhận -->
+        <HorizontalStackLayout Grid.Row="1" Padding="12" Spacing="12" HorizontalOptions="Center">
+            <Button Text="Dùng ảnh này" Clicked="OnConfirmClicked"/>
+            <Button Text="Chụp lại" Clicked="OnRetakeClicked"/>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
+
+
+

@@ -24,11 +24,22 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .UseBarcodeReader()
+            .ConfigureMauiHandlers(handlers =>
+            {
+#if ANDROID
+                handlers.AddHandler<CameraPreviewView, ScanPackage.Platforms.Android.CameraPreviewViewHandler>();
+#endif
+            })
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+#if ANDROID
+        // Register Android OCR service
+        builder.Services.AddSingleton<IOcrService, AndroidOcrService>();
+#endif
 
         return builder.Build();
     }

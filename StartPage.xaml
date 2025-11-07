@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.StartPage"
+             Title="Start up"
+             BackgroundColor="White">
+    <Grid>
+        <VerticalStackLayout VerticalOptions="Center" 
+                           HorizontalOptions="Center" 
+                           Spacing="24"
+                           Padding="40">
+            <Frame HasShadow="True"
+                   CornerRadius="20"
+                   Padding="20"
+                   BackgroundColor="#F5F5F5"
+                   HorizontalOptions="Center">
+                <Image Source="Resources/Images/dotnet_bot.png" 
+                       WidthRequest="120" 
+                       HeightRequest="120"/>
+            </Frame>
+            
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Label Text="Scan Package"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="#212121"
+                       HorizontalOptions="Center"/>
+                <Label Text="Ứng dụng quét và quản lý gói hàng"
+                       FontSize="14"
+                       TextColor="#666"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
+
+
+
+
+
+
+
+

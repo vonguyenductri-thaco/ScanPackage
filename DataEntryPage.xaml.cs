@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
@@ -28,26 +30,60 @@ public partial class DataEntryPage : ContentPage
     private readonly Dictionary<(int r, int c), Label> _cellLabelMap = new();
 
     private Label? _highlightLabel;
-    private bool _autoContinueScan = true;
+    private string? _existingFilePath; // Đường dẫn file nếu đang chỉnh sửa
 
-    public DataEntryPage(int rows, int cols)
+    public DataEntryPage(int rows, int cols) : this(rows, cols, null)
+    {
+    }
+
+    public DataEntryPage(int rows, int cols, string? existingFilePath)
     {
         InitializeComponent();
 
         _rows = rows;
         _cols = cols;
         _cellValues = new string[_rows, _cols];
+        _existingFilePath = existingFilePath;
 
-        DateEntry.Text = DateTime.Now.ToString("dd/MM/yyyy");
+        DateEntry.Date = DateTime.Now;
 
         NavigationPage.SetHasBackButton(this, false);
-        ToolbarItems.Add(new ToolbarItem
-        {
-            Text = "Quay lại",
-            Command = new Command(async () => await ConfirmLeaveAsync())
-        });
 
         BuildGrid();
+    }
+
+    // Method để set giá trị cell từ bên ngoài (khi load từ Excel)
+    public void SetCellValue(int row, int col, string value)
+    {
+        if (row >= 0 && row < _rows && col >= 0 && col < _cols)
+        {
+            _cellValues[row, col] = value;
+            // Cập nhật UI nếu grid đã được build
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (_cellLabelMap.TryGetValue((row, col), out var label))
+                {
+                    label.Text = value;
+                }
+            });
+        }
+    }
+
+    // Method để load toàn bộ dữ liệu từ mảng (sau khi grid đã build)
+    public void LoadData(string[,] data)
+    {
+        if (data == null) return;
+        
+        int dataRows = data.GetLength(0);
+        int dataCols = data.GetLength(1);
+        
+        for (int r = 0; r < Math.Min(dataRows, _rows); r++)
+        {
+            for (int c = 0; c < Math.Min(dataCols, _cols); c++)
+            {
+                SetCellValue(r, c, data[r, c] ?? "");
+            }
+        }
     }
 
     // ====================== Lưới dữ liệu ======================
@@ -74,12 +110,14 @@ public partial class DataEntryPage : ContentPage
             {
                 Text = $"Cột {colNum}",
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Colors.LightGray,
+                BackgroundColor = Color.FromArgb("#F5F5F5"),
+                TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center,
                 Margin = 1,
                 HeightRequest = 40,
-                WidthRequest = 120
+                WidthRequest = 120,
+                FontSize = 13
             };
             DataGrid.Children.Add(lbl);
             Grid.SetRow(lbl, 0);
@@ -94,18 +132,20 @@ public partial class DataEntryPage : ContentPage
             {
                 Text = stt.ToString(),
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Colors.LightGray,
+                BackgroundColor = Color.FromArgb("#F5F5F5"),
+                TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center,
                 Margin = 1,
-                HeightRequest = 40
+                HeightRequest = 40,
+                FontSize = 13
             };
             DataGrid.Children.Add(lbl);
             Grid.SetRow(lbl, r);
             Grid.SetColumn(lbl, 0);
         }
 
-        // Ô dữ liệu = Label trong Frame + Tap
+        // Ô dữ liệu = Label trong Border + Tap
         for (int r = 1; r <= _rows; r++)
         {
             for (int c = 1; c <= _cols; c++)
@@ -117,35 +157,36 @@ public partial class DataEntryPage : ContentPage
                 {
                     Text = "",
                     BackgroundColor = Colors.White,
-                    FontSize = 14,
+                    FontSize = 13,
                     HeightRequest = 40,
                     WidthRequest = 120,
                     Margin = 1,
                     HorizontalTextAlignment = TextAlignment.Center,
                     VerticalTextAlignment = TextAlignment.Center,
-                    TextColor = Colors.Black
+                    TextColor = Color.FromArgb("#212121")
                 };
 
                 var tap = new TapGestureRecognizer();
                 tap.Tapped += async (_, __) => await StartScanForCell(cellLabel, rr, cc);
                 cellLabel.GestureRecognizers.Add(tap);
 
-                var frame = new Frame
+                var border = new Border
                 {
                     Content = cellLabel,
-                    BorderColor = Colors.Silver,
+                    Stroke = Color.FromArgb("#E0E0E0"),
+                    StrokeThickness = 1,
                     Padding = 0,
                     Margin = new Thickness(0.5),
-                    HasShadow = false,
-                    CornerRadius = 0
+                    BackgroundColor = Colors.White
                 };
-                frame.GestureRecognizers.Add(tap);
+                border.StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(2) };
+                border.GestureRecognizers.Add(tap);
 
                 _cellLabelMap[(rr, cc)] = cellLabel;
 
-                DataGrid.Children.Add(frame);
-                Grid.SetRow(frame, r);
-                Grid.SetColumn(frame, c);
+                DataGrid.Children.Add(border);
+                Grid.SetRow(border, r);
+                Grid.SetColumn(border, c);
             }
         }
     }
@@ -154,20 +195,52 @@ public partial class DataEntryPage : ContentPage
     {
         HighlightCell(cellLabel);
 
-        await Navigation.PushAsync(new BarcodeScanPage(result =>
+        // Cho phép chọn giữa nhập tay hoặc quét barcode
+        var action = await DisplayActionSheet(
+            "Nhập dữ liệu cho ô",
+            "Hủy",
+            null,
+            "Nhập tay",
+            "Quét barcode");
+
+        string? entered = null;
+
+        if (action == "Nhập tay")
         {
-            _cellValues[rr, cc] = result;
-            cellLabel.Text = result;
+            entered = await DisplayPromptAsync("Nhập dữ liệu", "Nhập giá trị cho ô:", "OK", "Hủy", keyboard: Keyboard.Default);
+        }
+        else if (action == "Quét barcode")
+        {
+            entered = await ScanBarcodeAsync();
+        }
 
-            PlayBeep();
-
+        if (string.IsNullOrWhiteSpace(entered))
+        {
             cellLabel.BackgroundColor = Colors.White;
             _highlightLabel = null;
+            return;
+        }
 
-            // Tắt tính năng auto continue scan - dừng lại ở ô vừa quét
-            // if (_autoContinueScan)
-            //     _ = NextCellAndScan(rr, cc); // fire & forget
-        }));
+        _cellValues[rr, cc] = entered.Trim();
+        cellLabel.Text = _cellValues[rr, cc];
+
+        PlayBeep();
+
+        cellLabel.BackgroundColor = Colors.White;
+        _highlightLabel = null;
+    }
+
+    private async Task<string?> ScanBarcodeAsync()
+    {
+        var tcs = new System.Threading.Tasks.TaskCompletionSource<string?>();
+        var scanPage = new CellScanPage(tcs);
+        await Navigation.PushModalAsync(scanPage);
+        return await tcs.Task;
+    }
+
+    private async void OnBackButtonClicked(object sender, EventArgs e)
+    {
+        await ConfirmLeaveAsync();
     }
 
     private async System.Threading.Tasks.Task NextCellAndScan(int rr, int cc)
@@ -186,7 +259,7 @@ public partial class DataEntryPage : ContentPage
         if (_highlightLabel != null)
             _highlightLabel.BackgroundColor = Colors.White;
 
-        label.BackgroundColor = Color.FromArgb("#D1C4E9");
+        label.BackgroundColor = Color.FromArgb("#E3F2FD");
         _highlightLabel = label;
     }
 
@@ -217,40 +290,81 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-            var dateText = (DateEntry.Text ?? "").Trim();
-            if (!DateTime.TryParseExact(dateText, "dd/MM/yyyy", null,
-                System.Globalization.DateTimeStyles.None, out var dt))
-                dt = DateTime.Now;
+            string path;
+            bool isEditing = !string.IsNullOrEmpty(_existingFilePath);
 
-            var datePart = dt.ToString("yyyy.MM.dd");
-            var sttPart = (SttEntry.Text ?? "").Trim();
-            var contPart = (ContainerEntry.Text ?? "").Trim();
-            var sealPart = (SealEntry.Text ?? "").Trim();
+            if (isEditing)
+            {
+                // Đang chỉnh sửa file cũ - lưu vào file đó
+                path = _existingFilePath!;
+            }
+            else
+            {
+                // Tạo file mới
+                var dt = DateEntry.Date;
 
-            var raw = $"{datePart}_{sttPart}_{contPart}_{sealPart}";
-            var fileName = SanitizeFileName(raw) + ".xlsx";
-            var path = IOPath.Combine(FileSystem.AppDataDirectory, fileName);
+                var datePart = dt.ToString("yyyy.MM.dd");
+                var sttPart = (SttEntry.Text ?? "").Trim();
+                var contPart = (ContainerEntry.Text ?? "").Trim();
+                var sealPart = (SealEntry.Text ?? "").Trim();
+
+                var raw = $"{datePart}_{sttPart}_{contPart}_{sealPart}";
+                var fileName = SanitizeFileName(raw) + ".xlsx";
+                path = IOPath.Combine(FileSystem.AppDataDirectory, fileName);
+            }
 
             // FIX: EPPlus 8.x - Set license khi tạo ExcelPackage
             using (var pkg = new OfficeOpenXml.ExcelPackage())
             {
-
                 var ws = pkg.Workbook.Worksheets.Add("Sheet1");
 
+                // Thêm header cột (Cột N -> 1)
+                for (int c = 0; c < _cols; c++)
+                {
+                    int colNum = _cols - c;
+                    var cell = ws.Cells[1, c + 2];
+                    cell.Value = $"Cột {colNum}";
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                }
+
+                // Thêm header hàng (STT giảm dần) và dữ liệu
                 for (int r = 0; r < _rows; r++)
+                {
+                    int stt = _rows - r;
+                    // Header hàng
+                    var headerCell = ws.Cells[r + 2, 1];
+                    headerCell.Value = stt.ToString();
+                    headerCell.Style.Font.Bold = true;
+                    headerCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    headerCell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    headerCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    headerCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    
+                    // Dữ liệu
                     for (int c = 0; c < _cols; c++)
-                        ws.Cells[r + 1, c + 1].Value = _cellValues[r, c] ?? "";
+                    {
+                        var dataCell = ws.Cells[r + 2, c + 2];
+                        dataCell.Value = _cellValues[r, c] ?? "";
+                        dataCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                        dataCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    }
+                }
+
+                // AutoFit độ rộng cột để vừa với nội dung
+                ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
                 pkg.SaveAs(new FileInfo(path));
             }
 
-            await DisplayAlert("Xuất Excel", $"Đã lưu file:\n{path}", "OK");
+            var message = isEditing ? "Đã cập nhật file thành công!" : "Đã lưu file thành công!";
+            await DisplayAlert("Thành công", message, "OK");
 
-            await Share.RequestAsync(new ShareFileRequest
-            {
-                Title = "Chia sẻ file Excel",
-                File = new ShareFile(path)
-            });
+            // Quay về MainPage sau khi lưu
+            await Navigation.PopToRootAsync();
         }
         catch (Exception ex)
         {
@@ -291,29 +405,33 @@ public partial class DataEntryPage : ContentPage
             !string.IsNullOrWhiteSpace(SealEntry.Text);
     }
 
-    // ====================== Nhập thủ công Container / Seal (TẠM THỜI - thay cho OCR) ======================
+    // ====================== Quét trực tiếp Container / Seal bằng camera live ======================
     private async void OnContainerOcrClicked(object sender, EventArgs e)
     {
-        string result = await DisplayPromptAsync(
-            "Nhập Số Container",
-            "Nhập thủ công (OCR sẽ được thêm sau):",
-            initialValue: ContainerEntry.Text ?? "",
-            maxLength: 50,
-            keyboard: Keyboard.Text);
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        var ocr = services?.GetService<IOcrService>();
+        if (ocr == null)
+        {
+            await DisplayAlert("OCR", "OCR chưa sẵn sàng.", "Đóng");
+            return;
+        }
 
+        var result = await ocr.ScanLiveAsync(OcrMode.Container);
         if (!string.IsNullOrWhiteSpace(result))
             ContainerEntry.Text = result.ToUpperInvariant().Trim();
     }
 
     private async void OnSealOcrClicked(object sender, EventArgs e)
     {
-        string result = await DisplayPromptAsync(
-            "Nhập Số Seal",
-            "Nhập thủ công (OCR sẽ được thêm sau):",
-            initialValue: SealEntry.Text ?? "",
-            maxLength: 50,
-            keyboard: Keyboard.Text);
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        var ocr = services?.GetService<IOcrService>();
+        if (ocr == null)
+        {
+            await DisplayAlert("OCR", "OCR chưa sẵn sàng.", "Đóng");
+            return;
+        }
 
+        var result = await ocr.ScanLiveAsync(OcrMode.Seal);
         if (!string.IsNullOrWhiteSpace(result))
             SealEntry.Text = result.ToUpperInvariant().Trim();
     }
