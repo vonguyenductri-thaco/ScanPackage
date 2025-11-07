@@ -240,18 +240,17 @@ public partial class LiveOcrPage
     private sealed class FrameAnalyzer : Java.Lang.Object, ImageAnalysis.IAnalyzer
     {
         private readonly LiveOcrPage _page;
+        private readonly Android.Util.Size _defaultResolution;
         
         public FrameAnalyzer(LiveOcrPage page) 
         { 
-            _page = page; 
+            _page = page;
+            _defaultResolution = new Android.Util.Size(1280, 720);
         }
 
-        // Implement method từ interface IAnalyzer
-        // Method này được yêu cầu bởi CameraX 1.4+ để set default resolution
-        public Android.Util.Size GetDefaultTargetResolution()
-        {
-            return new Android.Util.Size(1280, 720);
-        }
+        // Implement property từ interface IAnalyzer
+        // Property này được yêu cầu bởi CameraX 1.4+ để set default resolution
+        Android.Util.Size ImageAnalysis.IAnalyzer.DefaultTargetResolution => _defaultResolution;
 
         public void Analyze(IImageProxy image)
         {
