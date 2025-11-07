@@ -1,5 +1,9 @@
 using Android.Graphics;
- 
+using Xamarin.Google.MLKit.Vision.Text;
+using Xamarin.Google.MLKit.Vision.Text.Latin;
+using Xamarin.Google.MLKit.Vision.Common;
+using Android.Gms.Tasks;
+using Java.Lang;
 
 namespace ScanPackage;
 
@@ -12,7 +16,8 @@ public class AndroidOcrService : IOcrService
             // Mở trang chọn vùng quét ngang và nhận kết quả crop tương đối
             var tcs = new TaskCompletionSource<OcrCropResult>();
             var cropPage = new OcrCropPage(mode, tcs);
-            var nav = Application.Current?.MainPage?.Navigation;
+            var window = Application.Current?.Windows?.FirstOrDefault();
+            var nav = window?.Page?.Navigation;
             if (nav == null) return null;
             await nav.PushAsync(cropPage);
 
@@ -25,24 +30,64 @@ public class AndroidOcrService : IOcrService
 
             // Crop theo tỉ lệ tương đối từ overlay
             var rel = cropResult.RelativeCrop;
-            int cropW = Math.Max(1, (int)(fullBitmap.Width * rel.Width));
-            int cropH = Math.Max(1, (int)(fullBitmap.Height * rel.Height));
-            int left = Math.Max(0, (int)(fullBitmap.Width * rel.X));
-            int top = Math.Max(0, (int)(fullBitmap.Height * rel.Y));
-            cropW = Math.Min(cropW, fullBitmap.Width - left);
-            cropH = Math.Min(cropH, fullBitmap.Height - top);
+            int cropW = System.Math.Max(1, (int)(fullBitmap.Width * rel.Width));
+            int cropH = System.Math.Max(1, (int)(fullBitmap.Height * rel.Height));
+            int left = System.Math.Max(0, (int)(fullBitmap.Width * rel.X));
+            int top = System.Math.Max(0, (int)(fullBitmap.Height * rel.Y));
+            cropW = System.Math.Min(cropW, fullBitmap.Width - left);
+            cropH = System.Math.Min(cropH, fullBitmap.Height - top);
             using var crop = Bitmap.CreateBitmap(fullBitmap, left, top, cropW, cropH);
 
-            // TODO: Re-enable ML Kit on .NET 9 after package add
-            var allText = string.Empty;
-            if (string.IsNullOrWhiteSpace(allText)) return null;
-
-            return mode switch
+            // Sử dụng ML Kit Text Recognition để OCR
+            try
             {
-                OcrMode.Container => ExtractContainer(allText),
-                OcrMode.Seal => ExtractSeal(allText),
-                _ => null
-            };
+                var options = new Xamarin.Google.MLKit.Vision.Text.Latin.TextRecognizerOptions.Builder().Build();
+                var textRecognizer = Xamarin.Google.MLKit.Vision.Text.TextRecognition.GetClient(options);
+                
+                // Chuyển Bitmap sang InputImage
+                var inputImage = Xamarin.Google.MLKit.Vision.Common.InputImage.FromBitmap(crop, 0);
+                
+                // Xử lý OCR
+                var task = textRecognizer.Process(inputImage);
+                var textResult = await System.Threading.Tasks.Task.Run(() =>
+                {
+                    var tcs = new System.Threading.Tasks.TaskCompletionSource<Xamarin.Google.MLKit.Vision.Text.Text?>();
+                    task.AddOnSuccessListener(new TextRecognitionTaskListener(tcs));
+                    task.AddOnFailureListener(new TextRecognitionFailureTaskListener(tcs));
+                    return tcs.Task;
+                });
+
+                if (textResult == null) return null;
+
+                // Lấy tất cả text từ TextBlocks
+                var allText = string.Empty;
+                foreach (var block in textResult.TextBlocks)
+                {
+                    foreach (var line in block.Lines)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line.Text))
+                        {
+                            allText += line.Text + " ";
+                        }
+                    }
+                }
+                allText = allText.Trim();
+                textRecognizer.Dispose();
+
+                if (string.IsNullOrWhiteSpace(allText)) return null;
+
+                return mode switch
+                {
+                    OcrMode.Container => ExtractContainer(allText),
+                    OcrMode.Seal => ExtractSeal(allText),
+                    _ => null
+                };
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OCR Error: {ex}");
+                return null;
+            }
         }
         catch
         {
@@ -56,7 +101,8 @@ public class AndroidOcrService : IOcrService
         {
             var tcs = new TaskCompletionSource<string?>();
             var page = new LiveOcrPage(mode, tcs);
-            var nav = Application.Current?.MainPage?.Navigation;
+            var window = Application.Current?.Windows?.FirstOrDefault();
+            var nav = window?.Page?.Navigation;
             if (nav == null) return null;
             await nav.PushModalAsync(page);
 
@@ -100,6 +146,39 @@ public class AndroidOcrService : IOcrService
         // Seal often alphanumeric length 6-12, e.g., VN64554AO
         var m = System.Text.RegularExpressions.Regex.Match(text, @"\b[A-Z0-9]{6,12}\b");
         return m.Success ? m.Value.ToUpperInvariant() : null;
+    }
+}
+
+// Helper classes for ML Kit async processing
+internal class TextRecognitionTaskListener : Java.Lang.Object, IOnSuccessListener
+{
+    private readonly System.Threading.Tasks.TaskCompletionSource<Xamarin.Google.MLKit.Vision.Text.Text?> _tcs;
+
+    public TextRecognitionTaskListener(System.Threading.Tasks.TaskCompletionSource<Xamarin.Google.MLKit.Vision.Text.Text?> tcs)
+    {
+        _tcs = tcs;
+    }
+
+    public void OnSuccess(Java.Lang.Object? result)
+    {
+        var textResult = Android.Runtime.Extensions.JavaCast<Xamarin.Google.MLKit.Vision.Text.Text>(result);
+        _tcs.TrySetResult(textResult);
+    }
+}
+
+internal class TextRecognitionFailureTaskListener : Java.Lang.Object, IOnFailureListener
+{
+    private readonly System.Threading.Tasks.TaskCompletionSource<Xamarin.Google.MLKit.Vision.Text.Text?> _tcs;
+
+    public TextRecognitionFailureTaskListener(System.Threading.Tasks.TaskCompletionSource<Xamarin.Google.MLKit.Vision.Text.Text?> tcs)
+    {
+        _tcs = tcs;
+    }
+
+    public void OnFailure(Java.Lang.Exception e)
+    {
+        System.Diagnostics.Debug.WriteLine($"Text Recognition failed: {e}");
+        _tcs.TrySetResult(null);
     }
 }
 

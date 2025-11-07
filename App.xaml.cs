@@ -5,6 +5,10 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        // Always use light theme regardless of system setting
+        UserAppTheme = AppTheme.Light;
+        RequestedThemeChanged += (_, __) => UserAppTheme = AppTheme.Light;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

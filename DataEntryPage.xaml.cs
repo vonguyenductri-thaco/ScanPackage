@@ -405,7 +405,7 @@ public partial class DataEntryPage : ContentPage
             !string.IsNullOrWhiteSpace(SealEntry.Text);
     }
 
-    // ====================== Quét trực tiếp Container / Seal bằng camera live ======================
+    // ====================== Chụp ảnh và quét Container / Seal bằng OCR ======================
     private async void OnContainerOcrClicked(object sender, EventArgs e)
     {
         var services = Application.Current?.Handler?.MauiContext?.Services;
@@ -416,7 +416,7 @@ public partial class DataEntryPage : ContentPage
             return;
         }
 
-        var result = await ocr.ScanLiveAsync(OcrMode.Container);
+        var result = await ocr.ScanTextAsync(OcrMode.Container);
         if (!string.IsNullOrWhiteSpace(result))
             ContainerEntry.Text = result.ToUpperInvariant().Trim();
     }
@@ -431,7 +431,7 @@ public partial class DataEntryPage : ContentPage
             return;
         }
 
-        var result = await ocr.ScanLiveAsync(OcrMode.Seal);
+        var result = await ocr.ScanTextAsync(OcrMode.Seal);
         if (!string.IsNullOrWhiteSpace(result))
             SealEntry.Text = result.ToUpperInvariant().Trim();
     }
