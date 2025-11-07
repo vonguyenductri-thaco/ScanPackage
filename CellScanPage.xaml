@@ -24,11 +24,12 @@
                        Padding="16"
                        HasShadow="False"
                        HorizontalOptions="Center">
-                    <Label Text="📷 Hướng camera vào mã vạch"
+                    <Label Text="📷 Hướng camera vào mã vạch&#10;Có thể quét ở mọi góc độ"
                            TextColor="White"
                            FontSize="16"
                            FontAttributes="Bold"
-                           HorizontalOptions="Center"/>
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
                 </Frame>
             </Grid>
 

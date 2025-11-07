@@ -28,7 +28,7 @@
                    Grid.Column="1"
                    VerticalOptions="Center"
                    Margin="8,0,0,0"/>
-        </Grid>
+            </Grid>
 
         <!-- ScrollView chứa form và grid -->
         <ScrollView Grid.Row="1" Padding="16">
@@ -125,8 +125,8 @@
                                         CornerRadius="8"
                                         Padding="16,12"
                                         Clicked="OnContainerOcrClicked"/>
-                            </Grid>
-                        </VerticalStackLayout>
+            </Grid>
+        </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="8">
                             <Label Text="Số Seal"
@@ -172,13 +172,13 @@
                                TextColor="#212121"
                                Margin="8,0"/>
                         <ScrollView Orientation="Horizontal">
-                            <ScrollView Orientation="Vertical">
-                                <Grid x:Name="DataGrid"
-                                      ColumnSpacing="1"
-                                      RowSpacing="1"
+            <ScrollView Orientation="Vertical">
+                <Grid x:Name="DataGrid"
+              ColumnSpacing="1"
+              RowSpacing="1"
                                       Padding="0"
-                                      BackgroundColor="#E0E0E0"/>
-                            </ScrollView>
+              BackgroundColor="#E0E0E0"/>
+            </ScrollView>
                         </ScrollView>
                     </VerticalStackLayout>
                 </Frame>
@@ -192,11 +192,11 @@
               BackgroundColor="White">
             <Button Text="Hoàn thành &amp; Xuất Excel"
                     BackgroundColor="#007AFF"
-                    TextColor="White"
-                    CornerRadius="12"
-                    FontSize="18"
+                TextColor="White"
+                CornerRadius="12"
+                FontSize="18"
                     FontAttributes="Bold"
-                    HeightRequest="56"
+                HeightRequest="56"
                     Clicked="OnExportClicked"/>
         </Grid>
     </Grid>

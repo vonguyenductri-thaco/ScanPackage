@@ -15,7 +15,8 @@ public partial class CellScanPage : ContentPage
         InitializeComponent();
         _tcs = tcs;
 
-        // Cải thiện nhận dạng: chỉ định định dạng, bật TryHarder và AutoRotate
+        // Cải thiện nhận dạng: hỗ trợ quét ở mọi góc độ
+        // AutoRotate, TryHarder, TryInverted giúp quét được khi điện thoại nghiêng
         BarcodeView.Options = new BarcodeReaderOptions
         {
             Formats = BarcodeFormat.Code128 |
@@ -26,11 +27,13 @@ public partial class CellScanPage : ContentPage
                       BarcodeFormat.Codabar |
                       BarcodeFormat.UpcA    |
                       BarcodeFormat.UpcE    |
-                      BarcodeFormat.QrCode,
-            AutoRotate = true,
-            TryHarder = true,
-            TryInverted = true,
-            Multiple = false
+                      BarcodeFormat.QrCode  |
+                      BarcodeFormat.DataMatrix |
+                      BarcodeFormat.Pdf417,
+            AutoRotate = true,      // Tự động xoay để nhận diện ở mọi góc
+            TryHarder = true,       // Cố gắng quét kỹ hơn (chậm hơn nhưng chính xác hơn)
+            TryInverted = true,     // Thử quét cả ảnh đảo ngược
+            Multiple = false        // Chỉ lấy 1 kết quả đầu tiên
         };
     }
 
