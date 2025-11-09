@@ -195,24 +195,8 @@ public partial class DataEntryPage : ContentPage
     {
         HighlightCell(cellLabel);
 
-        // Cho phép chọn giữa nhập tay hoặc quét barcode
-        var action = await DisplayActionSheet(
-            "Nhập dữ liệu cho ô",
-            "Hủy",
-            null,
-            "Nhập tay",
-            "Quét barcode");
-
-        string? entered = null;
-
-        if (action == "Nhập tay")
-        {
-            entered = await DisplayPromptAsync("Nhập dữ liệu", "Nhập giá trị cho ô:", "OK", "Hủy", keyboard: Keyboard.Default);
-        }
-        else if (action == "Quét barcode")
-        {
-            entered = await ScanBarcodeAsync();
-        }
+        // Đi thẳng đến quét barcode
+        string? entered = await ScanBarcodeAsync();
 
         if (string.IsNullOrWhiteSpace(entered))
         {
