@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.OcrCropPage"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="Black">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header Bar (Blue) -->
+        <Grid Grid.Row="0"
+              BackgroundColor="#007AFF"
+              Padding="16,12"
+              ColumnDefinitions="Auto,*,Auto">
+
+            <!-- Cancel Button -->
+            <Button Grid.Column="0"
+                    Text="Hủy"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    FontSize="16"
+                    Clicked="OnCancelClicked"
+                    Padding="0"
+                    WidthRequest="60"/>
+
+            <!-- Title -->
+            <Label Grid.Column="1"
+                   Text="Quét Container"
+                   x:Name="TitleLabel"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+
+            <!-- Help Button -->
+            <Button Grid.Column="2"
+                    Text="?"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    Clicked="OnHelpClicked"
+                    Padding="0"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    CornerRadius="20"
+                    BorderColor="White"
+                    BorderWidth="2"/>
+        </Grid>
+
+        <!-- Camera Preview Area -->
+        <Grid Grid.Row="1">
+            <!-- ScrollView cho phép pan hình ảnh -->
+            <ScrollView x:Name="ImageScrollView"
+                       Orientation="Both"
+                       HorizontalScrollBarVisibility="Never"
+                       VerticalScrollBarVisibility="Never">
+                <Image x:Name="PhotoView"
+                       Aspect="AspectFit"
+                       BackgroundColor="Black"/>
+            </ScrollView>
+
+            <!-- Overlay với khung quét -->
+            <Grid x:Name="Overlay"
+                  InputTransparent="True"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill">
+
+                <!-- Lớp mờ đen xung quanh -->
+                <BoxView BackgroundColor="Black" Opacity="0.4"/>
+
+                <!-- Khung quét cố định ở giữa (màu xanh lá) -->
+                <Grid x:Name="CropFrame"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center"
+                      WidthRequest="340"
+                      HeightRequest="140"
+                      BackgroundColor="Transparent">
+
+                    <!-- Border màu xanh lá với góc bo tròn -->
+                    <Border Stroke="#34C759"
+                            StrokeThickness="3"
+                            Background="Transparent">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                    </Border>
+
+                    <!-- Hint text -->
+                    <Label Text="Đưa số Container vào khung này"
+                           TextColor="White"
+                           FontSize="13"
+                           BackgroundColor="#80000000"
+                           Padding="12,6"
+                           HorizontalOptions="Center"
+                           VerticalOptions="End"
+                           Margin="0,0,0,8"
+                           Opacity="0.9"/>
+                </Grid>
+            </Grid>
+
+            <!-- Zoom controls overlay (top right) -->
+            <VerticalStackLayout Grid.Row="0"
+                                HorizontalOptions="End"
+                                VerticalOptions="Start"
+                                Margin="16,16"
+                                Spacing="8">
+
+                <!-- Zoom In -->
+                <Button Text="+"
+                        BackgroundColor="#80000000"
+                        TextColor="White"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        CornerRadius="22"
+                        Clicked="OnZoomInClicked"
+                        Padding="0"
+                        BorderColor="White"
+                        BorderWidth="1"/>
+
+                <!-- Zoom Out -->
+                <Button Text="−"
+                        BackgroundColor="#80000000"
+                        TextColor="White"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        CornerRadius="22"
+                        Clicked="OnZoomOutClicked"
+                        Padding="0"
+                        BorderColor="White"
+                        BorderWidth="1"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Bottom Control Bar (Blue) -->
+        <Grid Grid.Row="2"
+              BackgroundColor="#007AFF"
+              Padding="16,12"
+              ColumnDefinitions="Auto,*,Auto,*,Auto"
+              ColumnSpacing="12">
+
+            <!-- Retake Button -->
+            <Button Grid.Column="0"
+                    Text="📷"
+                    FontSize="20"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    Clicked="OnRetakeClicked"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    BorderColor="White"
+                    BorderWidth="2"
+                    Padding="0"/>
+
+            <Label Grid.Column="1"
+                   Text="Chụp lại"
+                   TextColor="White"
+                   FontSize="12"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start"/>
+
+            <!-- Capture/Scan Button (Large Center) -->
+            <Button Grid.Column="2"
+                    x:Name="CaptureButton"
+                    BackgroundColor="White"
+                    WidthRequest="70"
+                    HeightRequest="70"
+                    CornerRadius="35"
+                    Clicked="OnScanRegionClicked"
+                    Padding="0"
+                    BorderColor="#007AFF"
+                    BorderWidth="4">
+                <Button.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,2"
+                            Radius="8"
+                            Opacity="0.3"/>
+                </Button.Shadow>
+            </Button>
+
+            <Label Grid.Column="3"
+                   Text="Quét toàn bộ"
+                   TextColor="White"
+                   FontSize="12"
+                   VerticalOptions="Center"
+                   HorizontalOptions="End"/>
+
+            <!-- Full Scan Button -->
+            <Button Grid.Column="4"
+                    Text="📄"
+                    FontSize="20"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    Clicked="OnScanFullClicked"
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    BorderColor="White"
+                    BorderWidth="2"
+                    Padding="0"/>
+        </Grid>
+    </Grid>
+</ContentPage>
+
+
+

@@ -5,9 +5,10 @@ public partial class SetupPage : ContentPage
     public SetupPage()
     {
         InitializeComponent();   // Kết nối tới XAML
+        NavigationPage.SetHasBackButton(this, false);
     }
 
-    // Sự kiện click nút “Tạo bảng”
+    // Sự kiện click nút "Tạo bảng"
     private async void OnCreateClicked(object sender, EventArgs e)
     {
         if (!int.TryParse(RowsEntry.Text, out int rows) || rows <= 0)
@@ -26,5 +27,10 @@ public partial class SetupPage : ContentPage
             // Chuyển đến trang nhập dữ liệu
             await Navigation.PushAsync(new DataEntryPage(rows, cols));
         }
+    }
+
+    private async void OnBackButtonClicked(object sender, EventArgs e)
+    {
+        await Navigation.PopAsync();
     }
 }

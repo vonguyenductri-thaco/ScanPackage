@@ -1,67 +1,48 @@
+using System;
+using System.Linq;
+using Microsoft.Maui.Controls;
 using BarcodeScanning;
 
 namespace ScanPackage;
 
-public partial class BarcodeScanPage : ContentPage
+public partial class CellScanPage : ContentPage
 {
-    private readonly Action<string> _onResult;
-    private bool _isProcessing = false;
+    private readonly System.Threading.Tasks.TaskCompletionSource<string?> _tcs;
+    private bool _completed;
     private bool _isFlashOn = false;
     private double _currentScale = 1.0;
     private double _startScale = 1.0;
 
-    public BarcodeScanPage(Action<string> onResult)
+    public CellScanPage(System.Threading.Tasks.TaskCompletionSource<string?> tcs)
     {
         InitializeComponent();
-        _onResult = onResult;
+        _tcs = tcs;
 
         // Configure barcode formats
-        cameraView.BarcodeSymbologies = BarcodeFormats.All;
+        BarcodeView.BarcodeSymbologies = BarcodeFormats.All;
     }
 
-    private async void CameraView_BarcodesDetected(object sender, OnDetectionFinishedEventArg e)
+    private async void OnCloseClicked(object sender, EventArgs e)
     {
-        var result = e.BarcodeResults?.FirstOrDefault()?.DisplayValue;
-        if (string.IsNullOrEmpty(result)) return;
-
-        await MainThread.InvokeOnMainThreadAsync(async () =>
+        if (!_completed)
         {
-            if (_isProcessing) return;
-
-            _isProcessing = true;
-
-            cameraView.OnDetectionFinished -= CameraView_BarcodesDetected;
-
-            try
-            {
-                if (Navigation.NavigationStack.Count > 1)
-                {
-                    await Navigation.PopAsync();
-                }
-
-                _onResult?.Invoke(result);
-            }
-            catch
-            {
-                try
-                {
-                    if (Navigation.NavigationStack.Count > 1)
-                    {
-                        await Navigation.PopAsync();
-                    }
-                    _onResult?.Invoke(result);
-                }
-                catch { }
-            }
-        });
-    }
-
-    private async void OnBackClicked(object sender, EventArgs e)
-    {
-        if (Navigation.NavigationStack.Count > 1)
-        {
-            await Navigation.PopAsync();
+            _completed = true;
+            _tcs.TrySetResult(null);
         }
+        await Navigation.PopModalAsync();
+    }
+
+    private async void OnBarcodesDetected(object sender, OnDetectionFinishedEventArg e)
+    {
+        if (_completed) return;
+
+        var value = e.BarcodeResults?.FirstOrDefault()?.DisplayValue;
+        if (string.IsNullOrWhiteSpace(value)) return;
+
+        _completed = true;
+
+        _tcs.TrySetResult(value.Trim());
+        await MainThread.InvokeOnMainThreadAsync(async () => await Navigation.PopModalAsync());
     }
 
     private void OnZoomChanged(object sender, ValueChangedEventArgs e)
@@ -104,9 +85,9 @@ public partial class BarcodeScanPage : ContentPage
 
     private void ApplyZoom(double zoomFactor)
     {
-        cameraView.AnchorX = 0.5;
-        cameraView.AnchorY = 0.5;
-        cameraView.Scale = zoomFactor;
+        BarcodeView.AnchorX = 0.5;
+        BarcodeView.AnchorY = 0.5;
+        BarcodeView.Scale = zoomFactor;
     }
 
     private void OnFlashClicked(object sender, EventArgs e)
@@ -114,7 +95,7 @@ public partial class BarcodeScanPage : ContentPage
         try
         {
             _isFlashOn = !_isFlashOn;
-            cameraView.TorchOn = _isFlashOn;
+            BarcodeView.TorchOn = _isFlashOn;
 
             if (_isFlashOn)
             {
@@ -131,3 +112,6 @@ public partial class BarcodeScanPage : ContentPage
         }
     }
 }
+
+
+

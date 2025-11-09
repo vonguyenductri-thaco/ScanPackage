@@ -1,44 +1,112 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ScanPackage.SetupPage"
-             Title="Thiết lập bảng">
+             x:Class="ScanPackage.SetupPage">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="16">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              BackgroundColor="#007AFF"
+              Padding="20,16"
+              ColumnDefinitions="Auto,*">
+            <Button x:Name="BackButton"
+                    Text="←"
+                    FontSize="24"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Padding="0"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Clicked="OnBackButtonClicked"
+                    Grid.Column="0"
+                    VerticalOptions="Center"/>
+            <Label Text="Tạo bảng mới"
+                   FontAttributes="Bold"
+                   FontSize="24"
+                   TextColor="White"
+                   Grid.Column="1"
+                   VerticalOptions="Center"
+                   Margin="8,0,0,0"/>
+        </Grid>
 
         <!-- Tiêu đề và nội dung chính -->
-        <ScrollView Grid.Row="0" Grid.RowSpan="2">
-            <VerticalStackLayout Spacing="12">
-                <Label Text="Tạo bảng mới"
-                       FontAttributes="Bold"
-                       FontSize="22"
-                       HorizontalOptions="Center"
-                       Margin="0,10,0,20"/>
+        <ScrollView Grid.Row="1" Padding="20">
+            <VerticalStackLayout Spacing="24">
+                
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Số hàng"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"
+                           Margin="0,0,0,4"/>
+                    <Frame BorderColor="#E0E0E0"
+                           CornerRadius="12"
+                           Padding="0"
+                           HasShadow="False"
+                           BackgroundColor="White">
+                        <Entry x:Name="RowsEntry"
+                               Keyboard="Numeric"
+                               Placeholder="Nhập số hàng"
+                               Text="10"
+                               BackgroundColor="Transparent"
+                               Margin="16,12"/>
+                    </Frame>
+                </VerticalStackLayout>
 
-                <Label Text="Số hàng:"/>
-                <Entry x:Name="RowsEntry"
-                       Keyboard="Numeric"
-                       Placeholder="Nhập số hàng"
-                       Text="10"/>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Số cột"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#212121"
+                           Margin="0,0,0,4"/>
+                    <Frame BorderColor="#E0E0E0"
+                           CornerRadius="12"
+                           Padding="0"
+                           HasShadow="False"
+                           BackgroundColor="White">
+                        <Entry x:Name="ColsEntry"
+                               Keyboard="Numeric"
+                               Placeholder="Nhập số cột"
+                               Text="15"
+                               BackgroundColor="Transparent"
+                               Margin="16,12"/>
+                    </Frame>
+                </VerticalStackLayout>
 
-                <Label Text="Số cột:"/>
-                <Entry x:Name="ColsEntry"
-                       Keyboard="Numeric"
-                       Placeholder="Nhập số cột"
-                       Text="15"/>
+                <!-- Info card -->
+                <Frame BackgroundColor="#E3F2FD"
+                       BorderColor="#BBDEFB"
+                       CornerRadius="12"
+                       Padding="16"
+                       HasShadow="False">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="💡 Gợi ý"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#1976D2"/>
+                        <Label Text="Bảng sẽ có kích thước: [Số hàng] x [Số cột]"
+                               FontSize="13"
+                               TextColor="#424242"/>
+                    </VerticalStackLayout>
+                </Frame>
+
             </VerticalStackLayout>
         </ScrollView>
 
         <!-- Nút tạo bảng ở cuối cùng -->
-        <Button Grid.Row="2"
-                Text="Tạo bảng"
-                BackgroundColor="#2196F3"
-                TextColor="White"
-                FontSize="18"
-                CornerRadius="10"
-                HeightRequest="55"
-                Margin="0,15,0,10"
-                VerticalOptions="End"
-                Clicked="OnCreateClicked" />
+        <Grid Grid.Row="2" 
+              Padding="20,12,20,20"
+              BackgroundColor="White">
+            <Button Text="Tạo bảng"
+                    BackgroundColor="#007AFF"
+                    TextColor="White"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="56"
+                    Clicked="OnCreateClicked" />
+        </Grid>
     </Grid>
 </ContentPage>

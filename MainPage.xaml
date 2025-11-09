@@ -1,41 +1,137 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ScanPackage.MainPage"
-             Title="Lịch sử tệp Excel">
+             xmlns:local="clr-namespace:ScanPackage"
+             x:Class="ScanPackage.MainPage">
 
-    <VerticalStackLayout Padding="16" Spacing="10">
-
-        <Label Text="Danh sách file Excel đã tạo"
-               FontAttributes="Bold"
-               FontSize="20"
-               HorizontalOptions="Center" />
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              BackgroundColor="#007AFF"
+              Padding="20,16"
+              RowDefinitions="Auto,Auto">
+            <Label Text="Danh sách tệp đã tạo"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   Grid.Row="0"/>
+            <Label Text="Quản lý và chỉnh sửa các file đã tạo"
+                   FontSize="14"
+                   TextColor="#E3F2FD"
+                   Margin="0,4,0,0"
+                   Grid.Row="1"/>
+        </Grid>
 
         <!-- Danh sách file -->
-        <CollectionView x:Name="FilesView"
+        <CollectionView Grid.Row="1"
+                        x:Name="FilesView"
                         ItemsSource="{Binding Files}"
-                        SelectionMode="Single"
-                        SelectionChanged="OnFileSelected">
+                        SelectionMode="None"
+                        Margin="16,16,16,0"
+                        EmptyView="Chưa có tệp nào được tạo">
+            
+            <CollectionView.EmptyViewTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout VerticalOptions="Center" 
+                                       HorizontalOptions="Center"
+                                       Spacing="16"
+                                       Margin="40">
+                        <Label Text="📄"
+                               FontSize="64"
+                               HorizontalOptions="Center"
+                               Opacity="0.3"/>
+                        <Label Text="Chưa có tệp nào"
+                               FontSize="18"
+                               TextColor="#999"
+                               HorizontalOptions="Center"/>
+                        <Label Text="Tạo tệp mới để bắt đầu"
+                               FontSize="14"
+                               TextColor="#999"
+                               HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.EmptyViewTemplate>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Padding="10" Margin="5"
-                           BorderColor="#ccc"
+                <DataTemplate x:DataType="local:FileItem">
+                    <Frame Padding="16" 
+                           Margin="0,0,0,12"
+                           BorderColor="#E0E0E0"
                            HasShadow="True"
-                           CornerRadius="10">
-                        <Label Text="{Binding FileName}" FontSize="16" />
+                           CornerRadius="12"
+                           BackgroundColor="White">
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                            <!-- File info -->
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="0">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding FileName}" 
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="#212121"/>
+                                    <Label Text="{Binding FileDate, StringFormat='Tạo: {0}'}"
+                                           FontSize="12"
+                                           TextColor="#999"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="📄"
+                                       FontSize="24"
+                                       VerticalOptions="Center"
+                                       Margin="8,0,0,0"/>
+                            </Grid>
+                            
+                            <!-- Action buttons -->
+                            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <Button Grid.Column="0"
+                                        Text="Chỉnh sửa"
+                                        BackgroundColor="#007AFF"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Padding="12,8"
+                                        Clicked="OnEditClicked"
+                                        CommandParameter="{Binding .}"/>
+                                <Button Grid.Column="1"
+                                        Text="Chia sẻ"
+                                        BackgroundColor="#007AFF"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Padding="12,8"
+                                        Clicked="OnShareClicked"
+                                        CommandParameter="{Binding .}"/>
+                                <Button Grid.Column="2"
+                                        Text="Xóa"
+                                        BackgroundColor="#007AFF"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Padding="12,8"
+                                        Clicked="OnDeleteClicked"
+                                        CommandParameter="{Binding .}"/>
+                            </Grid>
+                        </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Text="Tạo mới"
-                FontSize="18"
-                Clicked="OnCreateClicked"
-                BackgroundColor="#4CAF50"
-                TextColor="White"
-                CornerRadius="10"
-                Margin="0,20,0,0"/>
+        <!-- Button tạo mới -->
+        <Grid Grid.Row="2" 
+              Padding="16,12,16,16"
+              BackgroundColor="White">
+            <Button Text="Tạo mới"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    Clicked="OnCreateClicked"
+                    BackgroundColor="#007AFF"
+                    TextColor="White"
+                    CornerRadius="12"
+                    HeightRequest="56"/>
+        </Grid>
 
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

@@ -425,9 +425,10 @@
     </Style>
 
     <Style TargetType="NavigationPage">
-        <Setter Property="BarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
+        <Setter Property="BarBackgroundColor" Value="Transparent" />
+        <Setter Property="BarTextColor" Value="Transparent" />
+        <Setter Property="IconColor" Value="Transparent" />
+        <Setter Property="Title" Value="" />
     </Style>
 
     <Style TargetType="TabbedPage">

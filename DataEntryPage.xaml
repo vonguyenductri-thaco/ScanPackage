@@ -1,47 +1,203 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ScanPackage.DataEntryPage"
-             Title="Nhập dữ liệu">
+             x:Class="ScanPackage.DataEntryPage">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
 
-    <VerticalStackLayout Padding="12" Spacing="8">
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              BackgroundColor="#007AFF"
+              Padding="20,16"
+              ColumnDefinitions="Auto,*">
+            <Button x:Name="BackButton"
+                    Text="←"
+                    FontSize="24"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Padding="0"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Clicked="OnBackButtonClicked"
+                    Grid.Column="0"
+                    VerticalOptions="Center"/>
+            <Label Text="Nhập dữ liệu"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   Grid.Column="1"
+                   VerticalOptions="Center"
+                   Margin="8,0,0,0"/>
+            </Grid>
 
-        <!-- Nhập thông tin chung -->
-        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-            <Label Text="Số thứ tự:" Grid.Row="0" Grid.Column="0"/>
-            <Entry x:Name="SttEntry" Grid.Row="0" Grid.Column="1" Keyboard="Numeric"/>
+        <!-- ScrollView chứa form và grid -->
+        <ScrollView Grid.Row="1" Padding="16">
+            <VerticalStackLayout Spacing="16">
+                
+                <!-- Thông tin chung -->
+                <Frame BackgroundColor="White"
+                       BorderColor="#E0E0E0"
+                       CornerRadius="12"
+                       Padding="16"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Thông tin chung"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#212121"
+                               Margin="0,0,0,4"/>
+                        
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Số thứ tự"
+                                   FontSize="14"
+                                   TextColor="#666"
+                                   Margin="0,0,0,4"/>
+                            <Frame BorderColor="#E0E0E0"
+                                   CornerRadius="8"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="#F9F9F9">
+                                <Entry x:Name="SttEntry" 
+                                       Keyboard="Numeric"
+                                       Placeholder="Nhập số thứ tự"
+                                       BackgroundColor="Transparent"
+                                       Margin="12,10"/>
+                            </Frame>
+                        </VerticalStackLayout>
 
-            <Label Text="Ngày (dd/MM/yyyy):" Grid.Row="1" Grid.Column="0"/>
-            <Entry x:Name="DateEntry" Grid.Row="1" Grid.Column="1"/>
-        </Grid>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Ngày"
+                                   FontSize="14"
+                                   TextColor="#666"
+                                   Margin="0,0,0,4"/>
+                            <Frame BorderColor="#E0E0E0"
+                                   CornerRadius="8"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="#F9F9F9">
+                                <DatePicker x:Name="DateEntry"
+                                           Format="dd/MM/yyyy"
+                                           BackgroundColor="Transparent"
+                                           Margin="12,10"
+                                           TextColor="#212121"
+                                           FontSize="14"/>
+                            </Frame>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
 
-        <Grid ColumnDefinitions="*,*,Auto" RowDefinitions="Auto,Auto">
-            <Label Text="Số Container:" Grid.Row="0" Grid.Column="0"/>
-            <Entry x:Name="ContainerEntry" Grid.Row="0" Grid.Column="1"/>
-            <Button Text="Scan" Grid.Row="0" Grid.Column="2" Clicked="OnContainerOcrClicked"/>
+                <!-- Container và Seal -->
+                <Frame BackgroundColor="White"
+                       BorderColor="#E0E0E0"
+                       CornerRadius="12"
+                       Padding="16"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Thông tin Container &amp; Seal"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#212121"
+                               Margin="0,0,0,4"/>
+                        
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Số Container"
+                                   FontSize="14"
+                                   TextColor="#666"
+                                   Margin="0,0,0,4"/>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Frame Grid.Column="0"
+                                       BorderColor="#E0E0E0"
+                                       CornerRadius="8"
+                                       Padding="0"
+                                       HasShadow="False"
+                                       BackgroundColor="#F9F9F9">
+                                    <Entry x:Name="ContainerEntry"
+                                           Placeholder="Nhập số Container"
+                                           BackgroundColor="Transparent"
+                                           Margin="12,10"/>
+                                </Frame>
+                                <Button Grid.Column="1"
+                                        Text="Scan"
+                                        BackgroundColor="#007AFF"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Clicked="OnContainerOcrClicked"/>
+            </Grid>
+        </VerticalStackLayout>
 
-            <Label Text="Số Seal:" Grid.Row="1" Grid.Column="0"/>
-            <Entry x:Name="SealEntry" Grid.Row="1" Grid.Column="1"/>
-            <Button Text="Scan" Grid.Row="1" Grid.Column="2" Clicked="OnSealOcrClicked"/>
-        </Grid>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Số Seal"
+                                   FontSize="14"
+                                   TextColor="#666"
+                                   Margin="0,0,0,4"/>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Frame Grid.Column="0"
+                                       BorderColor="#E0E0E0"
+                                       CornerRadius="8"
+                                       Padding="0"
+                                       HasShadow="False"
+                                       BackgroundColor="#F9F9F9">
+                                    <Entry x:Name="SealEntry"
+                                           Placeholder="Nhập số Seal"
+                                           BackgroundColor="Transparent"
+                                           Margin="12,10"/>
+                                </Frame>
+                                <Button Grid.Column="1"
+                                        Text="Scan"
+                                        BackgroundColor="#007AFF"
+                                        TextColor="White"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Padding="16,12"
+                                        Clicked="OnSealOcrClicked"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Frame>
 
-        <ScrollView Orientation="Horizontal">
+                <!-- Grid dữ liệu -->
+                <Frame BackgroundColor="White"
+                       BorderColor="#E0E0E0"
+                       CornerRadius="12"
+                       Padding="8"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Bảng dữ liệu"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#212121"
+                               Margin="8,0"/>
+                        <ScrollView Orientation="Horizontal">
             <ScrollView Orientation="Vertical">
                 <Grid x:Name="DataGrid"
               ColumnSpacing="1"
               RowSpacing="1"
-              Padding="0,10,0,10"
+                                      Padding="0"
               BackgroundColor="#E0E0E0"/>
             </ScrollView>
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Frame>
+
+            </VerticalStackLayout>
         </ScrollView>
 
-
-        <Button Text="Hoàn thành &amp; Xuất Excel"
-                BackgroundColor="#4CAF50"
+        <!-- Button xuất Excel -->
+        <Grid Grid.Row="2" 
+              Padding="16,12,16,16"
+              BackgroundColor="White">
+            <Button Text="Hoàn thành &amp; Xuất Excel"
+                    BackgroundColor="#007AFF"
                 TextColor="White"
-                CornerRadius="10"
+                CornerRadius="12"
                 FontSize="18"
-                Clicked="OnExportClicked"
-                VerticalOptions="End"/>
-    </VerticalStackLayout>
+                    FontAttributes="Bold"
+                HeightRequest="56"
+                    Clicked="OnExportClicked"/>
+        </Grid>
+    </Grid>
 </ContentPage>

@@ -2,7 +2,7 @@
 using CommunityToolkit.Maui;
 using OfficeOpenXml;
 using ScanPackage;
-using ZXing.Net.Maui.Controls;
+using BarcodeScanning;
 
 public static class MauiProgram
 {
@@ -23,12 +23,17 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .UseBarcodeReader()
+            .UseBarcodeScanning()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+#if ANDROID
+        // Register Android OCR service
+        builder.Services.AddSingleton<IOcrService, AndroidOcrService>();
+#endif
 
         return builder.Build();
     }

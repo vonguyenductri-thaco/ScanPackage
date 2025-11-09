@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:barcode="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
-             x:Class="ScanPackage.BarcodeScanPage"
+             x:Class="ScanPackage.CellScanPage"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="Black">
 
@@ -24,7 +24,7 @@
                         Padding="0"
                         WidthRequest="40"
                         HeightRequest="40"
-                        Clicked="OnBackClicked"
+                        Clicked="OnCloseClicked"
                         HorizontalOptions="Start"
                         VerticalOptions="Center"/>
 
@@ -65,13 +65,12 @@
                        VerticalOptions="Center"
                        IsClippedToBounds="True">
 
-                    <barcode:CameraView
-                        x:Name="cameraView"
-                        OnDetectionFinished="CameraView_BarcodesDetected"
-                        CameraEnabled="True"
-                        CameraFacing="Back"
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Fill">
+                    <barcode:CameraView x:Name="BarcodeView"
+                                        OnDetectionFinished="OnBarcodesDetected"
+                                        CameraEnabled="True"
+                                        CameraFacing="Back"
+                                        VerticalOptions="FillAndExpand"
+                                        HorizontalOptions="FillAndExpand">
                         <barcode:CameraView.GestureRecognizers>
                             <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
                         </barcode:CameraView.GestureRecognizers>
@@ -192,3 +191,12 @@
         </Grid>
     </Grid>
 </ContentPage>
+
+
+
+
+
+
+
+
+
