@@ -416,9 +416,29 @@ public partial class DataEntryPage : ContentPage
             return;
         }
 
-        var result = await ocr.ScanTextAsync(OcrMode.Container);
+        // Chỉ dùng chế độ chụp ảnh rồi quét
+        string? result = await ocr.ScanTextAsync(OcrMode.Container);
+
         if (!string.IsNullOrWhiteSpace(result))
+        {
             ContainerEntry.Text = result.ToUpperInvariant().Trim();
+        }
+        else
+        {
+            await DisplayAlert(
+                "Không quét được Container",
+                "Không thể nhận diện số Container từ ảnh.\n\n" +
+                "Hãy thử:\n" +
+                "• Chụp ảnh rõ nét hơn\n" +
+                "• Đảm bảo đủ ánh sáng\n" +
+                "• Chụp thẳng góc (không xiên)\n" +
+                "• Zoom vào vùng có số Container\n" +
+                "• Đảm bảo số Container nằm trong khung xanh\n\n" +
+                "Format Container: 4 chữ cái + 7 số\n" +
+                "Ví dụ: KOCU 411486 2",
+                "OK"
+            );
+        }
     }
 
     private async void OnSealOcrClicked(object sender, EventArgs e)
@@ -431,8 +451,28 @@ public partial class DataEntryPage : ContentPage
             return;
         }
 
-        var result = await ocr.ScanTextAsync(OcrMode.Seal);
+        // Chỉ dùng chế độ chụp ảnh rồi quét
+        string? result = await ocr.ScanTextAsync(OcrMode.Seal);
+
         if (!string.IsNullOrWhiteSpace(result))
+        {
             SealEntry.Text = result.ToUpperInvariant().Trim();
+        }
+        else
+        {
+            await DisplayAlert(
+                "Không quét được Seal",
+                "Không thể nhận diện số Seal từ ảnh.\n\n" +
+                "Hãy thử:\n" +
+                "• Chụp ảnh rõ nét hơn\n" +
+                "• Đảm bảo đủ ánh sáng\n" +
+                "• Chụp thẳng góc (không xiên)\n" +
+                "• Zoom vào vùng có số Seal\n" +
+                "• Đảm bảo số Seal nằm trong khung xanh\n\n" +
+                "Format Seal: 6-15 ký tự (chữ + số)\n" +
+                "Ví dụ: YN646E4AO",
+                "OK"
+            );
+        }
     }
 }

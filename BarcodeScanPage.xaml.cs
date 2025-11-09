@@ -1,57 +1,48 @@
-﻿using ZXing.Net.Maui;
-using ZXing.Net.Maui.Controls;
+using BarcodeScanning;
 
 namespace ScanPackage;
 
 public partial class BarcodeScanPage : ContentPage
 {
-    private readonly Action<string> _onResult; // callback khi có kết quả
-    private bool _isProcessing = false; // cờ để tránh xử lý nhiều lần
+    private readonly Action<string> _onResult;
+    private bool _isProcessing = false;
+    private bool _isFlashOn = false;
+    private double _currentScale = 1.0;
+    private double _startScale = 1.0;
 
     public BarcodeScanPage(Action<string> onResult)
     {
         InitializeComponent();
         _onResult = onResult;
 
-        cameraView.Options = new BarcodeReaderOptions
-        {
-            Formats = BarcodeFormats.All,
-            AutoRotate = true,
-            Multiple = false
-        };
+        // Configure barcode formats
+        cameraView.BarcodeSymbologies = BarcodeFormats.All;
     }
 
-    private async void CameraView_BarcodesDetected(object sender, BarcodeDetectionEventArgs e)
+    private async void CameraView_BarcodesDetected(object sender, OnDetectionFinishedEventArg e)
     {
-        // Lấy kết quả trước (có thể từ background thread)
-        var result = e.Results?.FirstOrDefault()?.Value;
+        var result = e.BarcodeResults?.FirstOrDefault()?.DisplayValue;
         if (string.IsNullOrEmpty(result)) return;
 
-        // Tất cả thao tác UI và logic phải thực hiện trên main thread
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
-            // Kiểm tra cờ trên main thread để tránh race condition
             if (_isProcessing) return;
 
-            _isProcessing = true; // đánh dấu đang xử lý
+            _isProcessing = true;
 
-            // Ngừng nhận events để tránh xử lý nhiều lần
-            cameraView.BarcodesDetected -= CameraView_BarcodesDetected;
+            cameraView.OnDetectionFinished -= CameraView_BarcodesDetected;
 
             try
             {
-                // Quay lại trang trước NGAY LẬP TỨC - không đợi callback
                 if (Navigation.NavigationStack.Count > 1)
                 {
                     await Navigation.PopAsync();
                 }
 
-                // Sau khi đã quay lại, mới gọi callback để nhập vào ô
                 _onResult?.Invoke(result);
             }
             catch
             {
-                // Nếu có lỗi, vẫn cố quay lại và gọi callback
                 try
                 {
                     if (Navigation.NavigationStack.Count > 1)
@@ -63,5 +54,80 @@ public partial class BarcodeScanPage : ContentPage
                 catch { }
             }
         });
+    }
+
+    private async void OnBackClicked(object sender, EventArgs e)
+    {
+        if (Navigation.NavigationStack.Count > 1)
+        {
+            await Navigation.PopAsync();
+        }
+    }
+
+    private void OnZoomChanged(object sender, ValueChangedEventArgs e)
+    {
+        try
+        {
+            _currentScale = e.NewValue;
+            ApplyZoom(_currentScale);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Zoom error: {ex.Message}");
+        }
+    }
+
+    private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
+    {
+        try
+        {
+            if (e.Status == GestureStatus.Started)
+            {
+                _startScale = _currentScale;
+            }
+            else if (e.Status == GestureStatus.Running)
+            {
+                var newScale = _startScale * e.Scale;
+                newScale = Math.Max(1.0, Math.Min(newScale, 5.0));
+
+                _currentScale = newScale;
+                ApplyZoom(_currentScale);
+
+                ZoomSlider.Value = _currentScale;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Pinch error: {ex.Message}");
+        }
+    }
+
+    private void ApplyZoom(double zoomFactor)
+    {
+        cameraView.AnchorX = 0.5;
+        cameraView.AnchorY = 0.5;
+        cameraView.Scale = zoomFactor;
+    }
+
+    private void OnFlashClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            _isFlashOn = !_isFlashOn;
+            cameraView.TorchOn = _isFlashOn;
+
+            if (_isFlashOn)
+            {
+                FlashButton.BackgroundColor = Color.FromArgb("#007AFF");
+            }
+            else
+            {
+                FlashButton.BackgroundColor = Color.FromArgb("#40FFFFFF");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Flash error: {ex.Message}");
+        }
     }
 }

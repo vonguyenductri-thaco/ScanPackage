@@ -9,7 +9,6 @@ public enum OcrMode
 public interface IOcrService
 {
     Task<string?> ScanTextAsync(OcrMode mode);
-    Task<string?> ScanLiveAsync(OcrMode mode);
 }
 
 

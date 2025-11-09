@@ -1,64 +1,193 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
+             xmlns:barcode="clr-namespace:BarcodeScanning;assembly=BarcodeScanning.Native.Maui"
              x:Class="ScanPackage.CellScanPage"
-             Title="Quét mã"
+             NavigationPage.HasNavigationBar="False"
              BackgroundColor="Black">
+
     <Grid>
-        <zxing:CameraBarcodeReaderView x:Name="BarcodeView"
-                                        BarcodesDetected="OnBarcodesDetected"
-                                        IsDetecting="True"
-                                        CameraLocation="Rear"
-                                        VerticalOptions="FillAndExpand"
-                                        HorizontalOptions="FillAndExpand" />
-        
-        <!-- Overlay với hướng dẫn -->
-        <Grid RowDefinitions="*,Auto">
-            <!-- Top overlay với hướng dẫn -->
-            <Grid Grid.Row="0" 
-                  VerticalOptions="Start"
-                  Padding="20,40,20,20">
-                <Frame BackgroundColor="#80000000"
-                       CornerRadius="12"
-                       Padding="16"
-                       HasShadow="False"
-                       HorizontalOptions="Center">
-                    <Label Text="📷 Hướng camera vào mã vạch&#10;Có thể quét ở mọi góc độ"
-                           TextColor="White"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center"/>
-                </Frame>
+        <BoxView Color="Black" />
+
+        <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+
+            <Grid Grid.Row="0"
+                  BackgroundColor="#CC000000"
+                  Padding="16,40,16,16"
+                  ColumnDefinitions="Auto,*,Auto">
+
+                <Button Grid.Column="0"
+                        Text="←"
+                        FontSize="28"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        Padding="0"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Clicked="OnCloseClicked"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"/>
+
+                <Label Grid.Column="1"
+                       Text="Quét"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Start"
+                       Margin="8,0,0,0"/>
+
+                <Button Grid.Column="2"
+                        x:Name="FlashButton"
+                        BackgroundColor="#40FFFFFF"
+                        CornerRadius="20"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Padding="8"
+                        Clicked="OnFlashClicked"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        ImageSource="flashlight.png"/>
             </Grid>
 
-            <!-- Bottom controls -->
-            <Grid Grid.Row="1" 
-                  Padding="16,16,16,24"
-                  BackgroundColor="#80000000"
-                  VerticalOptions="End">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                
-                <Label Text="Chạm vào màn hình để quét mã vạch"
-                       TextColor="White"
-                       FontSize="14"
+            <Grid Grid.Row="1"
+                  Padding="40"
+                  VerticalOptions="Center">
+
+                <Frame BackgroundColor="Transparent"
+                       BorderColor="Transparent"
+                       CornerRadius="16"
+                       Padding="0"
+                       HasShadow="False"
+                       HeightRequest="200"
+                       WidthRequest="320"
+                       HorizontalOptions="Center"
                        VerticalOptions="Center"
-                       Grid.Column="0"/>
-                
-                <Button Text="✕ Đóng"
-                        BackgroundColor="#F04E23"
-                        TextColor="White"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        CornerRadius="8"
-                        Padding="20,12"
-                        Clicked="OnCloseClicked"
-                        Grid.Column="1"/>
+                       IsClippedToBounds="True">
+
+                    <barcode:CameraView x:Name="BarcodeView"
+                                        OnDetectionFinished="OnBarcodesDetected"
+                                        CameraEnabled="True"
+                                        CameraFacing="Back"
+                                        VerticalOptions="FillAndExpand"
+                                        HorizontalOptions="FillAndExpand">
+                        <barcode:CameraView.GestureRecognizers>
+                            <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+                        </barcode:CameraView.GestureRecognizers>
+                    </barcode:CameraView>
+                </Frame>
+
+                <Frame BackgroundColor="Transparent"
+                       BorderColor="White"
+                       CornerRadius="16"
+                       Padding="0"
+                       HasShadow="False"
+                       HeightRequest="200"
+                       WidthRequest="320"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       InputTransparent="True">
+
+                    <Grid InputTransparent="True">
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="4"
+                                 HeightRequest="30"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="Start"
+                                 InputTransparent="True"/>
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="30"
+                                 HeightRequest="4"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="Start"
+                                 InputTransparent="True"/>
+
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="4"
+                                 HeightRequest="30"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Start"
+                                 InputTransparent="True"/>
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="30"
+                                 HeightRequest="4"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Start"
+                                 InputTransparent="True"/>
+
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="4"
+                                 HeightRequest="30"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="End"
+                                 InputTransparent="True"/>
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="30"
+                                 HeightRequest="4"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="End"
+                                 InputTransparent="True"/>
+
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="4"
+                                 HeightRequest="30"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="End"
+                                 InputTransparent="True"/>
+                        <BoxView Color="#00FF00"
+                                 WidthRequest="30"
+                                 HeightRequest="4"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="End"
+                                 InputTransparent="True"/>
+                    </Grid>
+                </Frame>
+
+                <!-- Instruction Text -->
+                <Label Text="Đưa mã vạch vào khung"
+                       TextColor="White"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       BackgroundColor="#80000000"
+                       Padding="16,8"
+                       HorizontalOptions="Center"
+                       VerticalOptions="End"
+                       Margin="0,0,0,20"/>
             </Grid>
+
+            <Grid Grid.Row="2"
+                  BackgroundColor="#CC000000"
+                  Padding="24,20,24,40"
+                  ColumnDefinitions="Auto,*,Auto">
+
+                <Label Grid.Column="0"
+                       Text="−"
+                       FontSize="32"
+                       TextColor="White"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"
+                       Margin="0,0,12,0"/>
+
+                <Slider Grid.Column="1"
+                        x:Name="ZoomSlider"
+                        Minimum="1"
+                        Maximum="5"
+                        Value="1"
+                        MinimumTrackColor="#007AFF"
+                        MaximumTrackColor="#40FFFFFF"
+                        ThumbColor="White"
+                        VerticalOptions="Center"
+                        ValueChanged="OnZoomChanged"/>
+
+                <Label Grid.Column="2"
+                       Text="+"
+                       FontSize="32"
+                       TextColor="White"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"
+                       Margin="12,0,0,0"/>
+            </Grid>
+
         </Grid>
     </Grid>
 </ContentPage>
