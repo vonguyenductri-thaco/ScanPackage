@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.ExportSuccessPopup"
+             BackgroundColor="#80000000">
+
+    <!-- Overlay với background mờ đen -->
+    <Grid Padding="20">
+        <!-- Popup container -->
+        <Frame BackgroundColor="White"
+               CornerRadius="24"
+               Padding="0"
+               HasShadow="True"
+               MaximumWidthRequest="360"
+               HorizontalOptions="Center"
+               VerticalOptions="Center">
+
+            <Grid RowDefinitions="Auto,Auto,Auto" Padding="0">
+
+                <!-- Header với icon success -->
+                <Grid Grid.Row="0"
+                      BackgroundColor="#34C759"
+                      Padding="32,40,32,32"
+                      RowDefinitions="Auto,Auto">
+
+                    <!-- Icon checkmark -->
+                    <Frame Grid.Row="0"
+                           BackgroundColor="White"
+                           CornerRadius="50"
+                           WidthRequest="100"
+                           HeightRequest="100"
+                           Padding="0"
+                           HasShadow="False"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center">
+                        <Label Text="✓"
+                               FontSize="60"
+                               FontAttributes="Bold"
+                               TextColor="#34C759"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               Margin="0,-8,0,0"/>
+                    </Frame>
+
+                    <!-- Success message -->
+                    <Label Grid.Row="1"
+                           x:Name="MessageLabel"
+                           Text="Đã lưu file thành công!"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           Margin="0,20,0,0"/>
+                </Grid>
+
+                <!-- Content -->
+                <VerticalStackLayout Grid.Row="1"
+                                   Padding="32,28,32,24"
+                                   Spacing="0">
+                    <Label Text="Bạn muốn làm gì tiếp theo?"
+                           FontSize="16"
+                           TextColor="#666666"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+                <!-- Action buttons -->
+                <VerticalStackLayout Grid.Row="2"
+                                   Padding="32,0,32,32"
+                                   Spacing="14">
+                    
+                    <!-- Share button with icon -->
+                    <Border BackgroundColor="#007AFF"
+                            StrokeThickness="0"
+                            Padding="0"
+                            HeightRequest="54">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnShareClicked"/>
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              Padding="20,0,20,0"
+                              ColumnSpacing="0">
+                            <Image Grid.Column="0"
+                                   Source="share.png"
+                                   WidthRequest="22"
+                                   HeightRequest="22"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Start"/>
+                            <Label Grid.Column="1"
+                                   Text="Chia sẻ file"
+                                   TextColor="White"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                            <!-- Spacer để cân bằng với icon bên trái -->
+                            <BoxView Grid.Column="2"
+                                     WidthRequest="22"
+                                     HeightRequest="22"
+                                     Color="Transparent"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Home button -->
+                    <Button Text="Quay về màn hình chính"
+                            Clicked="OnHomeClicked"
+                            BackgroundColor="#F5F5F5"
+                            TextColor="#007AFF"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            CornerRadius="14"
+                            HeightRequest="54"
+                            Padding="20,0"/>
+
+                    <!-- Cancel button -->
+                    <Button Text="Đóng"
+                            Clicked="OnCancelClicked"
+                            BackgroundColor="Transparent"
+                            TextColor="#999999"
+                            FontSize="15"
+                            HeightRequest="48"
+                            Padding="20,0"
+                            Margin="0,4,0,0"/>
+                </VerticalStackLayout>
+
+            </Grid>
+        </Frame>
+    </Grid>
+</ContentPage>
+

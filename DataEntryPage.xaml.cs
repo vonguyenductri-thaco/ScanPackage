@@ -344,11 +344,38 @@ public partial class DataEntryPage : ContentPage
                 pkg.SaveAs(new FileInfo(path));
             }
 
-            var message = isEditing ? "Đã cập nhật file thành công!" : "Đã lưu file thành công!";
-            await DisplayAlert("Thành công", message, "OK");
+            // Hiển thị custom popup
+            var tcs = new TaskCompletionSource<PopupAction>();
+            var popup = new ExportSuccessPopup(path, isEditing, tcs);
+            await Navigation.PushModalAsync(popup, false);
 
-            // Quay về MainPage sau khi lưu
-            await Navigation.PopToRootAsync();
+            var action = await tcs.Task;
+
+            if (action == PopupAction.Share)
+            {
+                // Chia sẻ file
+                try
+                {
+                    await Share.Default.RequestAsync(new ShareFileRequest
+                    {
+                        Title = "Chia sẻ file Excel",
+                        File = new ShareFile(path)
+                    });
+                }
+                catch (Exception shareEx)
+                {
+                    await DisplayAlert("Lỗi", $"Không thể chia sẻ file:\n{shareEx.Message}", "OK");
+                }
+
+                // Sau khi chia sẻ, quay về màn hình chính
+                await Navigation.PopToRootAsync();
+            }
+            else if (action == PopupAction.Home)
+            {
+                // Quay về MainPage
+                await Navigation.PopToRootAsync();
+            }
+            // Nếu Cancel, không làm gì cả (ở lại trang hiện tại)
         }
         catch (Exception ex)
         {
