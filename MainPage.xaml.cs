@@ -12,12 +12,22 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
         BindingContext = this;
+
+        // Ngăn không cho lùi về splash screen
+        NavigationPage.SetHasBackButton(this, false);
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
         LoadFiles(); // quay lại trang là refresh danh sách
+    }
+
+    // Ngăn nút back của hệ thống
+    protected override bool OnBackButtonPressed()
+    {
+        // Không làm gì cả - ngăn không cho thoát app
+        return true;
     }
 
     private void LoadFiles()

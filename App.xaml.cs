@@ -20,12 +20,12 @@ public partial class App : Application
             BarTextColor = Microsoft.Maui.Graphics.Colors.Transparent,
             Title = ""
         };
-        
+
         // Ẩn navigation bar hoàn toàn trên Android
         #if ANDROID
         Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.AppCompat.NavigationPage.SetBarHeight(navPage, 0);
         #endif
-        
+
         return new Window(navPage);
     }
 }
