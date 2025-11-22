@@ -2,6 +2,11 @@
 using System.Collections.ObjectModel;
 using OfficeOpenXml;
 
+#if ANDROID
+using Android.Views;
+using Microsoft.Maui.Platform;
+#endif
+
 namespace ScanPackage;
 
 public partial class MainPage : ContentPage
@@ -21,14 +26,98 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
         LoadFiles(); // quay lại trang là refresh danh sách
+
+        // Apply safe area với delay nhỏ để đảm bảo window đã load
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await Task.Delay(100);
+            ApplySafeAreaInsets();
+        });
     }
 
-    // Ngăn nút back của hệ thống
+    // Back button thoát app
     protected override bool OnBackButtonPressed()
     {
-        // Không làm gì cả - ngăn không cho thoát app
+        // Thoát ứng dụng
+        Application.Current?.Quit();
         return true;
     }
+
+    private void ApplySafeAreaInsets()
+    {
+        try
+        {
+#if ANDROID
+            // Get safe area insets for Android
+            var safeInsets = GetAndroidSafeAreaInsets();
+
+            // Áp dụng cho Header (notch/status bar ở trên)
+            if (safeInsets.Top > 0)
+            {
+                HeaderGrid.Padding = new Thickness(10, safeInsets.Top, 10, 0);
+                HeaderGrid.HeightRequest = safeInsets.Top + 44; // 22 (font) + 16 (margin) + 6 (buffer)
+            }
+
+            // Áp dụng cho Footer (navigation bar ở dưới)
+            if (safeInsets.Bottom > 0)
+            {
+                FooterGrid.Padding = new Thickness(10, 20, 10, safeInsets.Bottom + 10);
+                FooterGrid.HeightRequest = safeInsets.Bottom + 90;
+            }
+#endif
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Safe area error: {ex.Message}");
+        }
+    }
+
+#if ANDROID
+    private Thickness GetAndroidSafeAreaInsets()
+    {
+        try
+        {
+            var activity = Platform.CurrentActivity;
+            if (activity?.Window?.DecorView?.RootWindowInsets == null)
+                return new Thickness(0);
+
+            var insets = activity.Window.DecorView.RootWindowInsets;
+
+            // Android 11+ (API 30+)
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.R)
+            {
+                var windowInsets = insets.GetInsetsIgnoringVisibility(
+                    Android.Views.WindowInsets.Type.SystemBars());
+
+                var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
+
+                return new Thickness(
+                    windowInsets.Left / density,
+                    windowInsets.Top / density,
+                    windowInsets.Right / density,
+                    windowInsets.Bottom / density
+                );
+            }
+            else
+            {
+                // Android 10 and below (fallback)
+                var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
+
+                return new Thickness(
+                    insets.SystemWindowInsetLeft / density,
+                    insets.SystemWindowInsetTop / density,
+                    insets.SystemWindowInsetRight / density,
+                    insets.SystemWindowInsetBottom / density
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"GetAndroidSafeAreaInsets error: {ex.Message}");
+            return new Thickness(0);
+        }
+    }
+#endif
 
     private void LoadFiles()
     {
@@ -36,82 +125,144 @@ public partial class MainPage : ContentPage
         var folder = FileSystem.AppDataDirectory;
         var files = Directory.GetFiles(folder, "*.xlsx");
 
-        foreach (var file in files.OrderByDescending(File.GetCreationTime))
+        var fileList = files.OrderByDescending(File.GetCreationTime).ToList();
+
+        for (int i = 0; i < fileList.Count; i++)
         {
+            var file = fileList[i];
             var fileInfo = new FileInfo(file);
             Files.Add(new FileItem
             {
                 FileName = Path.GetFileName(file),
                 FullPath = file,
-                FileDate = fileInfo.CreationTime.ToString("dd/MM/yyyy HH:mm")
+                FileDate = fileInfo.CreationTime.ToString("dd/MM/yyyy HH:mm"),
+                IsNotLastItem = (i < fileList.Count - 1) // Item cuối = false
             });
         }
     }
 
-    private async void OnEditClicked(object sender, EventArgs e)
+    // ==================== ICON BUTTON EVENT HANDLERS ====================
+
+    private void OnEditIconTapped(object sender, EventArgs e)
     {
-        if (sender is Button button && button.CommandParameter is FileItem item)
+        if (sender is Border border && border.BindingContext is FileItem item)
+        {
+            OnEditClickedAsync(item);
+        }
+    }
+
+    private void OnShareIconTapped(object sender, EventArgs e)
+    {
+        if (sender is Border border && border.BindingContext is FileItem item)
+        {
+            OnShareClickedAsync(item);
+        }
+    }
+
+    private void OnDeleteIconTapped(object sender, EventArgs e)
+    {
+        if (sender is Border border && border.BindingContext is FileItem item)
+        {
+            OnDeleteClickedAsync(item);
+        }
+    }
+
+    // ==================== CORE ACTION METHODS ====================
+
+    private async void OnEditClickedAsync(FileItem item)
+    {
+        try
+        {
+            // Load file Excel và mở DataEntryPage để chỉnh sửa
+            var editPage = await LoadExcelFileAsync(item.FullPath);
+            if (editPage != null)
+            {
+                await Navigation.PushAsync(editPage);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Lỗi", $"Không thể mở file để chỉnh sửa:\n{ex.Message}", "OK");
+        }
+    }
+
+    private async void OnShareClickedAsync(FileItem item)
+    {
+        try
+        {
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Chia sẻ file Excel",
+                File = new ShareFile(item.FullPath)
+            });
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Lỗi", $"Không thể chia sẻ file:\n{ex.Message}", "OK");
+        }
+    }
+
+    private async void OnDeleteClickedAsync(FileItem item)
+    {
+        var confirm = await DisplayAlert(
+            "Xác nhận xóa",
+            $"Bạn có chắc muốn xóa file:\n{item.FileName}?",
+            "Xóa",
+            "Hủy");
+
+        if (confirm)
         {
             try
             {
-                // Load file Excel và mở DataEntryPage để chỉnh sửa
-                var editPage = await LoadExcelFileAsync(item.FullPath);
-                if (editPage != null)
-                {
-                    await Navigation.PushAsync(editPage);
-                }
+                File.Delete(item.FullPath);
+                LoadFiles();
+                await DisplayAlert("Thành công", "Đã xóa file thành công", "OK");
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Lỗi", $"Không thể mở file để chỉnh sửa:\n{ex.Message}", "OK");
+                await DisplayAlert("Lỗi", $"Không thể xóa file:\n{ex.Message}", "OK");
             }
         }
     }
 
-    private async void OnShareClicked(object sender, EventArgs e)
+    // ==================== PARSE METADATA FROM FILENAME ====================
+
+    private (DateTime? date, string stt, string container, string seal) ParseMetadataFromFilename(string fileName)
     {
-        if (sender is Button button && button.CommandParameter is FileItem item)
+        try
         {
-            try
+            // Format: yyyy.MM.dd_STT_Container_Seal.xlsx
+            // Example: 2025.01.15_123_ABCD1234567_YN646E4AO.xlsx
+
+            var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+            var parts = nameWithoutExt.Split('_');
+
+            if (parts.Length >= 4)
             {
-                await Share.Default.RequestAsync(new ShareFileRequest
+                // Parse date
+                DateTime? date = null;
+                if (DateTime.TryParseExact(parts[0], "yyyy.MM.dd", null,
+                    System.Globalization.DateTimeStyles.None, out DateTime parsedDate))
                 {
-                    Title = "Chia sẻ file Excel",
-                    File = new ShareFile(item.FullPath)
-                });
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Lỗi", $"Không thể chia sẻ file:\n{ex.Message}", "OK");
+                    date = parsedDate;
+                }
+
+                string stt = parts[1];
+                string container = parts[2];
+                string seal = parts[3];
+
+                return (date, stt, container, seal);
             }
         }
-    }
-
-    private async void OnDeleteClicked(object sender, EventArgs e)
-    {
-        if (sender is Button button && button.CommandParameter is FileItem item)
+        catch (Exception ex)
         {
-            var confirm = await DisplayAlert(
-                "Xác nhận xóa",
-                $"Bạn có chắc muốn xóa file:\n{item.FileName}?",
-                "Xóa",
-                "Hủy");
-
-            if (confirm)
-            {
-                try
-                {
-                    File.Delete(item.FullPath);
-                    LoadFiles();
-                    await DisplayAlert("Thành công", "Đã xóa file thành công", "OK");
-                }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Lỗi", $"Không thể xóa file:\n{ex.Message}", "OK");
-                }
-            }
+            System.Diagnostics.Debug.WriteLine($"ParseMetadataFromFilename error: {ex.Message}");
         }
+
+        return (null, "", "", "");
     }
+
+    // ==================== LOAD EXCEL FILE ====================
 
     private async Task<DataEntryPage?> LoadExcelFileAsync(string filePath)
     {
@@ -125,7 +276,7 @@ public partial class MainPage : ContentPage
 
             using var package = new ExcelPackage(new FileInfo(filePath));
             var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-            
+
             if (worksheet == null)
             {
                 await DisplayAlert("Lỗi", "File Excel không hợp lệ", "OK");
@@ -161,9 +312,19 @@ public partial class MainPage : ContentPage
             // Tạo DataEntryPage với kích thước từ file
             var dataPage = new DataEntryPage(rows, cols, filePath);
 
-            // Đợi một chút để grid được build xong, sau đó load dữ liệu
+            // Parse metadata từ filename
+            var fileName = Path.GetFileName(filePath);
+            var (date, stt, container, seal) = ParseMetadataFromFilename(fileName);
+
+            // Đợi một chút để grid được build xong, sau đó load dữ liệu và metadata
             await Task.Delay(200);
             dataPage.LoadData(data);
+
+            // Load metadata vào fields
+            if (date.HasValue)
+            {
+                dataPage.LoadMetadata(date.Value, stt, container, seal);
+            }
 
             return dataPage;
         }
@@ -174,15 +335,20 @@ public partial class MainPage : ContentPage
         }
     }
 
+    // ==================== CREATE NEW FILE ====================
+
     private async void OnCreateClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new SetupPage());
     }
 }
 
+// ==================== FILE ITEM CLASS ====================
+
 public class FileItem
 {
     public string FileName { get; set; } = "";
     public string FullPath { get; set; } = "";
     public string FileDate { get; set; } = "";
+    public bool IsNotLastItem { get; set; } = true; // Mặc định true, item cuối = false
 }

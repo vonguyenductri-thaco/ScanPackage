@@ -1,112 +1,222 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ScanPackage.SetupPage">
+             x:Class="ScanPackage.SetupPage"
+             BackgroundColor="#F8F3F3">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="0">
 
-        <!-- Header -->
+        <!-- Header Component -->
         <Grid Grid.Row="0" 
-              BackgroundColor="#007AFF"
-              Padding="20,16"
-              ColumnDefinitions="Auto,*">
-            <Button x:Name="BackButton"
-                    Text="←"
-                    FontSize="24"
-                    TextColor="White"
-                    BackgroundColor="Transparent"
-                    BorderWidth="0"
-                    Padding="0"
-                    WidthRequest="40"
-                    HeightRequest="40"
-                    Clicked="OnBackButtonClicked"
-                    Grid.Column="0"
-                    VerticalOptions="Center"/>
-            <Label Text="Tạo bảng mới"
-                   FontAttributes="Bold"
-                   FontSize="24"
-                   TextColor="White"
-                   Grid.Column="1"
-                   VerticalOptions="Center"
-                   Margin="8,0,0,0"/>
+              x:Name="HeaderGrid"
+              BackgroundColor="#F8F3F3"
+              MinimumHeightRequest="50">
+            <Grid ColumnDefinitions="Auto,*">
+                <!-- Back Button -->
+                <Border Grid.Column="0"
+                        BackgroundColor="Transparent"
+                        Padding="4"
+                        StrokeThickness="0"
+                        VerticalOptions="End"
+                        Margin="0,15,23,11">
+                    <Image Source="back_icon.svg"
+                           WidthRequest="24"
+                           HeightRequest="24"
+                           Aspect="AspectFit"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnBackButtonClicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <!-- Title -->
+                <Label Grid.Column="1"
+                       Text="Thiết lập bảng"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       VerticalOptions="End"
+                       HorizontalOptions="Start"
+                       Margin="0,0,0,12"/>
+            </Grid>
         </Grid>
 
-        <!-- Tiêu đề và nội dung chính -->
-        <ScrollView Grid.Row="1" Padding="20">
-            <VerticalStackLayout Spacing="24">
-                
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Số hàng"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="#212121"
-                           Margin="0,0,0,4"/>
-                    <Frame BorderColor="#E0E0E0"
-                           CornerRadius="12"
-                           Padding="0"
-                           HasShadow="False"
-                           BackgroundColor="White">
-                        <Entry x:Name="RowsEntry"
-                               Keyboard="Numeric"
-                               Placeholder="Nhập số hàng"
-                               Text="10"
-                               BackgroundColor="Transparent"
-                               Margin="16,12"/>
-                    </Frame>
-                </VerticalStackLayout>
+        <!-- Content Area -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="0" Spacing="0">
 
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Số cột"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="#212121"
-                           Margin="0,0,0,4"/>
-                    <Frame BorderColor="#E0E0E0"
-                           CornerRadius="12"
-                           Padding="0"
-                           HasShadow="False"
-                           BackgroundColor="White">
-                        <Entry x:Name="ColsEntry"
-                               Keyboard="Numeric"
-                               Placeholder="Nhập số cột"
-                               Text="15"
-                               BackgroundColor="Transparent"
-                               Margin="16,12"/>
-                    </Frame>
-                </VerticalStackLayout>
-
-                <!-- Info card -->
-                <Frame BackgroundColor="#E3F2FD"
-                       BorderColor="#BBDEFB"
+                <!-- White Area Container cho Số hàng và Số cột -->
+                <Frame Margin="10,0,10,0"
+                       Padding="10"
                        CornerRadius="12"
-                       Padding="16"
-                       HasShadow="False">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="💡 Gợi ý"
-                               FontSize="14"
-                               FontAttributes="Bold"
-                               TextColor="#1976D2"/>
-                        <Label Text="Bảng sẽ có kích thước: [Số hàng] x [Số cột]"
-                               FontSize="13"
-                               TextColor="#424242"/>
+                       BackgroundColor="White"
+                       HasShadow="False"
+                       BorderColor="Transparent">
+                    <VerticalStackLayout Spacing="24">
+
+                        <!-- Số hàng (Rows) -->
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                            <!-- Label with icon -->
+                            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Image Grid.Column="0"
+                                       Source="select_row.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="1"
+                                       Text="Số hàng"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="Black"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+
+                            <!-- Input Frame -->
+                            <Frame Grid.Row="1"
+                                   BorderColor="#E0E0E0"
+                                   CornerRadius="12"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="White">
+                                <Entry x:Name="RowsEntry"
+                                       Keyboard="Numeric"
+                                       Placeholder="Nhập số hàng"
+                                       Text="7"
+                                       BackgroundColor="Transparent"
+                                       TextColor="Black"
+                                       FontSize="14"
+                                       Margin="16,12"/>
+                            </Frame>
+                        </Grid>
+
+                        <!-- Số cột (Columns) -->
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                            <!-- Label with icon -->
+                            <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Image Grid.Column="0"
+                                       Source="select_column.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="1"
+                                       Text="Số cột"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="Black"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+
+                            <!-- Input Frame -->
+                            <Frame Grid.Row="1"
+                                   BorderColor="#E0E0E0"
+                                   CornerRadius="12"
+                                   Padding="0"
+                                   HasShadow="False"
+                                   BackgroundColor="White">
+                                <Entry x:Name="ColsEntry"
+                                       Keyboard="Numeric"
+                                       Placeholder="Nhập số cột"
+                                       Text="13"
+                                       BackgroundColor="Transparent"
+                                       TextColor="Black"
+                                       FontSize="14"
+                                       Margin="16,12"/>
+                            </Frame>
+                        </Grid>
+
                     </VerticalStackLayout>
+                </Frame>
+
+                <!-- Info Card với light bulb icon -->
+                <Frame  BackgroundColor="#E4F8FF"
+                        BorderColor="Transparent"
+                        CornerRadius="12"
+                        Padding="10"
+                        HasShadow="False"
+                        MinimumHeightRequest="300"
+                        Margin="10,10,10,10">
+                    <Grid RowDefinitions="Auto,Auto,*">
+
+                        <!-- Title with light bulb -->
+                        <Grid   Grid.Row="0"
+                                ColumnDefinitions="Auto,*" 
+                                ColumnSpacing="10.9">
+                            <Image  Grid.Column="0"
+                                    Source="creativity_icon.svg"
+                                    WidthRequest="24"
+                                    HeightRequest="24"
+                                    VerticalOptions="Start"
+                                    Margin="0"/>
+                            <Label  Grid.Column="1"
+                                    Text="Gợi ý"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    TextColor="#00529C"
+                                    VerticalOptions="Start"
+                                    Margin="0"/>
+                        </Grid>
+
+                        <!-- Comment text -->
+                        <Label  Grid.Row="1"
+                                LineBreakMode="WordWrap"
+                                FontSize="14"
+                                TextColor="Black"
+                                Margin="34,12,0,8">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Bảng sẽ có kích thước: "/>
+                                    <Span Text="[Số hàng] x [Số cột]" FontAttributes="Bold"/>
+                                    <Span Text=", ứng với cách xếp kiện hàng trong container."/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+
+                        <!-- Cargo Image - Fill remaining space -->
+                        <Image  Grid.Row="2"
+                                Source="info_cargo.png"
+                                Aspect="AspectFit"
+                                VerticalOptions="FillAndExpand"
+                                HorizontalOptions="FillAndExpand"
+                                Margin="16,16,0,0"/>
+                    </Grid>
                 </Frame>
 
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Nút tạo bảng ở cuối cùng -->
+        <!-- Footer with Create Button -->
         <Grid Grid.Row="2" 
-              Padding="20,12,20,20"
-              BackgroundColor="White">
-            <Button Text="Tạo bảng"
-                    BackgroundColor="#007AFF"
-                    TextColor="White"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    CornerRadius="12"
-                    HeightRequest="56"
-                    Clicked="OnCreateClicked" />
+              x:Name="FooterGrid"
+              BackgroundColor="White"
+              Padding="10,20,10,20"
+              MinimumHeightRequest="100">
+
+            <!-- Button Gradient (Đỏ - Cam: trái sang phải) -->
+            <Border StrokeThickness="0"
+                    MinimumHeightRequest="60"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30"/>
+                </Border.StrokeShape>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="1,0.5" EndPoint="0,0.5">
+                        <GradientStop Color="#ED1C24" Offset="0.0" />
+                        <GradientStop Color="#F7941D" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCreateClicked"/>
+                </Border.GestureRecognizers>
+
+                <Label Text="Tạo bảng"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       InputTransparent="True"/>
+            </Border>
         </Grid>
+
     </Grid>
 </ContentPage>
