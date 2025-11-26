@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ScanPackage Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b4bee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .preview {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="flex min-h-screen w-full">
+    <!-- SideNavBar -->
+    <aside class="w-64 flex-shrink-0 bg-white dark:bg-[#111422] border-r border-gray-200 dark:border-gray-800 flex flex-col">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-800">
+            <div class="flex gap-3 items-center">
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Firebase logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDLvucLoYmx9-C-gkzur_7hOPgT9OZ-eIRaJHqDMs2ia0x2msquEmyPxFUcDUEJAq5WFV5jpIu35LL-iFGmCU-oMq4_QhPuTni5j85aihoW5h1TzNC2UkdgkQ_-5KGrV9ljsB2YC9lMStpYvdKXUkh-_e5rEnqv6ZYlWUOgcoGwGZgLBTQnjmw0K5UJPUPEF_E-cF2tYKtdhJ4DS1FvCIHlrYXWkUbZnM5RWH00Z3tG7Pk24xlKkT3FmyuI6lpVCLYkUsDUZprORHXy");'></div>
+                <div class="flex flex-col">
+                    <h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">ScanPackage</h1>
+                    <p class="text-gray-500 dark:text-[#929bc9] text-sm font-normal leading-normal">Quản trị hệ thống</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex flex-col gap-2 p-4">
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-[#232948] nav-link active" href="#" onclick="switchTab('products')">
+                <span class="material-symbols-outlined text-primary dark:text-white" style="font-variation-settings: 'FILL' 1;">package_2</span>
+                <p class="text-primary dark:text-white text-sm font-medium leading-normal">Quản lý Sản phẩm</p>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 nav-link" href="#" onclick="switchTab('users')">
+                <span class="material-symbols-outlined text-gray-600 dark:text-white">group</span>
+                <p class="text-gray-600 dark:text-white text-sm font-medium leading-normal">Quản lý Người dùng</p>
+            </a>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 p-6 lg:p-8">
+        <div class="w-full">
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content active">
+                <!-- PageHeading -->
+                <div class="flex flex-wrap justify-between gap-3 mb-8">
+                    <p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Quản lý Sản phẩm</p>
+                </div>
+                
+                <!-- Product Management Section -->
+                <div class="flex flex-col gap-6">
+                    <!-- Upload Card -->
+                    <div class="bg-white dark:bg-[#111422] rounded-xl p-6">
+                        <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">Tải lên File Excel Sản phẩm</h2>
+                        <div class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-[#323b67] px-6 py-14">
+                            <div class="flex max-w-[480px] flex-col items-center gap-2">
+                                <p class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">Kéo thả file Excel vào đây</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal text-center">
+                                    hoặc nhấn để chọn file. Định dạng hỗ trợ: .xlsx với các cột Customer, Product, Model.
+                                </p>
+                            </div>
+                            <input type="file" id="productsFile" accept=".xlsx,.xls" onchange="handleProductsFile(this)" class="hidden">
+                            <button onclick="document.getElementById('productsFile').click()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-[#232948] text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-300 dark:hover:bg-[#323b67]">
+                                <span class="truncate">Chọn File</span>
+                            </button>
+                        </div>
+                        <div id="productsStatus"></div>
+                    </div>
+                    
+                    <!-- Preview and Upload Card -->
+                    <div class="bg-white dark:bg-[#111422] rounded-xl p-6" id="productsPreviewCard" style="display: none;">
+                        <div class="flex justify-between items-center mb-5">
+                            <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">Xem trước Dữ liệu</h2>
+                        </div>
+                        
+                        <!-- Preview Table -->
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                            <div id="productsPreview"></div>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button id="productsUploadBtn" onclick="uploadProducts()" disabled class="flex items-center justify-center rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 disabled:bg-gray-400">
+                                <span class="material-symbols-outlined mr-2 text-base">upload</span>
+                                <span class="truncate">Tải lên Firebase</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Users Tab -->
+            <div id="users-tab" class="tab-content" style="display: none;">
+                <!-- PageHeading for User Management -->
+                <div class="flex flex-wrap justify-between gap-3 mb-8">
+                    <p class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Quản lý Người dùng</p>
+                </div>
+                
+                <!-- Tabs/Segmented Control -->
+                <div class="mb-6">
+                    <div class="flex border-b border-gray-200 dark:border-gray-700">
+                        <button id="excelOptionBtn" onclick="selectUserOption('excel')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Tải lên File Excel</button>
+                        <button id="manualOptionBtn" onclick="selectUserOption('manual')" class="px-4 py-2 text-sm font-medium border-b-2 border-primary text-primary dark:text-primary">Nhập thủ công</button>
+                    </div>
+                </div>
+                
+                <!-- Excel Option -->
+                <div id="excelOption" class="flex flex-col gap-6" style="display: none;">
+                    <div class="bg-white dark:bg-[#111422] rounded-xl p-6">
+                        <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">Tải lên File Excel Người dùng</h2>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
+                            <h4 class="text-blue-900 dark:text-blue-200 font-semibold mb-2">Tải xuống Mẫu</h4>
+                            <p class="text-blue-800 dark:text-blue-300 text-sm mb-3">Tải xuống mẫu Excel và điền thông tin người dùng:</p>
+                            <button onclick="downloadUserTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                Tải xuống Mẫu Excel
+                            </button>
+                        </div>
+                        <div class="flex flex-col items-center gap-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-[#323b67] px-6 py-14">
+                            <div class="flex max-w-[480px] flex-col items-center gap-2">
+                                <p class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] text-center">Kéo thả file Excel vào đây</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal text-center">
+                                    Định dạng hỗ trợ: .xlsx với các cột MSNV, Họ Và Tên, Chức vụ.
+                                </p>
+                            </div>
+                            <input type="file" id="usersFile" accept=".xlsx,.xls" onchange="handleUsersFile(this)" class="hidden">
+                            <button onclick="document.getElementById('usersFile').click()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-[#232948] text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-300 dark:hover:bg-[#323b67]">
+                                <span class="truncate">Chọn File</span>
+                            </button>
+                        </div>
+                        <div id="usersStatus"></div>
+                        
+                        <!-- Users Preview Card -->
+                        <div id="usersPreviewCard" style="display: none;" class="mt-6">
+                            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                                <div id="usersPreview"></div>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button id="usersUploadBtn" onclick="uploadUsers()" disabled class="flex items-center justify-center rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 disabled:bg-gray-400">
+                                    <span class="material-symbols-outlined mr-2 text-base">upload</span>
+                                    <span class="truncate">Tải danh sách lên Firebase</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Manual Entry View (Active by default) -->
+                <div id="manualOption" class="flex flex-col gap-6">
+                    <!-- Add New User Card -->
+                    <div class="bg-white dark:bg-[#111422] rounded-xl p-6">
+                        <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-5">Thêm Người dùng Thủ công</h2>
+                        <form class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="newUserMsnv">MSNV</label>
+                                <input class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="newUserMsnv" placeholder="VD: 12345" type="text"/>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="newUserName">Họ Và Tên</label>
+                                <input class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="newUserName" placeholder="VD: Nguyễn Văn A" type="text"/>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="newUserPosition">Chức vụ</label>
+                                <input class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary focus:border-primary" id="newUserPosition" placeholder="VD: Nhân viên" type="text"/>
+                            </div>
+                            <div class="md:col-span-3 flex justify-end mt-2">
+                                <button onclick="addUser()" class="flex items-center justify-center rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90" type="button">
+                                    <span class="material-symbols-outlined mr-2 text-base">add</span>
+                                    <span class="truncate">Thêm Người dùng</span>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="manualStatus"></div>
+                    </div>
+                    
+                    <!-- Pending Users Card -->
+                    <div class="bg-white dark:bg-[#111422] rounded-xl p-6">
+                        <h2 class="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] mb-5">Danh sách Người dùng chờ Tải lên</h2>
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                            <table class="w-full text-sm text-left" id="manualUsersTable">
+                                <thead class="bg-gray-50 dark:bg-gray-800/50 text-xs text-gray-700 dark:text-gray-400 uppercase">
+                                    <tr>
+                                        <th class="px-6 py-3" scope="col">MSNV</th>
+                                        <th class="px-6 py-3" scope="col">Họ Và Tên</th>
+                                        <th class="px-6 py-3" scope="col">Chức vụ</th>
+                                        <th class="px-6 py-3 text-right" scope="col">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="manualUsersTableBody">
+                                    <tr class="bg-white dark:bg-[#111422]">
+                                        <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">
+                                            Chưa có người lập nào. Hãy thêm người lập mới ở trên.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button id="manualUploadBtn" onclick="uploadManualUsers()" disabled class="flex items-center justify-center rounded-lg h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 disabled:bg-gray-400">
+                                <span class="material-symbols-outlined mr-2 text-base">upload</span>
+                                <span class="truncate">Upload</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+    <script>
+        // Firebase variables
+        let firebaseApp = null;
+        let db = null;
+        let productsData = [];
+        let usersData = [];
+        let manualUsers = [];
+        
+        // Initialize Firebase
+        window.addEventListener('load', function() {
+            initFirebase();
+            initializeUI();
+        });
+        
+        // Initialize UI state
+        function initializeUI() {
+            // Set default user management tab to manual entry
+            selectUserOption('manual');
+        }
+        
+        function initFirebase() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDLyaG5keHZcy8gjLSATTq1LObgBNS8z1U",
+                    authDomain: "scanpackage-app.firebaseapp.com",
+                    projectId: "scanpackage-app"
+                };
+                
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                console.log('Firebase connected successfully');
+            } catch (error) {
+                console.error('Firebase connection error:', error);
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active', 'bg-primary/10', 'dark:bg-[#232948]');
+                link.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-800/50');
+                
+                // Update icon and text colors
+                const icon = link.querySelector('.material-symbols-outlined');
+                const text = link.querySelector('p');
+                icon.classList.remove('text-primary', 'dark:text-white');
+                icon.classList.add('text-gray-600', 'dark:text-white');
+                text.classList.remove('text-primary', 'dark:text-white');
+                text.classList.add('text-gray-600', 'dark:text-white');
+                icon.style.fontVariationSettings = "'FILL' 0";
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Activate selected nav link
+            const activeLink = event.target.closest('.nav-link');
+            if (activeLink) {
+                activeLink.classList.add('active', 'bg-primary/10', 'dark:bg-[#232948]');
+                activeLink.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-800/50');
+                
+                // Update icon and text colors for active state
+                const icon = activeLink.querySelector('.material-symbols-outlined');
+                const text = activeLink.querySelector('p');
+                icon.classList.remove('text-gray-600');
+                icon.classList.add('text-primary', 'dark:text-white');
+                text.classList.remove('text-gray-600');
+                text.classList.add('text-primary', 'dark:text-white');
+                icon.style.fontVariationSettings = "'FILL' 1";
+            }
+        }
+        
+        // User option selection
+        function selectUserOption(option) {
+            const excelBtn = document.getElementById('excelOptionBtn');
+            const manualBtn = document.getElementById('manualOptionBtn');
+            const excelDiv = document.getElementById('excelOption');
+            const manualDiv = document.getElementById('manualOption');
+            
+            // Reset both buttons
+            excelBtn.classList.remove('border-primary', 'text-primary', 'dark:text-primary');
+            excelBtn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'dark:hover:text-gray-300');
+            
+            manualBtn.classList.remove('border-primary', 'text-primary', 'dark:text-primary');
+            manualBtn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'dark:hover:text-gray-300');
+            
+            if (option === 'excel') {
+                excelBtn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'dark:hover:text-gray-300');
+                excelBtn.classList.add('border-primary', 'text-primary', 'dark:text-primary');
+                excelDiv.style.display = 'block';
+                manualDiv.style.display = 'none';
+            } else {
+                manualBtn.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'dark:hover:text-gray-300');
+                manualBtn.classList.add('border-primary', 'text-primary', 'dark:text-primary');
+                excelDiv.style.display = 'none';
+                manualDiv.style.display = 'block';
+            }
+        }
+        
+        // Download user template
+        function downloadUserTemplate() {
+            const sampleData = [
+                ['MSNV', 'Họ Và Tên', 'Chức vụ'],
+                ['NV001', 'Nguyễn Văn A', 'Nhân viên'],
+                ['NV002', 'Trần Thị B', 'Trưởng phòng'],
+                ['NV003', 'Lê Văn C', 'Phó phòng']
+            ];
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(sampleData);
+            
+            ws['!cols'] = [
+                { width: 15 },
+                { width: 25 },
+                { width: 20 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'Danh sách người lập');
+            XLSX.writeFile(wb, 'Mau_Danh_Sach_Nguoi_Lap.xlsx');
+        }
+        
+        // Handle products file
+        function handleProductsFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            showStatus('productsStatus', 'Đang đọc file...', 'info');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    
+                    parseProductsData(jsonData);
+                } catch (error) {
+                    showStatus('productsStatus', 'Lỗi đọc file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Parse products data
+        function parseProductsData(rawData) {
+            if (!rawData || rawData.length < 2) {
+                showStatus('productsStatus', 'File không có dữ liệu hợp lệ', 'error');
+                return;
+            }
+            
+            const headers = rawData[0].map(h => h?.toString().trim().toLowerCase());
+            const customerIndex = headers.findIndex(h => h.includes('customer') || h.includes('khách hàng'));
+            const productIndex = headers.findIndex(h => h.includes('product') || h.includes('sản phẩm'));
+            const modelIndex = headers.findIndex(h => h.includes('model'));
+            
+            if (customerIndex === -1 || productIndex === -1 || modelIndex === -1) {
+                showStatus('productsStatus', 'Không tìm thấy cột Customer, Product, hoặc Model', 'error');
+                return;
+            }
+            
+            productsData = [];
+            let validRows = 0;
+            
+            for (let i = 1; i < rawData.length; i++) {
+                const row = rawData[i];
+                if (!row || row.length === 0) continue;
+                
+                const customer = row[customerIndex]?.toString().trim();
+                const product = row[productIndex]?.toString().trim();
+                const model = row[modelIndex]?.toString().trim();
+                
+                if (customer && product && model) {
+                    productsData.push({
+                        customer: customer,
+                        product: product,
+                        model: model,
+                        updatedAt: new Date()
+                    });
+                    validRows++;
+                }
+            }
+            
+            if (validRows === 0) {
+                showStatus('productsStatus', 'Không có dữ liệu hợp lệ', 'error');
+                return;
+            }
+            
+            showStatus('productsStatus', `Đọc thành công ${validRows} sản phẩm`, 'success');
+            displayProductsPreview();
+            document.getElementById('productsUploadBtn').disabled = false;
+        }
+        
+        // Display products preview
+        function displayProductsPreview() {
+            const preview = document.getElementById('productsPreview');
+            const previewCard = document.getElementById('productsPreviewCard');
+            
+            let html = `<table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 dark:bg-gray-800/50 text-xs text-gray-700 dark:text-gray-400 uppercase">
+                    <tr>
+                        <th class="px-6 py-3" scope="col">Customer</th>
+                        <th class="px-6 py-3" scope="col">Product</th>
+                        <th class="px-6 py-3" scope="col">Model</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            const displayCount = Math.min(productsData.length, 10);
+            for (let i = 0; i < displayCount; i++) {
+                const item = productsData[i];
+                const rowClass = i === displayCount - 1 ? 'bg-white dark:bg-[#111422]' : 'bg-white dark:bg-[#111422] border-b dark:border-gray-800';
+                html += `<tr class="${rowClass}">
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${item.customer}</td>
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${item.product}</td>
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${item.model}</td>
+                </tr>`;
+            }
+            
+            if (productsData.length > 10) {
+                html += `<tr class="bg-white dark:bg-[#111422]">
+                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400 italic">
+                        ... và ${productsData.length - 10} sản phẩm khác
+                    </td>
+                </tr>`;
+            }
+            
+            html += '</tbody></table>';
+            preview.innerHTML = html;
+            previewCard.style.display = 'block';
+        }
+        
+        // Upload products
+        async function uploadProducts() {
+            if (!db) {
+                showStatus('productsStatus', 'Chưa kết nối Firebase', 'error');
+                return;
+            }
+            
+            if (productsData.length === 0) {
+                showStatus('productsStatus', 'Không có dữ liệu để upload', 'error');
+                return;
+            }
+            
+            document.getElementById('productsUploadBtn').disabled = true;
+            showStatus('productsStatus', 'Đang upload sản phẩm lên Firebase...', 'info');
+            
+            try {
+                let uploaded = 0;
+                let duplicates = 0;
+                
+                for (const product of productsData) {
+                    const existingQuery = await db.collection('products')
+                        .where('customer', '==', product.customer)
+                        .where('product', '==', product.product)
+                        .where('model', '==', product.model)
+                        .get();
+                    
+                    if (existingQuery.empty) {
+                        await db.collection('products').add(product);
+                        uploaded++;
+                    } else {
+                        duplicates++;
+                    }
+                }
+                
+                showStatus('productsStatus', `Upload thành công! ${uploaded} mới, ${duplicates} trùng lặp`, 'success');
+            } catch (error) {
+                showStatus('productsStatus', 'Lỗi upload: ' + error.message, 'error');
+            }
+            
+            document.getElementById('productsUploadBtn').disabled = false;
+        }
+        
+        // Handle users file
+        function handleUsersFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            showStatus('usersStatus', 'Đang đọc file...', 'info');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    
+                    parseUsersData(jsonData);
+                } catch (error) {
+                    showStatus('usersStatus', 'Lỗi đọc file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // Parse users data
+        function parseUsersData(rawData) {
+            if (!rawData || rawData.length < 2) {
+                showStatus('usersStatus', 'File không có dữ liệu hợp lệ', 'error');
+                return;
+            }
+            
+            const headers = rawData[0].map(h => h?.toString().trim().toLowerCase());
+            const msnvIndex = headers.findIndex(h => h.includes('msnv') || h.includes('mã số'));
+            const nameIndex = headers.findIndex(h => h.includes('tên') || h.includes('họ'));
+            const positionIndex = headers.findIndex(h => h.includes('chức vụ') || h.includes('position'));
+            
+            if (msnvIndex === -1 || nameIndex === -1 || positionIndex === -1) {
+                showStatus('usersStatus', 'Không tìm thấy cột MSNV, Họ Và Tên, hoặc Chức vụ', 'error');
+                return;
+            }
+            
+            usersData = [];
+            let validRows = 0;
+            
+            for (let i = 1; i < rawData.length; i++) {
+                const row = rawData[i];
+                if (!row || row.length === 0) continue;
+                
+                const msnv = row[msnvIndex]?.toString().trim();
+                const name = row[nameIndex]?.toString().trim();
+                const position = row[positionIndex]?.toString().trim();
+                
+                if (msnv && name && position) {
+                    usersData.push({
+                        msnv: msnv,
+                        name: name,
+                        position: position,
+                        updatedAt: new Date()
+                    });
+                    validRows++;
+                }
+            }
+            
+            if (validRows === 0) {
+                showStatus('usersStatus', 'Không có dữ liệu hợp lệ', 'error');
+                return;
+            }
+            
+            showStatus('usersStatus', `Đọc thành công ${validRows} người lập`, 'success');
+            displayUsersPreview();
+            document.getElementById('usersUploadBtn').disabled = false;
+        }
+        
+        // Display users preview
+        function displayUsersPreview() {
+            const preview = document.getElementById('usersPreview');
+            const previewCard = document.getElementById('usersPreviewCard');
+            
+            let html = `<table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 dark:bg-gray-800/50 text-xs text-gray-700 dark:text-gray-400 uppercase">
+                    <tr>
+                        <th class="px-6 py-3" scope="col">MSNV</th>
+                        <th class="px-6 py-3" scope="col">Họ Và Tên</th>
+                        <th class="px-6 py-3" scope="col">Chức vụ</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            const displayCount = Math.min(usersData.length, 10);
+            for (let i = 0; i < displayCount; i++) {
+                const user = usersData[i];
+                const rowClass = i === displayCount - 1 ? 'bg-white dark:bg-[#111422]' : 'bg-white dark:bg-[#111422] border-b dark:border-gray-800';
+                html += `<tr class="${rowClass}">
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${user.msnv}</td>
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${user.name}</td>
+                    <td class="px-6 py-4 text-gray-900 dark:text-white">${user.position}</td>
+                </tr>`;
+            }
+            
+            if (usersData.length > 10) {
+                html += `<tr class="bg-white dark:bg-[#111422]">
+                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400 italic">
+                        ... và ${usersData.length - 10} người lập khác
+                    </td>
+                </tr>`;
+            }
+            
+            html += '</tbody></table>';
+            preview.innerHTML = html;
+            previewCard.style.display = 'block';
+        }
+        
+        // Upload users
+        async function uploadUsers() {
+            if (!db) {
+                showStatus('usersStatus', 'Chưa kết nối Firebase', 'error');
+                return;
+            }
+            
+            if (usersData.length === 0) {
+                showStatus('usersStatus', 'Không có dữ liệu để upload', 'error');
+                return;
+            }
+            
+            document.getElementById('usersUploadBtn').disabled = true;
+            showStatus('usersStatus', 'Đang upload người lập lên Firebase...', 'info');
+            
+            try {
+                let uploaded = 0;
+                let duplicates = 0;
+                
+                for (const user of usersData) {
+                    const existingQuery = await db.collection('users').where('msnv', '==', user.msnv).get();
+                    
+                    if (existingQuery.empty) {
+                        await db.collection('users').add(user);
+                        uploaded++;
+                    } else {
+                        const existingDoc = existingQuery.docs[0];
+                        await existingDoc.ref.update(user);
+                        duplicates++;
+                    }
+                }
+                
+                showStatus('usersStatus', `Upload thành công! ${uploaded} mới, ${duplicates} cập nhật`, 'success');
+            } catch (error) {
+                showStatus('usersStatus', 'Lỗi upload: ' + error.message, 'error');
+            }
+            
+            document.getElementById('usersUploadBtn').disabled = false;
+        }
+        
+        // Add user manually
+        function addUser() {
+            const msnv = document.getElementById('newUserMsnv').value.trim();
+            const name = document.getElementById('newUserName').value.trim();
+            const position = document.getElementById('newUserPosition').value.trim();
+            
+            if (!msnv || !name || !position) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+            
+            if (manualUsers.find(u => u.msnv === msnv)) {
+                alert('MSNV đã tồn tại!');
+                return;
+            }
+            
+            manualUsers.push({
+                msnv: msnv,
+                name: name,
+                position: position,
+                updatedAt: new Date()
+            });
+            
+            document.getElementById('newUserMsnv').value = '';
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserPosition').value = '';
+            
+            updateManualUsersTable();
+            document.getElementById('manualUploadBtn').disabled = false;
+        }
+        
+        // Update manual users table
+        function updateManualUsersTable() {
+            const tbody = document.getElementById('manualUsersTableBody');
+            
+            if (manualUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="bg-white dark:bg-[#111422]">
+                        <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">
+                            Chưa có người lập nào. Hãy thêm người lập mới ở trên.
+                        </td>
+                    </tr>`;
+                return;
+            }
+            
+            let html = '';
+            manualUsers.forEach((user, index) => {
+                const rowClass = index === manualUsers.length - 1 ? 'bg-white dark:bg-[#111422]' : 'bg-white dark:bg-[#111422] border-b dark:border-gray-800';
+                html += `
+                    <tr class="${rowClass}">
+                        <td class="px-6 py-4 text-gray-900 dark:text-white">${user.msnv}</td>
+                        <td class="px-6 py-4 text-gray-900 dark:text-white">${user.name}</td>
+                        <td class="px-6 py-4 text-gray-900 dark:text-white">${user.position}</td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="removeUser(${index})" class="p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-500/10">
+                                <span class="material-symbols-outlined text-xl">delete</span>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // Remove user
+        function removeUser(index) {
+            if (confirm('Bạn có chắc muốn xóa người lập này?')) {
+                manualUsers.splice(index, 1);
+                updateManualUsersTable();
+                
+                if (manualUsers.length === 0) {
+                    document.getElementById('manualUploadBtn').disabled = true;
+                }
+            }
+        }
+        
+        // Upload manual users
+        async function uploadManualUsers() {
+            if (!db) {
+                showStatus('manualStatus', 'Chưa kết nối Firebase', 'error');
+                return;
+            }
+            
+            if (manualUsers.length === 0) {
+                showStatus('manualStatus', 'Không có dữ liệu để upload', 'error');
+                return;
+            }
+            
+            document.getElementById('manualUploadBtn').disabled = true;
+            showStatus('manualStatus', 'Đang upload người lập lên Firebase...', 'info');
+            
+            try {
+                let uploaded = 0;
+                let duplicates = 0;
+                
+                for (const user of manualUsers) {
+                    const existingQuery = await db.collection('users').where('msnv', '==', user.msnv).get();
+                    
+                    if (existingQuery.empty) {
+                        await db.collection('users').add(user);
+                        uploaded++;
+                    } else {
+                        const existingDoc = existingQuery.docs[0];
+                        await existingDoc.ref.update(user);
+                        duplicates++;
+                    }
+                }
+                
+                showStatus('manualStatus', `Upload thành công! ${uploaded} mới, ${duplicates} cập nhật`, 'success');
+                
+                manualUsers = [];
+                updateManualUsersTable();
+                document.getElementById('manualUploadBtn').disabled = true;
+                
+            } catch (error) {
+                showStatus('manualStatus', 'Lỗi upload: ' + error.message, 'error');
+            }
+            
+            document.getElementById('manualUploadBtn').disabled = false;
+        }
+        
+        // Show status message
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = message ? `status ${type}` : '';
+        }
+    </script>
+</body>
+</html>
