@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using IOPath = System.IO.Path;
 using Microsoft.Maui.Controls;
@@ -268,14 +268,14 @@ public partial class DataEntryPage : ContentPage
 
         var options = currentPath == null
             ? new[] { "Ch?p ?nh" }
-            : new[] { "Ch?p l?i", "Xóa ?nh" };
+            : new[] { "Ch?p l?i", "Xï¿½a ?nh" };
 
         var action = await DisplayActionSheet("?nh ch?p", "H?y", null, options);
         if (action == "Ch?p ?nh" || action == "Ch?p l?i")
         {
             await CapturePhotoAsync(photoIndex);
         }
-        else if (action == "Xóa ?nh")
+        else if (action == "Xï¿½a ?nh")
         {
             await DeletePhotoAsync(photoIndex);
         }
@@ -329,18 +329,18 @@ public partial class DataEntryPage : ContentPage
             }
             else
             {
-                await DisplayAlert("L?i", "Camera không du?c h? tr? trên thi?t b? này.", "OK");
+                await DisplayAlert("L?i", "Camera khï¿½ng du?c h? tr? trï¿½n thi?t b? nï¿½y.", "OK");
             }
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? ch?p ?nh.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? ch?p ?nh.", "OK");
         }
     }
 
     private async Task DeletePhotoAsync(int photoIndex)
     {
-        bool confirm = await DisplayAlert("Xóa ?nh", "B?n có ch?c mu?n xóa ?nh này?", "Xóa", "H?y");
+        bool confirm = await DisplayAlert("Xï¿½a ?nh", "B?n cï¿½ ch?c mu?n xï¿½a ?nh nï¿½y?", "Xï¿½a", "H?y");
         if (!confirm) return;
 
         try
@@ -383,7 +383,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? xóa ?nh.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? xï¿½a ?nh.", "OK");
         }
     }
 
@@ -507,7 +507,7 @@ public partial class DataEntryPage : ContentPage
                         else
                         {
 
-                            // N?u không tìm th?y user theo MSNV, th? tìm theo tên
+                            // N?u khï¿½ng tï¿½m th?y user theo MSNV, th? tï¿½m theo tï¿½n
                             if (!string.IsNullOrEmpty(creatorName))
                             {
                                 var userByName = UserService.Instance.GetAllUsers().FirstOrDefault(u =>
@@ -522,9 +522,9 @@ public partial class DataEntryPage : ContentPage
                                 }
                                 else
                                 {
-                                    // N?u v?n không tìm th?y, t?o user t?m v?i tên g?c
+                                    // N?u v?n khï¿½ng tï¿½m th?y, t?o user t?m v?i tï¿½n g?c
                                     _selectedUser = new UserData { Name = creatorName, Position = "", Msnv = "" };
-                                    CreatorLabel.Text = creatorName; // Ch? hi?n th? tên
+                                    CreatorLabel.Text = creatorName; // Ch? hi?n th? tï¿½n
                                     CreatorLabel.TextColor = Color.FromArgb("#212121");
 
                                 }
@@ -533,9 +533,9 @@ public partial class DataEntryPage : ContentPage
                     }
                     else if (!string.IsNullOrEmpty(creatorName))
                     {
-                        // N?u không có MSNV nhung có tên, t?o user t?m và hi?n th? tên
+                        // N?u khï¿½ng cï¿½ MSNV nhung cï¿½ tï¿½n, t?o user t?m vï¿½ hi?n th? tï¿½n
                         _selectedUser = new UserData { Name = creatorName, Position = "", Msnv = "" };
-                        CreatorLabel.Text = creatorName; // Ch? hi?n th? tên
+                        CreatorLabel.Text = creatorName; // Ch? hi?n th? tï¿½n
                         CreatorLabel.TextColor = Color.FromArgb("#212121");
 
                     }
@@ -660,7 +660,7 @@ public partial class DataEntryPage : ContentPage
             int totalSkipped = 0;
             int totalOverflow = 0;
 
-            // Ğ?m t?ng s? series có d? li?u
+            // ï¿½?m t?ng s? series cï¿½ d? li?u
             for (int i = 0; i < totalDataCells; i++)
             {
                 if (!string.IsNullOrWhiteSpace(GetSeriesValueByIndex(i)))
@@ -668,8 +668,8 @@ public partial class DataEntryPage : ContentPage
             }
 
 
-            // 1) Ğ? vào c?t H: H13 ? H75 (gi? nguyên v? trí theo index)
-            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
+            // 1) ï¿½? vï¿½o c?t H: H13 ? H60 (gi? nguyï¿½n v? trï¿½ theo index)
+            for (int row = 13; row <= 60 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
 
@@ -685,21 +685,18 @@ public partial class DataEntryPage : ContentPage
                     okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
-
                     totalFilled++;
                 }
                 else
                 {
-                    // B? QUA Ô NÀY - KHÔNG GHI GÌ C?
-
                     totalSkipped++;
                 }
 
-                seriesIndex++; // QUAN TR?NG: V?n tang index dù ô tr?ng
+                seriesIndex++; 
             }
 
-            // 2) Ğ? ti?p vào c?t L: L13 ? L75 (ti?p t?c index)
-            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
+            // 2) ï¿½? ti?p vï¿½o c?t L: L13 ? L60 (ti?p t?c index)
+            for (int row = 13; row <= 60 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
 
@@ -715,20 +712,17 @@ public partial class DataEntryPage : ContentPage
                     okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
-
                     totalFilled++;
                 }
                 else
                 {
-                    // B? QUA Ô NÀY - KHÔNG GHI GÌ C?
-
                     totalSkipped++;
                 }
 
-                seriesIndex++; // QUAN TR?NG: V?n tang index dù ô tr?ng
+                seriesIndex++; // QUAN TR?NG: V?n tang index dï¿½ ï¿½ tr?ng
             }
 
-            // Ğ?m s? b? th?a (n?u còn d? li?u sau khi h?t L75)
+            // Äáº¿m sá»‘ bá»‹ thá»«a (náº¿u cÃ²n dá»¯ liá»‡u sau khi háº¿t L60)
             if (seriesIndex < totalDataCells)
             {
                 totalOverflow = totalDataCells - seriesIndex;
@@ -759,11 +753,8 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-            // Column-major: di h?t các hàng c?a 1 c?t r?i sang c?t ti?p theo
-            int col = index / _rows;   // c?t logic (0,1,2,...)
-            int row = index % _rows;   // hàng (0.._rows-1)
-
-            // UI hi?n th? c?t d?o: C?t 1 UI là c?t v?t lı cu?i cùng
+            int col = index / _rows;
+            int row = index % _rows;
             int actualCol = _cols - col - 1;
 
             if (row >= 0 && row < _rows && actualCol >= 0 && actualCol < _cols)
@@ -1170,7 +1161,7 @@ public partial class DataEntryPage : ContentPage
             var ocr = services?.GetService<IOcrService>();
             if (ocr == null)
             {
-                await DisplayAlert("OCR", "OCR chua s?n sàng.", "Ğóng");
+                await DisplayAlert("OCR", "OCR chua s?n sï¿½ng.", "ï¿½ï¿½ng");
                 return;
             }
 
@@ -1183,16 +1174,16 @@ public partial class DataEntryPage : ContentPage
             else
             {
                 await DisplayAlert(
-                    "Không quét du?c Container",
-                    "Không th? nh?n di?n s? Container t? ?nh.\n\n" +
-                    "Hãy th?:\n" +
-                    "• Ch?p ?nh rõ nét hon\n" +
-                    "• Ğ?m b?o d? ánh sáng\n" +
-                    "• Ch?p th?ng góc (không xiên)\n" +
-                    "• Zoom vào vùng có s? Container\n" +
-                    "• Ğ?m b?o s? Container n?m trong khung xanh\n\n" +
-                    "Format Container: 4 ch? cái + 7 s?\n" +
-                    "Ví d?: KOCU 411486 2",
+                    "Khï¿½ng quï¿½t du?c Container",
+                    "Khï¿½ng th? nh?n di?n s? Container t? ?nh.\n\n" +
+                    "Hï¿½y th?:\n" +
+                    "ï¿½ Ch?p ?nh rï¿½ nï¿½t hon\n" +
+                    "ï¿½ ï¿½?m b?o d? ï¿½nh sï¿½ng\n" +
+                    "ï¿½ Ch?p th?ng gï¿½c (khï¿½ng xiï¿½n)\n" +
+                    "ï¿½ Zoom vï¿½o vï¿½ng cï¿½ s? Container\n" +
+                    "ï¿½ ï¿½?m b?o s? Container n?m trong khung xanh\n\n" +
+                    "Format Container: 4 ch? cï¿½i + 7 s?\n" +
+                    "Vï¿½ d?: KOCU 411486 2",
                     "OK"
                 );
             }
@@ -1217,7 +1208,7 @@ public partial class DataEntryPage : ContentPage
             var ocr = services?.GetService<IOcrService>();
             if (ocr == null)
             {
-                await DisplayAlert("OCR", "OCR chua s?n sàng.", "Ğóng");
+                await DisplayAlert("OCR", "OCR chua s?n sï¿½ng.", "ï¿½ï¿½ng");
                 return;
             }
 
@@ -1230,16 +1221,16 @@ public partial class DataEntryPage : ContentPage
             else
             {
                 await DisplayAlert(
-                    "Không quét du?c Seal",
-                    "Không th? nh?n di?n s? Seal t? ?nh.\n\n" +
-                    "Hãy th?:\n" +
-                    "• Ch?p ?nh rõ nét hon\n" +
-                    "• Ğ?m b?o d? ánh sáng\n" +
-                    "• Ch?p th?ng góc (không xiên)\n" +
-                    "• Zoom vào vùng có s? Seal\n" +
-                    "• Ğ?m b?o s? Seal n?m trong khung xanh\n\n" +
-                    "Format Seal: 6-15 kı t? (ch? + s?)\n" +
-                    "Ví d?: YN646E4AO",
+                    "Khï¿½ng quï¿½t du?c Seal",
+                    "Khï¿½ng th? nh?n di?n s? Seal t? ?nh.\n\n" +
+                    "Hï¿½y th?:\n" +
+                    "ï¿½ Ch?p ?nh rï¿½ nï¿½t hon\n" +
+                    "ï¿½ ï¿½?m b?o d? ï¿½nh sï¿½ng\n" +
+                    "ï¿½ Ch?p th?ng gï¿½c (khï¿½ng xiï¿½n)\n" +
+                    "ï¿½ Zoom vï¿½o vï¿½ng cï¿½ s? Seal\n" +
+                    "ï¿½ ï¿½?m b?o s? Seal n?m trong khung xanh\n\n" +
+                    "Format Seal: 6-15 kï¿½ t? (ch? + s?)\n" +
+                    "Vï¿½ d?: YN646E4AO",
                     "OK"
                 );
             }
@@ -1266,12 +1257,12 @@ public partial class DataEntryPage : ContentPage
 
             if (customers.Count == 0)
             {
-                await DisplayAlert("Thông báo", "Chua có d? li?u khách hàng.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u dã upload lên Firebase\n3. Firebase config dúng", "OK");
+                await DisplayAlert("Thï¿½ng bï¿½o", "Chua cï¿½ d? li?u khï¿½ch hï¿½ng.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u dï¿½ upload lï¿½n Firebase\n3. Firebase config dï¿½ng", "OK");
                 return;
             }
 
             var tcs = new TaskCompletionSource<string?>();
-            var pickerPage = new SearchablePickerPage("Ch?n khách hàng", customers, tcs);
+            var pickerPage = new SearchablePickerPage("Ch?n khï¿½ch hï¿½ng", customers, tcs);
 
             await Navigation.PushModalAsync(pickerPage);
 
@@ -1289,7 +1280,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? ch?n khách hàng.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? ch?n khï¿½ch hï¿½ng.", "OK");
         }
     }
 
@@ -1299,7 +1290,7 @@ public partial class DataEntryPage : ContentPage
 
         if (string.IsNullOrEmpty(_selectedCustomer))
         {
-            await DisplayAlert("Thông báo", "Vui lòng ch?n khách hàng tru?c", "OK");
+            await DisplayAlert("Thï¿½ng bï¿½o", "Vui lï¿½ng ch?n khï¿½ch hï¿½ng tru?c", "OK");
             return;
         }
 
@@ -1309,7 +1300,7 @@ public partial class DataEntryPage : ContentPage
 
             if (products.Count == 0)
             {
-                await DisplayAlert("Thông báo", $"Không có s?n ph?m cho khách hàng '{_selectedCustomer}'", "OK");
+                await DisplayAlert("Thï¿½ng bï¿½o", $"Khï¿½ng cï¿½ s?n ph?m cho khï¿½ch hï¿½ng '{_selectedCustomer}'", "OK");
                 return;
             }
 
@@ -1332,7 +1323,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? ch?n s?n ph?m.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? ch?n s?n ph?m.", "OK");
         }
     }
 
@@ -1342,13 +1333,13 @@ public partial class DataEntryPage : ContentPage
 
         if (string.IsNullOrEmpty(_selectedCustomer))
         {
-            await DisplayAlert("Thông báo", "Vui lòng ch?n khách hàng tru?c", "OK");
+            await DisplayAlert("Thï¿½ng bï¿½o", "Vui lï¿½ng ch?n khï¿½ch hï¿½ng tru?c", "OK");
             return;
         }
 
         if (string.IsNullOrEmpty(_selectedProduct))
         {
-            await DisplayAlert("Thông báo", "Vui lòng ch?n s?n ph?m tru?c", "OK");
+            await DisplayAlert("Thï¿½ng bï¿½o", "Vui lï¿½ng ch?n s?n ph?m tru?c", "OK");
             return;
         }
 
@@ -1358,7 +1349,7 @@ public partial class DataEntryPage : ContentPage
 
             if (models.Count == 0)
             {
-                await DisplayAlert("Thông báo", $"Không có model cho s?n ph?m '{_selectedProduct}' c?a khách hàng '{_selectedCustomer}'", "OK");
+                await DisplayAlert("Thï¿½ng bï¿½o", $"Khï¿½ng cï¿½ model cho s?n ph?m '{_selectedProduct}' c?a khï¿½ch hï¿½ng '{_selectedCustomer}'", "OK");
                 return;
             }
 
@@ -1381,7 +1372,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? ch?n model.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? ch?n model.", "OK");
         }
     }
 
@@ -1400,7 +1391,7 @@ public partial class DataEntryPage : ContentPage
 
             if (userDisplayNames.Count == 0)
             {
-                await DisplayAlert("Thông báo", "Chua có d? li?u ngu?i l?p.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u dã upload lên Firebase\n3. Firebase config dúng", "OK");
+                await DisplayAlert("Thï¿½ng bï¿½o", "Chua cï¿½ d? li?u ngu?i l?p.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u dï¿½ upload lï¿½n Firebase\n3. Firebase config dï¿½ng", "OK");
                 return;
             }
 
@@ -1424,7 +1415,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i", "Không th? ch?n ngu?i l?p.", "OK");
+            await DisplayAlert("L?i", "Khï¿½ng th? ch?n ngu?i l?p.", "OK");
         }
     }
 
@@ -1446,25 +1437,25 @@ public partial class DataEntryPage : ContentPage
         {
             if (string.IsNullOrEmpty(_selectedCustomer))
             {
-                await DisplayAlert("Thi?u thông tin", "Vui lòng ch?n tên khách hàng", "OK");
+                await DisplayAlert("Thi?u thï¿½ng tin", "Vui lï¿½ng ch?n tï¿½n khï¿½ch hï¿½ng", "OK");
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectedProduct))
             {
-                await DisplayAlert("Thi?u thông tin", "Vui lòng ch?n tên s?n ph?m", "OK");
+                await DisplayAlert("Thi?u thï¿½ng tin", "Vui lï¿½ng ch?n tï¿½n s?n ph?m", "OK");
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectedModel))
             {
-                await DisplayAlert("Thi?u thông tin", "Vui lòng ch?n model", "OK");
+                await DisplayAlert("Thi?u thï¿½ng tin", "Vui lï¿½ng ch?n model", "OK");
                 return;
             }
 
             if (_selectedUser == null)
             {
-                await DisplayAlert("Thi?u thông tin", "Vui lòng ch?n ngu?i l?p", "OK");
+                await DisplayAlert("Thi?u thï¿½ng tin", "Vui lï¿½ng ch?n ngu?i l?p", "OK");
                 return;
             }
 
@@ -1507,7 +1498,7 @@ public partial class DataEntryPage : ContentPage
 
                 if (!metadataChanged && !cellsChanged && !productChanged)
                 {
-                    await DisplayAlert("Thông báo", "Không có thay d?i nào d? luu", "OK");
+                    await DisplayAlert("Thï¿½ng bï¿½o", "Khï¿½ng cï¿½ thay d?i nï¿½o d? luu", "OK");
                     _navigationConfirmed = true;
                     await Navigation.PopToRootAsync();
                     return;
@@ -1570,7 +1561,7 @@ public partial class DataEntryPage : ContentPage
 
                 ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
-                // Thêm Sheet 2 t? template - ch?y trên background thread
+                // Thï¿½m Sheet 2 t? template - ch?y trï¿½n background thread
                 await Task.Run(async () =>
                 {
                     using (var templateStream = await FileSystem.Current.OpenAppPackageFileAsync("Template/BM_Phieu kiem tra dong container.xlsx"))
@@ -1581,14 +1572,14 @@ public partial class DataEntryPage : ContentPage
                         {
                             var newSheet = pkg.Workbook.Worksheets.Add("Phi?u ki?m tra", templateSheet);
                             
-                            // Ği?n thông tin vào các ô tuong ?ng
+                            // ï¿½i?n thï¿½ng tin vï¿½o cï¿½c ï¿½ tuong ?ng
                             var customerCell = newSheet.Cells["D4"];
-                            customerCell.Value = _selectedCustomer;  // Tên khách hàng 
+                            customerCell.Value = _selectedCustomer;  // Tï¿½n khï¿½ch hï¿½ng 
                             customerCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             customerCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                             
                             var productCell = newSheet.Cells["D5"];
-                            productCell.Value = _selectedProduct;   // Tên Products
+                            productCell.Value = _selectedProduct;   // Tï¿½n Products
                             productCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             productCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                             
@@ -1598,7 +1589,7 @@ public partial class DataEntryPage : ContentPage
                             modelCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                             
                             var dateCell = newSheet.Cells["D9"];
-                            dateCell.Value = DateEntry.Date.ToString("dd/MM/yyyy"); // Ngày ki?m tra
+                            dateCell.Value = DateEntry.Date.ToString("dd/MM/yyyy"); // Ngï¿½y ki?m tra
                             dateCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             dateCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                             
@@ -1618,14 +1609,14 @@ public partial class DataEntryPage : ContentPage
                             sealCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                             
                             var userCell = newSheet.Cells["L9"];
-                            userCell.Value = _selectedUser?.Name; // Nhân viên ki?m tra
+                            userCell.Value = _selectedUser?.Name; // NhÃ¢n viÃªn kiá»ƒm tra
                             userCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             userCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
-                            // Ği?n s? series vào sheet 2 (Phi?u ki?m tra)
+                            // Äiá»n sá»‘ series vÃ o sheet 2 (Phiáº¿u kiá»ƒm tra)
                             FillSeriesToCheckSheet(newSheet);
 
-                            // Chèn ?nh th?c t? vào vùng A35:F75 (4 ?nh)
+                            // ChÃ¨n áº£nh thá»±c táº¿ vÃ o vÃ¹ng A35:F75 (4 áº£nh)
                             await InsertPhotosToExcel(newSheet);
                         }
                     }
@@ -1662,7 +1653,7 @@ public partial class DataEntryPage : ContentPage
                 }
                 catch
                 {
-                    await DisplayAlert("L?i", "Không th? chia s? file.", "OK");
+                    await DisplayAlert("L?i", "Khï¿½ng th? chia s? file.", "OK");
                 }
 
                 _navigationConfirmed = true;
@@ -1676,7 +1667,7 @@ public partial class DataEntryPage : ContentPage
         }
         catch
         {
-            await DisplayAlert("L?i xu?t Excel", "L?i xu?t Excel.", "Ğóng");
+            await DisplayAlert("L?i xu?t Excel", "L?i xu?t Excel.", "ï¿½ï¿½ng");
         }
         finally
         {
@@ -1829,9 +1820,9 @@ public partial class DataEntryPage : ContentPage
         if (HasAnyChangesIncludingMetadata())
         {
             bool confirm = await DisplayAlert(
-                "Thoát mà không luu?",
-                "B?n có thay d?i chua luu. B?n có ch?c mu?n thoát?",
-                "Thoát",
+                "Thoï¿½t mï¿½ khï¿½ng luu?",
+                "B?n cï¿½ thay d?i chua luu. B?n cï¿½ ch?c mu?n thoï¿½t?",
+                "Thoï¿½t",
                 "H?y"
             );
 
@@ -1886,13 +1877,13 @@ public partial class DataEntryPage : ContentPage
 
             var positions = new[]
             {
-                new { StartCol = 1, EndCol = 3, StartRow = 35, EndRow = 54 }, // A35:C54 - ?nh 1 (hàng 1, c?t 1)
-                new { StartCol = 4, EndCol = 6, StartRow = 35, EndRow = 54 }, // D35:F54 - ?nh 2 (hàng 1, c?t 2)
-                new { StartCol = 1, EndCol = 3, StartRow = 55, EndRow = 75 }, // A55:C75 - ?nh 3 (hàng 2, c?t 1)
-                new { StartCol = 4, EndCol = 6, StartRow = 55, EndRow = 75 }  // D55:F75 - ?nh 4 (hàng 2, c?t 2)
+                new { StartCol = 1, EndCol = 3, StartRow = 35, EndRow = 54 }, // A35:C54 - ?nh 1 (hï¿½ng 1, c?t 1)
+                new { StartCol = 4, EndCol = 6, StartRow = 35, EndRow = 54 }, // D35:F54 - ?nh 2 (hï¿½ng 1, c?t 2)
+                new { StartCol = 1, EndCol = 3, StartRow = 55, EndRow = 75 }, // A55:C75 - ?nh 3 (hï¿½ng 2, c?t 1)
+                new { StartCol = 4, EndCol = 6, StartRow = 55, EndRow = 75 }  // D55:F75 - ?nh 4 (hï¿½ng 2, c?t 2)
             };
 
-            // Chèn t?t c? 4 ?nh
+            // Chï¿½n t?t c? 4 ?nh
             for (int i = 0; i < photos.Length; i++)
             {
                 if (!string.IsNullOrEmpty(photos[i]) && File.Exists(photos[i]))
@@ -1901,23 +1892,23 @@ public partial class DataEntryPage : ContentPage
                     {
                         var pos = positions[i];
                         
-                        // Ğ?c ?nh t? file
+                        // ï¿½?c ?nh t? file
                         using var imageStream = File.OpenRead(photos[i]!);
                         
-                        // Thêm ?nh vào worksheet
+                        // Thï¿½m ?nh vï¿½o worksheet
                         var picture = worksheet.Drawings.AddPicture($"Photo{i + 1}", imageStream);
                         
-                        // Ğ?t v? trí ?nh theo position
+                        // ï¿½?t v? trï¿½ ?nh theo position
                         picture.From.Column = pos.StartCol - 1; // 0-based index
                         picture.From.Row = pos.StartRow - 1;
                         
-                        // Kích thu?c theo yêu c?u W:300px v?i t? l? 9:16
-                        int maxWidth = 300;  // pixels theo yêu c?u
-                        int maxHeight = (int)(maxWidth * 16.0 / 9.0); // 533 pixels (9:16 ratio chính xác)
+                        // Kï¿½ch thu?c theo yï¿½u c?u W:300px v?i t? l? 9:16
+                        int maxWidth = 300;  // pixels theo yï¿½u c?u
+                        int maxHeight = (int)(maxWidth * 16.0 / 9.0); // 533 pixels (9:16 ratio chï¿½nh xï¿½c)
                         
                         picture.SetSize(maxWidth, maxHeight);
                         
-                        // Ğ?t ch? d? không resize khi thay d?i cell
+                        // ï¿½?t ch? d? khï¿½ng resize khi thay d?i cell
                         picture.EditAs = OfficeOpenXml.Drawing.eEditAs.Absolute;
                         
 
