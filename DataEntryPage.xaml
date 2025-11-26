@@ -190,7 +190,7 @@
                                         <Label Grid.Column="0"
                                                x:Name="CustomerLabel"
                                                TextColor="#9E9E9E"
-                                               FontSize="14"
+                                        FontSize="14"
                                                VerticalOptions="Center"
                                                Margin="12,0"/>
                                         <Image Grid.Column="1"
@@ -224,7 +224,7 @@
                                         <Label Grid.Column="0"
                                                x:Name="ProductLabel"
                                                TextColor="#9E9E9E"
-                                               FontSize="14"
+                                        FontSize="14"
                                                VerticalOptions="Center"
                                                Margin="12,0"/>
                                         <Image Grid.Column="1"
@@ -261,7 +261,7 @@
                                         <Label Grid.Column="0"
                                                x:Name="ModelLabel"
                                                TextColor="#9E9E9E"
-                                               FontSize="14"
+                                        FontSize="14"
                                                VerticalOptions="Center"
                                                Margin="12,0"/>
                                         <Image Grid.Column="1"
@@ -296,7 +296,7 @@
                                                x:Name="CreatorLabel"
                                                Text="Chọn người lập"
                                                TextColor="#9E9E9E"
-                                               FontSize="14"
+                                        FontSize="14"
                                                VerticalOptions="Center"
                                                Margin="12,0"/>
                                         <Image Grid.Column="1"
@@ -348,7 +348,8 @@
                                     <Image x:Name="Photo1Image"
                                            Aspect="AspectFill"
                                            HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"/>
+                                           VerticalOptions="Fill"
+                                           IsVisible="False"/>
                                     <VerticalStackLayout x:Name="Photo1Placeholder"
                                                        HorizontalOptions="Center"
                                                        VerticalOptions="Center"
@@ -380,7 +381,8 @@
                                     <Image x:Name="Photo2Image"
                                            Aspect="AspectFill"
                                            HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"/>
+                                           VerticalOptions="Fill"
+                                           IsVisible="False"/>
                                     <VerticalStackLayout x:Name="Photo2Placeholder"
                                                        HorizontalOptions="Center"
                                                        VerticalOptions="Center"
@@ -412,7 +414,8 @@
                                     <Image x:Name="Photo3Image"
                                            Aspect="AspectFill"
                                            HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"/>
+                                           VerticalOptions="Fill"
+                                           IsVisible="False"/>
                                     <VerticalStackLayout x:Name="Photo3Placeholder"
                                                        HorizontalOptions="Center"
                                                        VerticalOptions="Center"
@@ -444,7 +447,8 @@
                                     <Image x:Name="Photo4Image"
                                            Aspect="AspectFill"
                                            HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"/>
+                                           VerticalOptions="Fill"
+                                           IsVisible="False"/>
                                     <VerticalStackLayout x:Name="Photo4Placeholder"
                                                        HorizontalOptions="Center"
                                                        VerticalOptions="Center"
@@ -564,6 +568,32 @@
                        InputTransparent="True"/>
             </Border>
         </Grid>
+
+        <!-- Loading Overlay -->
+        <ContentView x:Name="LoadingOverlay"
+                     Grid.RowSpan="3"
+                     IsVisible="False"
+                     BackgroundColor="#80000000">
+            <VerticalStackLayout 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                Spacing="20">
+                
+                <ActivityIndicator 
+                    IsRunning="True"
+                    Color="White"
+                    WidthRequest="60"
+                    HeightRequest="60"/>
+                
+                <Label 
+                    x:Name="LoadingMessage"
+                    Text="Đang xử lý..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </ContentView>
 
     </Grid>
 </ContentPage>

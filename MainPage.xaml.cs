@@ -11,7 +11,27 @@ namespace ScanPackage;
 
 public partial class MainPage : ContentPage
 {
-    public ObservableCollection<FileItem> Files { get; set; } = new();
+    private ObservableCollection<FileItem> _files = new();
+    
+    // Loading overlay helpers
+    private void ShowLoading(string message = "Đang tải file...")
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            LoadingMessage.Text = message;
+            LoadingOverlay.IsVisible = true;
+        });
+    }
+    
+    private void HideLoading()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            LoadingOverlay.IsVisible = false;
+        });
+    }
+
+    public ObservableCollection<FileItem> Files => _files;
 
     public MainPage()
     {
@@ -25,9 +45,8 @@ public partial class MainPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        LoadFiles(); // quay lại trang là refresh danh sách
+        LoadFiles();
 
-        // Apply safe area với delay nhỏ để đảm bảo window đã load
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             await Task.Delay(100);
@@ -171,17 +190,24 @@ public partial class MainPage : ContentPage
 
     private async void OnEditClickedAsync(FileItem item)
     {
+        ShowLoading("Đang tải file...");
         try
         {
             // Load file Excel và mở DataEntryPage để chỉnh sửa
             var editPage = await LoadExcelFileAsync(item.FullPath);
             if (editPage != null)
             {
+                HideLoading();
                 await Navigation.PushAsync(editPage);
+            }
+            else
+            {
+                HideLoading();
             }
         }
         catch (Exception ex)
         {
+            HideLoading();
             await DisplayAlert("Lỗi", $"Không thể mở file để chỉnh sửa:\n{ex.Message}", "OK");
         }
     }

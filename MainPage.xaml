@@ -186,5 +186,31 @@
             </Border>
         </Grid>
 
+        <!-- Loading Overlay -->
+        <ContentView x:Name="LoadingOverlay"
+                     Grid.RowSpan="3"
+                     IsVisible="False"
+                     BackgroundColor="#80000000">
+            <VerticalStackLayout 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                Spacing="20">
+                
+                <ActivityIndicator 
+                    IsRunning="True"
+                    Color="White"
+                    WidthRequest="60"
+                    HeightRequest="60"/>
+                
+                <Label 
+                    x:Name="LoadingMessage"
+                    Text="Đang tải file..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </ContentView>
+
     </Grid>
 </ContentPage>
