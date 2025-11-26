@@ -57,7 +57,7 @@ public partial class SetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Safe area error: {ex.Message}");
+            // Ignore safe area errors
         }
     }
 
@@ -102,7 +102,6 @@ public partial class SetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"GetAndroidSafeAreaInsets error: {ex.Message}");
             return new Thickness(0);
         }
     }
@@ -121,7 +120,7 @@ public partial class SetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Back navigation error: {ex.Message}");
+            // Ignore navigation errors
         }
     }
 
@@ -207,19 +206,12 @@ public partial class SetupPage : ContentPage
 
             if (confirm)
             {
-                System.Diagnostics.Debug.WriteLine($"Creating table: {rows} rows x {cols} cols");
-
                 // Chuyển đến trang nhập dữ liệu
                 await Navigation.PushAsync(new DataEntryPage(rows, cols));
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("User cancelled table creation");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Create table error: {ex.Message}");
             await DisplayAlert(
                 "Lỗi",
                 $"Không thể tạo bảng:\n{ex.Message}",

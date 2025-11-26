@@ -18,14 +18,11 @@ public class AndroidOcrService : IOcrService
         // Use Latin script recognizer for better accuracy with English/Latin characters
         var options = new TextRecognizerOptions.Builder().Build();
         _textRecognizer = TextRecognition.GetClient(options);
-
-        System.Diagnostics.Debug.WriteLine(">>> AndroidOcrService initialized with ML Kit Latin TextRecognizer");
     }
     public async Task<string?> ScanTextAsync(OcrMode mode)
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($">>> ScanTextAsync started for mode: {mode}");
 
             // Open crop page to select scan region
             var tcs = new TaskCompletionSource<OcrCropResult>();
@@ -34,32 +31,26 @@ public class AndroidOcrService : IOcrService
             var nav = window?.Page?.Navigation;
             if (nav == null)
             {
-                System.Diagnostics.Debug.WriteLine(">>> ERROR: Navigation is null");
                 return null;
             }
 
             await nav.PushAsync(cropPage);
             var cropResult = await tcs.Task;
 
-            System.Diagnostics.Debug.WriteLine($">>> Crop result received. IsCanceled: {cropResult.IsCanceled}");
 
             if (cropResult.IsCanceled || cropResult.Photo == null)
             {
-                System.Diagnostics.Debug.WriteLine(">>> Crop was canceled or no photo");
                 return null;
             }
 
             // Load bitmap from photo
-            System.Diagnostics.Debug.WriteLine(">>> Opening photo stream...");
             using var stream = await cropResult.Photo.OpenReadAsync();
             using var fullBitmap = await BitmapFactory.DecodeStreamAsync(stream);
             if (fullBitmap == null)
             {
-                System.Diagnostics.Debug.WriteLine(">>> ERROR: Failed to decode bitmap");
                 return null;
             }
 
-            System.Diagnostics.Debug.WriteLine($">>> Full bitmap size: {fullBitmap.Width}x{fullBitmap.Height}");
 
             // Calculate crop region from relative coordinates
             var rel = cropResult.RelativeCrop;
@@ -70,12 +61,10 @@ public class AndroidOcrService : IOcrService
             cropW = System.Math.Min(cropW, fullBitmap.Width - left);
             cropH = System.Math.Min(cropH, fullBitmap.Height - top);
 
-            System.Diagnostics.Debug.WriteLine($">>> Crop region: left={left}, top={top}, width={cropW}, height={cropH}");
 
             // Expand ROI with padding to avoid cutting text
             var roi = new Android.Graphics.Rect(left, top, left + cropW, top + cropH);
             roi = ImagePreprocessor.ExpandROI(roi, 20, fullBitmap.Width, fullBitmap.Height);
-            System.Diagnostics.Debug.WriteLine($">>> Expanded ROI: {roi.Left},{roi.Top} -> {roi.Right},{roi.Bottom}");
 
             using var croppedBitmap = Bitmap.CreateBitmap(
                 fullBitmap,

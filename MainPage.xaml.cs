@@ -275,17 +275,21 @@ public partial class MainPage : ContentPage
             }
 
             using var package = new ExcelPackage(new FileInfo(filePath));
-            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+        
+        // Tìm sheet "Dữ liệu" và "Thông tin"
+        var dataSheet = package.Workbook.Worksheets["Dữ liệu"] ?? package.Workbook.Worksheets.FirstOrDefault();
+        var metaSheet = package.Workbook.Worksheets["Thông tin"];
+        var checkSheet = package.Workbook.Worksheets["Phiếu kiểm tra"]; // Thêm sheet Phiếu kiểm tra
 
-            if (worksheet == null)
-            {
-                await DisplayAlert("Lỗi", "File Excel không hợp lệ", "OK");
-                return null;
-            }
+        if (dataSheet == null)
+        {
+            await DisplayAlert("Lỗi", "File Excel không hợp lệ", "OK");
+            return null;
+        }
 
             // Đếm số hàng và cột có dữ liệu (bỏ qua header)
-            int totalRows = worksheet.Dimension?.End.Row ?? 0;
-            int totalCols = worksheet.Dimension?.End.Column ?? 0;
+        int totalRows = dataSheet.Dimension?.End.Row ?? 0;
+        int totalCols = dataSheet.Dimension?.End.Column ?? 0;
 
             if (totalRows <= 1 || totalCols <= 1)
             {
@@ -305,7 +309,7 @@ public partial class MainPage : ContentPage
                 for (int c = 0; c < cols; c++)
                 {
                     // Bỏ qua hàng 1 (header) và cột 1 (header), bắt đầu từ hàng 2, cột 2
-                    data[r, c] = worksheet.Cells[r + 2, c + 2].Value?.ToString() ?? "";
+                data[r, c] = dataSheet.Cells[r + 2, c + 2].Value?.ToString() ?? "";
                 }
             }
 
@@ -315,16 +319,42 @@ public partial class MainPage : ContentPage
             // Parse metadata từ filename
             var fileName = Path.GetFileName(filePath);
             var (date, stt, container, seal) = ParseMetadataFromFilename(fileName);
-
             // Đợi một chút để grid được build xong, sau đó load dữ liệu và metadata
             await Task.Delay(200);
             dataPage.LoadData(data);
 
-            // Load metadata vào fields
-            if (date.HasValue)
+            // Load metadata from sheets
+        if (metaSheet != null)
+        {
+            await LoadProductMetadataFromSheet(dataPage, metaSheet);
+        }
+        else if (checkSheet != null)
+        {
+            await LoadProductMetadataFromCheckSheet(dataPage, checkSheet);
+        }
+        else
+        {
+            // Extract from filename as fallback
+            var fileNameParts = Path.GetFileNameWithoutExtension(filePath).Split('_');
+            if (fileNameParts.Length >= 7)
             {
-                dataPage.LoadMetadata(date.Value, stt, container, seal);
+                var customer = fileNameParts[4];
+                var product = fileNameParts[5];
+                var model = fileNameParts[6];
+                var creator = fileNameParts.Length > 7 ? fileNameParts[7] : "";
+                
+                await dataPage.LoadProductMetadata(customer, product, model, "", creator);
             }
+        }
+        
+        // Load metadata vào fields
+        if (date.HasValue)
+        {
+            dataPage.LoadMetadata(date.Value, stt, container, seal);
+        }
+
+        // Load photos from Excel file
+        await dataPage.LoadPhotosFromExcel(filePath);
 
             return dataPage;
         }
@@ -332,6 +362,61 @@ public partial class MainPage : ContentPage
         {
             await DisplayAlert("Lỗi", $"Không thể đọc file Excel:\n{ex.Message}", "OK");
             return null;
+        }
+    }
+
+    private async Task LoadProductMetadataFromSheet(DataEntryPage dataPage, ExcelWorksheet metaSheet)
+    {
+        try
+        {
+            string customer = metaSheet.Cells["B5"].Value?.ToString() ?? "";
+            string product = metaSheet.Cells["B6"].Value?.ToString() ?? "";
+            string model = metaSheet.Cells["B7"].Value?.ToString() ?? "";
+            string creatorInfo = metaSheet.Cells["B8"].Value?.ToString() ?? "";
+
+            string msnv = "";
+            string creatorName = "";
+            
+            if (!string.IsNullOrEmpty(creatorInfo))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(creatorInfo, @"MSNV:\s*(\w+)\)");
+                if (match.Success)
+                {
+                    msnv = match.Groups[1].Value;
+                    var nameMatch = System.Text.RegularExpressions.Regex.Match(creatorInfo, @"^(.+?)\s*\(\s*MSNV:");
+                    if (nameMatch.Success)
+                    {
+                        creatorName = nameMatch.Groups[1].Value.Trim();
+                    }
+                }
+                else
+                {
+                    creatorName = creatorInfo.Trim();
+                }
+            }
+
+            await dataPage.LoadProductMetadata(customer, product, model, msnv, creatorName);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadProductMetadataFromSheet error: {ex.Message}");
+        }
+    }
+
+    private async Task LoadProductMetadataFromCheckSheet(DataEntryPage dataPage, ExcelWorksheet checkSheet)
+    {
+        try
+        {
+            string customer = checkSheet.Cells["D4"].Value?.ToString() ?? "";
+            string product = checkSheet.Cells["D5"].Value?.ToString() ?? "";
+            string model = checkSheet.Cells["D6"].Value?.ToString() ?? "";
+            string creatorName = checkSheet.Cells["L9"].Value?.ToString() ?? "";
+
+            await dataPage.LoadProductMetadata(customer, product, model, "", creatorName);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"LoadProductMetadataFromCheckSheet error: {ex.Message}");
         }
     }
 

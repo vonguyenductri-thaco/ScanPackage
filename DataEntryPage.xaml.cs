@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Collections.Generic;
 using IOPath = System.IO.Path;
 using Microsoft.Maui.Controls;
@@ -37,10 +37,20 @@ public partial class DataEntryPage : ContentPage
     private bool _isAnyFieldFocused = false;
     private bool _navigationConfirmed = false;
 
-    // Product selection fields
     private string? _selectedCustomer;
     private string? _selectedProduct;
     private string? _selectedModel;
+    private UserData? _selectedUser;
+
+    private string? _photo1Path;
+    private string? _photo2Path;
+    private string? _photo3Path;
+    private string? _photo4Path;
+
+    private string? _originalCustomer;
+    private string? _originalProduct;
+    private string? _originalModel;
+    private UserData? _originalUser;
 
     private static readonly Color DuplicateColor = Color.FromArgb("#FFF9C4");
     private static readonly Color NormalColor = Colors.White;
@@ -66,19 +76,9 @@ public partial class DataEntryPage : ContentPage
         SubscribeToFocusEvents();
         BuildGrid();
 
-        // Load product data
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            try
-            {
-                await ProductDataService.Instance.LoadDataAsync();
-                System.Diagnostics.Debug.WriteLine("Product data loaded successfully");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to load product data: {ex.Message}");
-                await DisplayAlert("L·ªói", "Kh√¥ng th·ªÉ load d·ªØ li·ªáu s·∫£n ph·∫©m", "OK");
-            }
+            await LoadProductDataAsync();
         });
     }
 
@@ -122,12 +122,9 @@ public partial class DataEntryPage : ContentPage
             SealEntry.Unfocused -= OnMetadataFieldUnfocused;
             DateEntry.Focused -= OnMetadataFieldFocused;
             DateEntry.Unfocused -= OnMetadataFieldUnfocused;
-            CreatorEntry.Focused -= OnMetadataFieldFocused;
-            CreatorEntry.Unfocused -= OnMetadataFieldUnfocused;
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"OnDisappearing unsubscribe error: {ex.Message}");
         }
     }
 
@@ -145,22 +142,17 @@ public partial class DataEntryPage : ContentPage
 
             double calculatedHeight = headerHeight + (totalRows * rowHeight) + spacing + framePadding + labelHeight + scrollbarBuffer;
 
-            System.Diagnostics.Debug.WriteLine($"Calculated table height: {calculatedHeight}px for {_rows} rows");
-
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 if (TableContainerFrame != null)
                 {
                     TableContainerFrame.HeightRequest = calculatedHeight;
                     TableContainerFrame.VerticalOptions = LayoutOptions.Start;
-
-                    System.Diagnostics.Debug.WriteLine($"Set TableContainerFrame.HeightRequest = {calculatedHeight}");
                 }
             });
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"SetDynamicTableHeight error: {ex.Message}");
         }
     }
 
@@ -184,9 +176,8 @@ public partial class DataEntryPage : ContentPage
             }
 #endif
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"Safe area error: {ex.Message}");
         }
     }
 
@@ -227,9 +218,8 @@ public partial class DataEntryPage : ContentPage
                 );
             }
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"GetAndroidSafeAreaInsets error: {ex.Message}");
             return new Thickness(0);
         }
     }
@@ -248,21 +238,153 @@ public partial class DataEntryPage : ContentPage
 
         DateEntry.Focused += OnMetadataFieldFocused;
         DateEntry.Unfocused += OnMetadataFieldUnfocused;
-
-        CreatorEntry.Focused += OnMetadataFieldFocused;
-        CreatorEntry.Unfocused += OnMetadataFieldUnfocused;
     }
 
-    private void OnMetadataFieldFocused(object sender, FocusEventArgs e)
+    private void OnMetadataFieldFocused(object? sender, FocusEventArgs e)
     {
         _isAnyFieldFocused = true;
-        System.Diagnostics.Debug.WriteLine("Metadata field focused");
     }
 
-    private void OnMetadataFieldUnfocused(object sender, FocusEventArgs e)
+    private void OnMetadataFieldUnfocused(object? sender, FocusEventArgs e)
     {
         _isAnyFieldFocused = false;
-        System.Diagnostics.Debug.WriteLine("Metadata field unfocused");
+    }
+
+    private void OnPhoto1Tapped(object? sender, EventArgs e) => ShowPhotoActions(1);
+    private void OnPhoto2Tapped(object? sender, EventArgs e) => ShowPhotoActions(2);
+    private void OnPhoto3Tapped(object? sender, EventArgs e) => ShowPhotoActions(3);
+    private void OnPhoto4Tapped(object? sender, EventArgs e) => ShowPhotoActions(4);
+
+    private async void ShowPhotoActions(int photoIndex)
+    {
+        string currentPath = photoIndex switch
+        {
+            1 => _photo1Path,
+            2 => _photo2Path,
+            3 => _photo3Path,
+            4 => _photo4Path,
+            _ => null
+        };
+
+        var options = currentPath == null
+            ? new[] { "Ch?p ?nh" }
+            : new[] { "Ch?p l?i", "XÛa ?nh" };
+
+        var action = await DisplayActionSheet("?nh ch?p", "H?y", null, options);
+        if (action == "Ch?p ?nh" || action == "Ch?p l?i")
+        {
+            await CapturePhotoAsync(photoIndex);
+        }
+        else if (action == "XÛa ?nh")
+        {
+            await DeletePhotoAsync(photoIndex);
+        }
+    }
+
+    private async Task CapturePhotoAsync(int photoIndex)
+    {
+        try
+        {
+            if (MediaPicker.Default.IsCaptureSupported)
+            {
+                var photo = await MediaPicker.Default.CapturePhotoAsync();
+                if (photo != null)
+                {
+                    var folder = FileSystem.AppDataDirectory;
+                    var fileName = $"photo_{photoIndex}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+                    var targetPath = IOPath.Combine(folder, fileName);
+
+                    using var sourceStream = await photo.OpenReadAsync();
+                    using var targetStream = File.Create(targetPath);
+                    await sourceStream.CopyToAsync(targetStream);
+
+                    switch (photoIndex)
+                    {
+                        case 1:
+                            _photo1Path = targetPath;
+                            Photo1Image.IsVisible = true;
+                            Photo1Placeholder.IsVisible = false;
+                            Photo1Image.Source = ImageSource.FromFile(targetPath);
+                            break;
+                        case 2:
+                            _photo2Path = targetPath;
+                            Photo2Image.IsVisible = true;
+                            Photo2Placeholder.IsVisible = false;
+                            Photo2Image.Source = ImageSource.FromFile(targetPath);
+                            break;
+                        case 3:
+                            _photo3Path = targetPath;
+                            Photo3Image.IsVisible = true;
+                            Photo3Placeholder.IsVisible = false;
+                            Photo3Image.Source = ImageSource.FromFile(targetPath);
+                            break;
+                        case 4:
+                            _photo4Path = targetPath;
+                            Photo4Image.IsVisible = true;
+                            Photo4Placeholder.IsVisible = false;
+                            Photo4Image.Source = ImageSource.FromFile(targetPath);
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                await DisplayAlert("L?i", "Camera khÙng du?c h? tr? trÍn thi?t b? n‡y.", "OK");
+            }
+        }
+        catch
+        {
+            await DisplayAlert("L?i", "KhÙng th? ch?p ?nh.", "OK");
+        }
+    }
+
+    private async Task DeletePhotoAsync(int photoIndex)
+    {
+        bool confirm = await DisplayAlert("XÛa ?nh", "B?n cÛ ch?c mu?n xÛa ?nh n‡y?", "XÛa", "H?y");
+        if (!confirm) return;
+
+        try
+        {
+            switch (photoIndex)
+            {
+                case 1:
+                    if (!string.IsNullOrEmpty(_photo1Path) && File.Exists(_photo1Path))
+                        File.Delete(_photo1Path);
+                    _photo1Path = null;
+                    Photo1Image.IsVisible = false;
+                    Photo1Placeholder.IsVisible = true;
+                    Photo1Image.Source = null;
+                    break;
+                case 2:
+                    if (!string.IsNullOrEmpty(_photo2Path) && File.Exists(_photo2Path))
+                        File.Delete(_photo2Path);
+                    _photo2Path = null;
+                    Photo2Image.IsVisible = false;
+                    Photo2Placeholder.IsVisible = true;
+                    Photo2Image.Source = null;
+                    break;
+                case 3:
+                    if (!string.IsNullOrEmpty(_photo3Path) && File.Exists(_photo3Path))
+                        File.Delete(_photo3Path);
+                    _photo3Path = null;
+                    Photo3Image.IsVisible = false;
+                    Photo3Placeholder.IsVisible = true;
+                    Photo3Image.Source = null;
+                    break;
+                case 4:
+                    if (!string.IsNullOrEmpty(_photo4Path) && File.Exists(_photo4Path))
+                        File.Delete(_photo4Path);
+                    _photo4Path = null;
+                    Photo4Image.IsVisible = false;
+                    Photo4Placeholder.IsVisible = true;
+                    Photo4Image.Source = null;
+                    break;
+            }
+        }
+        catch
+        {
+            await DisplayAlert("L?i", "KhÙng th? xÛa ?nh.", "OK");
+        }
     }
 
     public void SetCellValue(int row, int col, string value)
@@ -316,11 +438,344 @@ public partial class DataEntryPage : ContentPage
                 ContainerEntry.Text = container;
                 SealEntry.Text = seal;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"LoadMetadata error: {ex.Message}");
             }
         });
+    }
+
+    public async Task LoadProductMetadata(string customer, string product, string model, string msnv, string creatorName = "")
+    {
+        try
+        {
+
+
+
+
+
+
+            if (!ProductDataService.Instance.IsDataLoaded)
+            {
+                await ProductDataService.Instance.LoadDataAsync();
+
+            }
+            if (!UserService.Instance.IsLoaded)
+            {
+                await UserService.Instance.LoadUsersAsync();
+
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(customer))
+                    {
+                        _selectedCustomer = customer;
+                        CustomerLabel.Text = customer;
+                        CustomerLabel.TextColor = Color.FromArgb("#212121");
+
+                    }
+
+                    if (!string.IsNullOrEmpty(product))
+                    {
+                        _selectedProduct = product;
+                        ProductLabel.Text = product;
+                        ProductLabel.TextColor = Color.FromArgb("#212121");
+
+                    }
+
+                    if (!string.IsNullOrEmpty(model))
+                    {
+                        _selectedModel = model;
+                        ModelLabel.Text = model;
+                        ModelLabel.TextColor = Color.FromArgb("#212121");
+
+                    }
+
+                    if (!string.IsNullOrEmpty(msnv))
+                    {
+                        var user = UserService.Instance.GetAllUsers().FirstOrDefault(u => u.Msnv == msnv);
+                        if (user != null)
+                        {
+                            _selectedUser = user;
+                            var displayName = $"{user.Name} - {user.Position}";
+                            CreatorLabel.Text = displayName;
+                            CreatorLabel.TextColor = Color.FromArgb("#212121");
+
+                        }
+                        else
+                        {
+
+                            // N?u khÙng tÏm th?y user theo MSNV, th? tÏm theo tÍn
+                            if (!string.IsNullOrEmpty(creatorName))
+                            {
+                                var userByName = UserService.Instance.GetAllUsers().FirstOrDefault(u =>
+                                    u.Name.Equals(creatorName, StringComparison.OrdinalIgnoreCase));
+                                if (userByName != null)
+                                {
+                                    _selectedUser = userByName;
+                                    var displayName = $"{userByName.Name} - {userByName.Position}";
+                                    CreatorLabel.Text = displayName;
+                                    CreatorLabel.TextColor = Color.FromArgb("#212121");
+
+                                }
+                                else
+                                {
+                                    // N?u v?n khÙng tÏm th?y, t?o user t?m v?i tÍn g?c
+                                    _selectedUser = new UserData { Name = creatorName, Position = "", Msnv = "" };
+                                    CreatorLabel.Text = creatorName; // Ch? hi?n th? tÍn
+                                    CreatorLabel.TextColor = Color.FromArgb("#212121");
+
+                                }
+                            }
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(creatorName))
+                    {
+                        // N?u khÙng cÛ MSNV nhung cÛ tÍn, t?o user t?m v‡ hi?n th? tÍn
+                        _selectedUser = new UserData { Name = creatorName, Position = "", Msnv = "" };
+                        CreatorLabel.Text = creatorName; // Ch? hi?n th? tÍn
+                        CreatorLabel.TextColor = Color.FromArgb("#212121");
+
+                    }
+
+
+                }
+                catch
+                {
+
+                }
+            });
+        }
+        catch
+        {
+
+        }
+    }
+
+    public async Task LoadPhotosFromExcel(string excelFilePath)
+    {
+        try
+        {
+
+
+
+            if (!File.Exists(excelFilePath))
+            {
+
+                return;
+            }
+
+            using var package = new ExcelPackage(new FileInfo(excelFilePath));
+            var checkSheet = package.Workbook.Worksheets["Phi?u ki?m tra"];
+            
+            if (checkSheet?.Drawings == null)
+            {
+
+                return;
+            }
+
+            // T?o thu m?c temp d? luu ?nh
+            var tempFolder = IOPath.Combine(FileSystem.AppDataDirectory, "temp_photos");
+            if (!Directory.Exists(tempFolder))
+                Directory.CreateDirectory(tempFolder);
+
+            int photoCount = 0;
+            foreach (var drawing in checkSheet.Drawings)
+            {
+                if (drawing is OfficeOpenXml.Drawing.ExcelPicture picture && photoCount < 4)
+                {
+                    try
+                    {
+                        var imageBytes = picture.Image.ImageBytes;
+                        if (imageBytes != null && imageBytes.Length > 0)
+                        {
+                            photoCount++;
+                            var fileName = $"loaded_photo_{photoCount}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+                            var filePath = IOPath.Combine(tempFolder, fileName);
+                            
+                            await File.WriteAllBytesAsync(filePath, imageBytes);
+                            
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                switch (photoCount)
+                                {
+                                    case 1:
+                                        _photo1Path = filePath;
+                                        Photo1Image.IsVisible = true;
+                                        Photo1Placeholder.IsVisible = false;
+                                        Photo1Image.Source = ImageSource.FromFile(filePath);
+                                        break;
+                                    case 2:
+                                        _photo2Path = filePath;
+                                        Photo2Image.IsVisible = true;
+                                        Photo2Placeholder.IsVisible = false;
+                                        Photo2Image.Source = ImageSource.FromFile(filePath);
+                                        break;
+                                    case 3:
+                                        _photo3Path = filePath;
+                                        Photo3Image.IsVisible = true;
+                                        Photo3Placeholder.IsVisible = false;
+                                        Photo3Image.Source = ImageSource.FromFile(filePath);
+                                        break;
+                                    case 4:
+                                        _photo4Path = filePath;
+                                        Photo4Image.IsVisible = true;
+                                        Photo4Placeholder.IsVisible = false;
+                                        Photo4Image.Source = ImageSource.FromFile(filePath);
+                                        break;
+                                }
+                            });
+                            
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+            
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private void FillSeriesToCheckSheet(ExcelWorksheet checkSheet)
+    {
+        try
+        {
+
+
+
+            int totalDataCells = _rows * _cols;
+            int seriesIndex = 0;
+            int totalSeriesWithData = 0;
+            int totalFilled = 0;
+            int totalSkipped = 0;
+            int totalOverflow = 0;
+
+            // –?m t?ng s? series cÛ d? li?u
+            for (int i = 0; i < totalDataCells; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(GetSeriesValueByIndex(i)))
+                    totalSeriesWithData++;
+            }
+
+
+            // 1) –? v‡o c?t H: H13 ? H75 (gi? nguyÍn v? trÌ theo index)
+            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
+            {
+                string seriesValue = GetSeriesValueByIndex(seriesIndex);
+
+                if (!string.IsNullOrWhiteSpace(seriesValue))
+                {
+                    var cell = checkSheet.Cells[$"H{row}"];
+                    cell.Value = seriesValue;
+                    cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                    var okCell = checkSheet.Cells[$"I{row}"];
+                    okCell.Value = "OK";
+                    okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+
+                    totalFilled++;
+                }
+                else
+                {
+                    // B? QUA ‘ N¿Y - KH‘NG GHI GÃ C?
+
+                    totalSkipped++;
+                }
+
+                seriesIndex++; // QUAN TR?NG: V?n tang index d˘ Ù tr?ng
+            }
+
+            // 2) –? ti?p v‡o c?t L: L13 ? L75 (ti?p t?c index)
+            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
+            {
+                string seriesValue = GetSeriesValueByIndex(seriesIndex);
+
+                if (!string.IsNullOrWhiteSpace(seriesValue))
+                {
+                    var cell = checkSheet.Cells[$"L{row}"];
+                    cell.Value = seriesValue;
+                    cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                    var okCell = checkSheet.Cells[$"M{row}"];
+                    okCell.Value = "OK";
+                    okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+
+                    totalFilled++;
+                }
+                else
+                {
+                    // B? QUA ‘ N¿Y - KH‘NG GHI GÃ C?
+
+                    totalSkipped++;
+                }
+
+                seriesIndex++; // QUAN TR?NG: V?n tang index d˘ Ù tr?ng
+            }
+
+            // –?m s? b? th?a (n?u cÚn d? li?u sau khi h?t L75)
+            if (seriesIndex < totalDataCells)
+            {
+                totalOverflow = totalDataCells - seriesIndex;
+                for (int i = seriesIndex; i < totalDataCells; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(GetSeriesValueByIndex(i)))
+                    {
+
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+        }
+        catch
+        {
+
+        }
+    }
+
+    private string GetSeriesValueByIndex(int index)
+    {
+        try
+        {
+            // Column-major: di h?t c·c h‡ng c?a 1 c?t r?i sang c?t ti?p theo
+            int col = index / _rows;   // c?t logic (0,1,2,...)
+            int row = index % _rows;   // h‡ng (0.._rows-1)
+
+            // UI hi?n th? c?t d?o: C?t 1 UI l‡ c?t v?t l˝ cu?i c˘ng
+            int actualCol = _cols - col - 1;
+
+            if (row >= 0 && row < _rows && actualCol >= 0 && actualCol < _cols)
+            {
+                return _cellValues[row, actualCol] ?? string.Empty;
+            }
+        }
+        catch
+        {
+
+        }
+        return string.Empty;
     }
 
     private void BuildGrid()
@@ -347,7 +802,7 @@ public partial class DataEntryPage : ContentPage
             int colNum = _cols - c + 1;
             var lbl = new Label
             {
-                Text = $"C·ªôt {colNum}",
+                Text = $"C?t {colNum}",
                 FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Color.FromArgb("#F5F5F5"),
                 TextColor = Color.FromArgb("#212121"),
@@ -450,7 +905,7 @@ public partial class DataEntryPage : ContentPage
             int colNum = _cols - c + 1;
             var lbl = new Label
             {
-                Text = $"C·ªôt {colNum}",
+                Text = $"C?t {colNum}",
                 FontAttributes = FontAttributes.Bold,
                 BackgroundColor = Color.FromArgb("#F5F5F5"),
                 TextColor = Color.FromArgb("#212121"),
@@ -554,9 +1009,8 @@ public partial class DataEntryPage : ContentPage
                 }
             });
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"UpdateDuplicateHighlighting error: {ex.Message}");
         }
     }
 
@@ -589,9 +1043,8 @@ public partial class DataEntryPage : ContentPage
 
             UpdateDuplicateHighlighting();
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"StartScanForCell error: {ex.Message}");
             RestoreCellColor(cellLabel, rr, cc);
             _highlightLabel = null;
         }
@@ -615,9 +1068,8 @@ public partial class DataEntryPage : ContentPage
 
             return result;
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"ScanBarcodeAsync error: {ex.Message}");
             return null;
         }
     }
@@ -685,7 +1137,6 @@ public partial class DataEntryPage : ContentPage
             ContainerEntry.IsEnabled = enabled;
             DateEntry.IsEnabled = enabled;
             SealEntry.IsEnabled = enabled;
-            CreatorEntry.IsEnabled = enabled;
             DataGrid.IsEnabled = enabled;
         });
     }
@@ -700,7 +1151,9 @@ public partial class DataEntryPage : ContentPage
             var ring = RingtoneManager.GetRingtone(ctx, uri);
             ring?.Play();
         }
-        catch { }
+        catch
+        {
+        }
 #endif
     }
 
@@ -717,7 +1170,7 @@ public partial class DataEntryPage : ContentPage
             var ocr = services?.GetService<IOcrService>();
             if (ocr == null)
             {
-                await DisplayAlert("OCR", "OCR ch∆∞a s·∫µn s√†ng.", "ƒê√≥ng");
+                await DisplayAlert("OCR", "OCR chua s?n s‡ng.", "–Ûng");
                 return;
             }
 
@@ -730,16 +1183,16 @@ public partial class DataEntryPage : ContentPage
             else
             {
                 await DisplayAlert(
-                    "Kh√¥ng qu√©t ƒë∆∞·ª£c Container",
-                    "Kh√¥ng th·ªÉ nh·∫≠n di·ªán s·ªë Container t·ª´ ·∫£nh.\n\n" +
-                    "H√£y th·ª≠:\n" +
-                    "‚Ä¢ Ch·ª•p ·∫£nh r√µ n√©t h∆°n\n" +
-                    "‚Ä¢ ƒê·∫£m b·∫£o ƒë·ªß √°nh s√°ng\n" +
-                    "‚Ä¢ Ch·ª•p th·∫≥ng g√≥c (kh√¥ng xi√™n)\n" +
-                    "‚Ä¢ Zoom v√†o v√πng c√≥ s·ªë Container\n" +
-                    "‚Ä¢ ƒê·∫£m b·∫£o s·ªë Container n·∫±m trong khung xanh\n\n" +
-                    "Format Container: 4 ch·ªØ c√°i + 7 s·ªë\n" +
-                    "V√≠ d·ª•: KOCU 411486 2",
+                    "KhÙng quÈt du?c Container",
+                    "KhÙng th? nh?n di?n s? Container t? ?nh.\n\n" +
+                    "H„y th?:\n" +
+                    "ï Ch?p ?nh rı nÈt hon\n" +
+                    "ï –?m b?o d? ·nh s·ng\n" +
+                    "ï Ch?p th?ng gÛc (khÙng xiÍn)\n" +
+                    "ï Zoom v‡o v˘ng cÛ s? Container\n" +
+                    "ï –?m b?o s? Container n?m trong khung xanh\n\n" +
+                    "Format Container: 4 ch? c·i + 7 s?\n" +
+                    "VÌ d?: KOCU 411486 2",
                     "OK"
                 );
             }
@@ -764,7 +1217,7 @@ public partial class DataEntryPage : ContentPage
             var ocr = services?.GetService<IOcrService>();
             if (ocr == null)
             {
-                await DisplayAlert("OCR", "OCR ch∆∞a s·∫µn s√†ng.", "ƒê√≥ng");
+                await DisplayAlert("OCR", "OCR chua s?n s‡ng.", "–Ûng");
                 return;
             }
 
@@ -777,16 +1230,16 @@ public partial class DataEntryPage : ContentPage
             else
             {
                 await DisplayAlert(
-                    "Kh√¥ng qu√©t ƒë∆∞·ª£c Seal",
-                    "Kh√¥ng th·ªÉ nh·∫≠n di·ªán s·ªë Seal t·ª´ ·∫£nh.\n\n" +
-                    "H√£y th·ª≠:\n" +
-                    "‚Ä¢ Ch·ª•p ·∫£nh r√µ n√©t h∆°n\n" +
-                    "‚Ä¢ ƒê·∫£m b·∫£o ƒë·ªß √°nh s√°ng\n" +
-                    "‚Ä¢ Ch·ª•p th·∫≥ng g√≥c (kh√¥ng xi√™n)\n" +
-                    "‚Ä¢ Zoom v√†o v√πng c√≥ s·ªë Seal\n" +
-                    "‚Ä¢ ƒê·∫£m b·∫£o s·ªë Seal n·∫±m trong khung xanh\n\n" +
-                    "Format Seal: 6-15 k√Ω t·ª± (ch·ªØ + s·ªë)\n" +
-                    "V√≠ d·ª•: YN646E4AO",
+                    "KhÙng quÈt du?c Seal",
+                    "KhÙng th? nh?n di?n s? Seal t? ?nh.\n\n" +
+                    "H„y th?:\n" +
+                    "ï Ch?p ?nh rı nÈt hon\n" +
+                    "ï –?m b?o d? ·nh s·ng\n" +
+                    "ï Ch?p th?ng gÛc (khÙng xiÍn)\n" +
+                    "ï Zoom v‡o v˘ng cÛ s? Seal\n" +
+                    "ï –?m b?o s? Seal n?m trong khung xanh\n\n" +
+                    "Format Seal: 6-15 k˝ t? (ch? + s?)\n" +
+                    "VÌ d?: YN646E4AO",
                     "OK"
                 );
             }
@@ -798,24 +1251,27 @@ public partial class DataEntryPage : ContentPage
         }
     }
 
-    // ==================== PRODUCT SELECTION HANDLERS ====================
-
     private async void OnCustomerPickerTapped(object sender, EventArgs e)
     {
         if (_isProcessing) return;
 
         try
         {
+            if (!ProductDataService.Instance.IsDataLoaded)
+            {
+                await ProductDataService.Instance.LoadDataAsync();
+            }
+
             var customers = ProductDataService.Instance.GetCustomers();
 
             if (customers.Count == 0)
             {
-                await DisplayAlert("Th√¥ng b√°o", "Ch∆∞a c√≥ d·ªØ li·ªáu kh√°ch h√†ng", "OK");
+                await DisplayAlert("ThÙng b·o", "Chua cÛ d? li?u kh·ch h‡ng.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u d„ upload lÍn Firebase\n3. Firebase config d˙ng", "OK");
                 return;
             }
 
             var tcs = new TaskCompletionSource<string?>();
-            var pickerPage = new SearchablePickerPage("Ch·ªçn kh√°ch h√†ng", customers, tcs);
+            var pickerPage = new SearchablePickerPage("Ch?n kh·ch h‡ng", customers, tcs);
 
             await Navigation.PushModalAsync(pickerPage);
 
@@ -823,23 +1279,17 @@ public partial class DataEntryPage : ContentPage
 
             if (!string.IsNullOrEmpty(selected))
             {
-                _selectedCustomer = selected;
-                CustomerLabel.Text = selected;
-                CustomerLabel.TextColor = Color.FromArgb("#212121");
-
-                // Reset product v√† model khi ƒë·ªïi customer
-                _selectedProduct = null;
-                _selectedModel = null;
-                ProductLabel.Text = "Ch·ªçn s·∫£n ph·∫©m";
-                ProductLabel.TextColor = Color.FromArgb("#9E9E9E");
-                ModelLabel.Text = "Ch·ªçn model";
-                ModelLabel.TextColor = Color.FromArgb("#9E9E9E");
+                if (_selectedCustomer != selected)
+                {
+                    _selectedCustomer = selected;
+                    CustomerLabel.Text = selected;
+                    CustomerLabel.TextColor = Color.FromArgb("#212121");
+                }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"OnCustomerPickerTapped error: {ex.Message}");
-            await DisplayAlert("L·ªói", $"Kh√¥ng th·ªÉ ch·ªçn kh√°ch h√†ng: {ex.Message}", "OK");
+            await DisplayAlert("L?i", "KhÙng th? ch?n kh·ch h‡ng.", "OK");
         }
     }
 
@@ -849,7 +1299,7 @@ public partial class DataEntryPage : ContentPage
 
         if (string.IsNullOrEmpty(_selectedCustomer))
         {
-            await DisplayAlert("Th√¥ng b√°o", "Vui l√≤ng ch·ªçn kh√°ch h√†ng tr∆∞·ªõc", "OK");
+            await DisplayAlert("ThÙng b·o", "Vui lÚng ch?n kh·ch h‡ng tru?c", "OK");
             return;
         }
 
@@ -859,12 +1309,12 @@ public partial class DataEntryPage : ContentPage
 
             if (products.Count == 0)
             {
-                await DisplayAlert("Th√¥ng b√°o", "Kh√¥ng c√≥ s·∫£n ph·∫©m cho kh√°ch h√†ng n√†y", "OK");
+                await DisplayAlert("ThÙng b·o", $"KhÙng cÛ s?n ph?m cho kh·ch h‡ng '{_selectedCustomer}'", "OK");
                 return;
             }
 
             var tcs = new TaskCompletionSource<string?>();
-            var pickerPage = new SearchablePickerPage("Ch·ªçn s·∫£n ph·∫©m", products, tcs);
+            var pickerPage = new SearchablePickerPage("Ch?n s?n ph?m", products, tcs);
 
             await Navigation.PushModalAsync(pickerPage);
 
@@ -872,20 +1322,17 @@ public partial class DataEntryPage : ContentPage
 
             if (!string.IsNullOrEmpty(selected))
             {
-                _selectedProduct = selected;
-                ProductLabel.Text = selected;
-                ProductLabel.TextColor = Color.FromArgb("#212121");
-
-                // Reset model khi ƒë·ªïi product
-                _selectedModel = null;
-                ModelLabel.Text = "Ch·ªçn model";
-                ModelLabel.TextColor = Color.FromArgb("#9E9E9E");
+                if (_selectedProduct != selected)
+                {
+                    _selectedProduct = selected;
+                    ProductLabel.Text = selected;
+                    ProductLabel.TextColor = Color.FromArgb("#212121");
+                }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"OnProductPickerTapped error: {ex.Message}");
-            await DisplayAlert("L·ªói", $"Kh√¥ng th·ªÉ ch·ªçn s·∫£n ph·∫©m: {ex.Message}", "OK");
+            await DisplayAlert("L?i", "KhÙng th? ch?n s?n ph?m.", "OK");
         }
     }
 
@@ -895,13 +1342,13 @@ public partial class DataEntryPage : ContentPage
 
         if (string.IsNullOrEmpty(_selectedCustomer))
         {
-            await DisplayAlert("Th√¥ng b√°o", "Vui l√≤ng ch·ªçn kh√°ch h√†ng tr∆∞·ªõc", "OK");
+            await DisplayAlert("ThÙng b·o", "Vui lÚng ch?n kh·ch h‡ng tru?c", "OK");
             return;
         }
 
         if (string.IsNullOrEmpty(_selectedProduct))
         {
-            await DisplayAlert("Th√¥ng b√°o", "Vui l√≤ng ch·ªçn s·∫£n ph·∫©m tr∆∞·ªõc", "OK");
+            await DisplayAlert("ThÙng b·o", "Vui lÚng ch?n s?n ph?m tru?c", "OK");
             return;
         }
 
@@ -911,12 +1358,12 @@ public partial class DataEntryPage : ContentPage
 
             if (models.Count == 0)
             {
-                await DisplayAlert("Th√¥ng b√°o", "Kh√¥ng c√≥ model cho s·∫£n ph·∫©m n√†y", "OK");
+                await DisplayAlert("ThÙng b·o", $"KhÙng cÛ model cho s?n ph?m '{_selectedProduct}' c?a kh·ch h‡ng '{_selectedCustomer}'", "OK");
                 return;
             }
 
             var tcs = new TaskCompletionSource<string?>();
-            var pickerPage = new SearchablePickerPage("Ch·ªçn model", models, tcs);
+            var pickerPage = new SearchablePickerPage("Ch?n model", models, tcs);
 
             await Navigation.PushModalAsync(pickerPage);
 
@@ -924,19 +1371,62 @@ public partial class DataEntryPage : ContentPage
 
             if (!string.IsNullOrEmpty(selected))
             {
-                _selectedModel = selected;
-                ModelLabel.Text = selected;
-                ModelLabel.TextColor = Color.FromArgb("#212121");
+                if (_selectedModel != selected)
+                {
+                    _selectedModel = selected;
+                    ModelLabel.Text = selected;
+                    ModelLabel.TextColor = Color.FromArgb("#212121");
+                }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"OnModelPickerTapped error: {ex.Message}");
-            await DisplayAlert("L·ªói", $"Kh√¥ng th·ªÉ ch·ªçn model: {ex.Message}", "OK");
+            await DisplayAlert("L?i", "KhÙng th? ch?n model.", "OK");
         }
     }
 
-    // ==================== EXPORT EXCEL ====================
+    private async void OnCreatorPickerTapped(object sender, EventArgs e)
+    {
+        if (_isProcessing) return;
+
+        try
+        {
+            if (!UserService.Instance.IsLoaded)
+            {
+                await UserService.Instance.LoadUsersAsync();
+            }
+
+            var userDisplayNames = UserService.Instance.GetUserDisplayNames();
+
+            if (userDisplayNames.Count == 0)
+            {
+                await DisplayAlert("ThÙng b·o", "Chua cÛ d? li?u ngu?i l?p.\n\nKi?m tra:\n1. K?t n?i internet\n2. D? li?u d„ upload lÍn Firebase\n3. Firebase config d˙ng", "OK");
+                return;
+            }
+
+            var tcs = new TaskCompletionSource<string?>();
+            var pickerPage = new SearchablePickerPage("Ch?n ngu?i l?p", userDisplayNames, tcs);
+
+            await Navigation.PushModalAsync(pickerPage);
+
+            var selected = await tcs.Task;
+
+            if (!string.IsNullOrEmpty(selected))
+            {
+                var newUser = UserService.Instance.GetUserByDisplayName(selected);
+                if (newUser != null && (_selectedUser == null || _selectedUser.Msnv != newUser.Msnv))
+                {
+                    _selectedUser = newUser;
+                    CreatorLabel.Text = selected;
+                    CreatorLabel.TextColor = Color.FromArgb("#212121");
+                }
+            }
+        }
+        catch
+        {
+            await DisplayAlert("L?i", "KhÙng th? ch?n ngu?i l?p.", "OK");
+        }
+    }
 
     private static string SanitizeFileName(string name)
     {
@@ -954,28 +1444,27 @@ public partial class DataEntryPage : ContentPage
 
         try
         {
-            // Validate product fields
             if (string.IsNullOrEmpty(_selectedCustomer))
             {
-                await DisplayAlert("Thi·∫øu th√¥ng tin", "Vui l√≤ng ch·ªçn t√™n kh√°ch h√†ng", "OK");
+                await DisplayAlert("Thi?u thÙng tin", "Vui lÚng ch?n tÍn kh·ch h‡ng", "OK");
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectedProduct))
             {
-                await DisplayAlert("Thi·∫øu th√¥ng tin", "Vui l√≤ng ch·ªçn t√™n s·∫£n ph·∫©m", "OK");
+                await DisplayAlert("Thi?u thÙng tin", "Vui lÚng ch?n tÍn s?n ph?m", "OK");
                 return;
             }
 
             if (string.IsNullOrEmpty(_selectedModel))
             {
-                await DisplayAlert("Thi·∫øu th√¥ng tin", "Vui l√≤ng ch·ªçn model", "OK");
+                await DisplayAlert("Thi?u thÙng tin", "Vui lÚng ch?n model", "OK");
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(CreatorEntry.Text))
+            if (_selectedUser == null)
             {
-                await DisplayAlert("Thi·∫øu th√¥ng tin", "Vui l√≤ng nh·∫≠p t√™n ng∆∞·ªùi l·∫≠p", "OK");
+                await DisplayAlert("Thi?u thÙng tin", "Vui lÚng ch?n ngu?i l?p", "OK");
                 return;
             }
 
@@ -989,7 +1478,7 @@ public partial class DataEntryPage : ContentPage
             var customerPart = SanitizeFileName(_selectedCustomer ?? "");
             var productPart = SanitizeFileName(_selectedProduct ?? "");
             var modelPart = SanitizeFileName(_selectedModel ?? "");
-            var creatorPart = SanitizeFileName(CreatorEntry.Text?.Trim() ?? "");
+            var creatorPart = SanitizeFileName(_selectedUser?.Name ?? "");
 
             var raw = $"{datePart}_{sttPart}_{contPart}_{sealPart}_{customerPart}_{productPart}_{modelPart}_{creatorPart}";
             var baseFileName = SanitizeFileName(raw);
@@ -1010,20 +1499,32 @@ public partial class DataEntryPage : ContentPage
 
                 bool cellsChanged = HasAnyChanges();
 
-                if (!metadataChanged && !cellsChanged)
+                bool productChanged =
+                    _selectedCustomer != _originalCustomer ||
+                    _selectedProduct != _originalProduct ||
+                    _selectedModel != _originalModel ||
+                    (_selectedUser?.Msnv ?? "") != (_originalUser?.Msnv ?? "");
+
+                if (!metadataChanged && !cellsChanged && !productChanged)
                 {
-                    await DisplayAlert("Th√¥ng b√°o", "Kh√¥ng c√≥ thay ƒë·ªïi n√†o ƒë·ªÉ l∆∞u", "OK");
+                    await DisplayAlert("ThÙng b·o", "KhÙng cÛ thay d?i n‡o d? luu", "OK");
                     _navigationConfirmed = true;
                     await Navigation.PopToRootAsync();
                     return;
                 }
-                else if (metadataChanged)
+
+                if (metadataChanged || productChanged)
                 {
                     path = IOPath.Combine(FileSystem.AppDataDirectory, baseFileName + ".xlsx");
+                    
+                    if (File.Exists(_existingFilePath!))
+                    {
+                        File.Delete(_existingFilePath!);
+                    }
                 }
                 else
                 {
-                    path = GetUniqueFilePath(baseFileName);
+                    path = _existingFilePath!;
                 }
             }
             else
@@ -1033,37 +1534,13 @@ public partial class DataEntryPage : ContentPage
 
             using (var pkg = new ExcelPackage())
             {
-                // Add metadata sheet
-                var metaWs = pkg.Workbook.Worksheets.Add("Th√¥ng tin");
-                metaWs.Cells["A1"].Value = "Ng√†y";
-                metaWs.Cells["B1"].Value = DateEntry.Date.ToString("dd/MM/yyyy");
-                metaWs.Cells["A2"].Value = "S·ªë th·ª© t·ª±";
-                metaWs.Cells["B2"].Value = sttPart;
-                metaWs.Cells["A3"].Value = "S·ªë container";
-                metaWs.Cells["B3"].Value = contPart;
-                metaWs.Cells["A4"].Value = "S·ªë seal";
-                metaWs.Cells["B4"].Value = sealPart;
-                metaWs.Cells["A5"].Value = "T√™n kh√°ch h√†ng";
-                metaWs.Cells["B5"].Value = _selectedCustomer;
-                metaWs.Cells["A6"].Value = "T√™n s·∫£n ph·∫©m";
-                metaWs.Cells["B6"].Value = _selectedProduct;
-                metaWs.Cells["A7"].Value = "Model";
-                metaWs.Cells["B7"].Value = _selectedModel;
-                metaWs.Cells["A8"].Value = "Ng∆∞·ªùi l·∫≠p";
-                metaWs.Cells["B8"].Value = CreatorEntry.Text?.Trim();
-
-                metaWs.Cells["A:A"].Style.Font.Bold = true;
-                metaWs.Cells["A:A"].AutoFitColumns();
-                metaWs.Cells["B:B"].AutoFitColumns();
-
-                // Add data sheet
-                var ws = pkg.Workbook.Worksheets.Add("D·ªØ li·ªáu");
+                var ws = pkg.Workbook.Worksheets.Add("B?ng d? li?u");
 
                 for (int c = 0; c < _cols; c++)
                 {
                     int colNum = _cols - c;
                     var cell = ws.Cells[1, c + 2];
-                    cell.Value = $"C·ªôt {colNum}";
+                    cell.Value = $"C?t {colNum}";
                     cell.Style.Font.Bold = true;
                     cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
@@ -1073,7 +1550,7 @@ public partial class DataEntryPage : ContentPage
 
                 for (int r = 0; r < _rows; r++)
                 {
-                    int stt = _rows - r;
+                    int stt = r + 1;
                     var headerCell = ws.Cells[r + 2, 1];
                     headerCell.Value = stt.ToString();
                     headerCell.Style.Font.Bold = true;
@@ -1093,14 +1570,79 @@ public partial class DataEntryPage : ContentPage
 
                 ws.Cells[ws.Dimension.Address].AutoFitColumns();
 
-                var fileInfo = new System.IO.FileInfo(path);
-                pkg.SaveAs(fileInfo);
+                // ThÍm Sheet 2 t? template - ch?y trÍn background thread
+                await Task.Run(async () =>
+                {
+                    using (var templateStream = await FileSystem.Current.OpenAppPackageFileAsync("Template/BM_Phieu kiem tra dong container.xlsx"))
+                    using (var templatePkg = new ExcelPackage(templateStream))
+                    {
+                        var templateSheet = templatePkg.Workbook.Worksheets["Sheet2"];
+                        if (templateSheet != null)
+                        {
+                            var newSheet = pkg.Workbook.Worksheets.Add("Phi?u ki?m tra", templateSheet);
+                            
+                            // –i?n thÙng tin v‡o c·c Ù tuong ?ng
+                            var customerCell = newSheet.Cells["D4"];
+                            customerCell.Value = _selectedCustomer;  // TÍn kh·ch h‡ng 
+                            customerCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            customerCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var productCell = newSheet.Cells["D5"];
+                            productCell.Value = _selectedProduct;   // TÍn Products
+                            productCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            productCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var modelCell = newSheet.Cells["D6"];
+                            modelCell.Value = _selectedModel;     // Model
+                            modelCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            modelCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var dateCell = newSheet.Cells["D9"];
+                            dateCell.Value = DateEntry.Date.ToString("dd/MM/yyyy"); // Ng‡y ki?m tra
+                            dateCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            dateCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var sttCell = newSheet.Cells["D8"];
+                            sttCell.Value = sttPart;            // S? th? t?
+                            sttCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            sttCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                            var contCell = newSheet.Cells["L5"];
+                            contCell.Value = contPart;           // S? container
+                            contCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            contCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var sealCell = newSheet.Cells["L7"];
+                            sealCell.Value = sealPart;           // S? seal
+                            sealCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            sealCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
+                            var userCell = newSheet.Cells["L9"];
+                            userCell.Value = _selectedUser?.Name; // Nh‚n viÍn ki?m tra
+                            userCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                            userCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+
+                            // –i?n s? series v‡o sheet 2 (Phi?u ki?m tra)
+                            FillSeriesToCheckSheet(newSheet);
+
+                            // ChËn ?nh th?c t? v‡o v˘ng A35:F75 (4 ?nh)
+                            await InsertPhotosToExcel(newSheet);
+                        }
+                    }
+
+                    ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                });
+                var fileInfo = new FileInfo(path);
+                await Task.Run(() => pkg.SaveAs(fileInfo));
             }
 
-            if (isEditing)
-            {
-                UpdateOriginalCellValues();
-            }
+            UpdateOriginalCellValues();
+            _originalCustomer = _selectedCustomer;
+            _originalProduct = _selectedProduct;
+            _originalModel = _selectedModel;
+            _originalUser = _selectedUser;
+
+            _existingFilePath = path;
 
             var tcs = new TaskCompletionSource<PopupAction>();
             var popup = new ExportSuccessPopup(path, isEditing, tcs);
@@ -1114,13 +1656,13 @@ public partial class DataEntryPage : ContentPage
                 {
                     await Share.Default.RequestAsync(new ShareFileRequest
                     {
-                        Title = "Chia s·∫ª file Excel",
+                        Title = "Chia s? file Excel",
                         File = new ShareFile(path)
                     });
                 }
-                catch (Exception shareEx)
+                catch
                 {
-                    await DisplayAlert("L·ªói", $"Kh√¥ng th·ªÉ chia s·∫ª file:\n{shareEx.Message}", "OK");
+                    await DisplayAlert("L?i", "KhÙng th? chia s? file.", "OK");
                 }
 
                 _navigationConfirmed = true;
@@ -1132,9 +1674,9 @@ public partial class DataEntryPage : ContentPage
                 await Navigation.PopToRootAsync();
             }
         }
-        catch (Exception ex)
+        catch
         {
-            await DisplayAlert("L·ªói xu·∫•t Excel", ex.Message, "ƒê√≥ng");
+            await DisplayAlert("L?i xu?t Excel", "L?i xu?t Excel.", "–Ûng");
         }
         finally
         {
@@ -1191,24 +1733,29 @@ public partial class DataEntryPage : ContentPage
     {
         if (_isAnyFieldFocused)
         {
-            System.Diagnostics.Debug.WriteLine("Field is focused - treated as having changes");
-            return true;
-        }
-
-        // Ki·ªÉm tra product fields c√≥ gi√° tr·ªã kh√¥ng
-        if (!string.IsNullOrEmpty(_selectedCustomer) ||
-            !string.IsNullOrEmpty(_selectedProduct) ||
-            !string.IsNullOrEmpty(_selectedModel) ||
-            !string.IsNullOrEmpty(CreatorEntry.Text?.Trim()))
-        {
             return true;
         }
 
         if (string.IsNullOrEmpty(_existingFilePath))
-            return true;
+        {
+            return !string.IsNullOrEmpty(_selectedCustomer) ||
+                   !string.IsNullOrEmpty(_selectedProduct) ||
+                   !string.IsNullOrEmpty(_selectedModel) ||
+                   _selectedUser != null ||
+                   HasAnyChanges();
+        }
 
         try
         {
+            bool productChanged =
+                _selectedCustomer != _originalCustomer ||
+                _selectedProduct != _originalProduct ||
+                _selectedModel != _originalModel ||
+                (_selectedUser?.Msnv ?? "") != (_originalUser?.Msnv ?? "");
+
+            if (productChanged)
+                return true;
+
             var oldFileName = IOPath.GetFileNameWithoutExtension(_existingFilePath);
             var (oldDate, oldStt, oldContainer, oldSeal) = ParseMetadataFromFilename(oldFileName);
 
@@ -1226,9 +1773,8 @@ public partial class DataEntryPage : ContentPage
             if (metadataChanged)
                 return true;
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"HasAnyChangesIncludingMetadata metadata check error: {ex.Message}");
         }
 
         return HasAnyChanges();
@@ -1265,9 +1811,8 @@ public partial class DataEntryPage : ContentPage
                 return (date, stt, container, seal);
             }
         }
-        catch (Exception ex)
+        catch
         {
-            System.Diagnostics.Debug.WriteLine($"ParseMetadataFromFilename error: {ex.Message}");
         }
 
         return (null, "", "", "");
@@ -1284,10 +1829,10 @@ public partial class DataEntryPage : ContentPage
         if (HasAnyChangesIncludingMetadata())
         {
             bool confirm = await DisplayAlert(
-                "Tho√°t m√† kh√¥ng l∆∞u?",
-                "B·∫°n c√≥ thay ƒë·ªïi ch∆∞a l∆∞u. B·∫°n c√≥ ch·∫Øc mu·ªën tho√°t?",
-                "Tho√°t",
-                "H·ªßy"
+                "Tho·t m‡ khÙng luu?",
+                "B?n cÛ thay d?i chua luu. B?n cÛ ch?c mu?n tho·t?",
+                "Tho·t",
+                "H?y"
             );
 
             if (!confirm)
@@ -1309,5 +1854,84 @@ public partial class DataEntryPage : ContentPage
     private async void OnBackButtonClicked(object sender, EventArgs e)
     {
         await HandleBackNavigation();
+    }
+
+    private async Task LoadProductDataAsync()
+    {
+        try
+        {
+            await ProductDataService.Instance.LoadDataAsync();
+
+            await UserService.Instance.LoadUsersAsync();
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task InsertPhotosToExcel(ExcelWorksheet worksheet)
+    {
+        try
+        {
+            // Layout 2x2: 4 ?nh trong Excel
+            // M?i ?nh width t? A d?n 80% c?t C, t? l? 9:16
+
+            var photos = new[]
+            {
+                _photo1Path,
+                _photo2Path, 
+                _photo3Path,
+                _photo4Path
+            };
+
+            var positions = new[]
+            {
+                new { StartCol = 1, EndCol = 3, StartRow = 35, EndRow = 54 }, // A35:C54 - ?nh 1 (h‡ng 1, c?t 1)
+                new { StartCol = 4, EndCol = 6, StartRow = 35, EndRow = 54 }, // D35:F54 - ?nh 2 (h‡ng 1, c?t 2)
+                new { StartCol = 1, EndCol = 3, StartRow = 55, EndRow = 75 }, // A55:C75 - ?nh 3 (h‡ng 2, c?t 1)
+                new { StartCol = 4, EndCol = 6, StartRow = 55, EndRow = 75 }  // D55:F75 - ?nh 4 (h‡ng 2, c?t 2)
+            };
+
+            // ChËn t?t c? 4 ?nh
+            for (int i = 0; i < photos.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(photos[i]) && File.Exists(photos[i]))
+                {
+                    try
+                    {
+                        var pos = positions[i];
+                        
+                        // –?c ?nh t? file
+                        using var imageStream = File.OpenRead(photos[i]!);
+                        
+                        // ThÍm ?nh v‡o worksheet
+                        var picture = worksheet.Drawings.AddPicture($"Photo{i + 1}", imageStream);
+                        
+                        // –?t v? trÌ ?nh theo position
+                        picture.From.Column = pos.StartCol - 1; // 0-based index
+                        picture.From.Row = pos.StartRow - 1;
+                        
+                        // KÌch thu?c theo yÍu c?u W:300px v?i t? l? 9:16
+                        int maxWidth = 300;  // pixels theo yÍu c?u
+                        int maxHeight = (int)(maxWidth * 16.0 / 9.0); // 533 pixels (9:16 ratio chÌnh x·c)
+                        
+                        picture.SetSize(maxWidth, maxHeight);
+                        
+                        // –?t ch? d? khÙng resize khi thay d?i cell
+                        picture.EditAs = OfficeOpenXml.Drawing.eEditAs.Absolute;
+                        
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 }

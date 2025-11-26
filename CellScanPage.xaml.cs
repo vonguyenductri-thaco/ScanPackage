@@ -32,7 +32,7 @@ public partial class CellScanPage : ContentPage
             CutoutWidth = 372,
             CutoutHeight = 220,
             CornerRadius = 20,
-            OverlayColor = Color.FromRgba(0, 0, 0, 0.50f) // 50% opacity black
+            OverlayColor = Color.FromRgba(0, 0, 0, 0.50f)
         };
     }
 
@@ -46,12 +46,12 @@ public partial class CellScanPage : ContentPage
             grid.SizeChanged += OnGridSizeChanged;
         }
 
-        // Apply safe area v� initialize custom thumb position after layout is ready
+        // Apply safe area và initialize custom thumb position after layout is ready
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             await Task.Delay(100);
             ApplySafeAreaInsets();
-            await Task.Delay(100); // Give more time for layout to complete
+            await Task.Delay(100);
             UpdateCustomThumbPosition();
         });
     }
@@ -59,6 +59,9 @@ public partial class CellScanPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+
+        // QUAN TRỌNG: Tắt camera trước khi trang đóng để giải phóng tài nguyên
+        DisableCamera();
 
         // Unsubscribe from events
         if (ZoomSlider.Parent is Grid grid)
@@ -69,8 +72,27 @@ public partial class CellScanPage : ContentPage
 
     private void OnGridSizeChanged(object sender, EventArgs e)
     {
-        // Update thumb position when grid size changes
         UpdateCustomThumbPosition();
+    }
+
+    // ==================== CAMERA CONTROL ====================
+
+    private void DisableCamera()
+    {
+        try
+        {
+            // Tắt camera để giải phóng tài nguyên native
+            var cameraEnabledProperty = BarcodeView.GetType().GetProperty("CameraEnabled");
+            if (cameraEnabledProperty != null && cameraEnabledProperty.CanWrite)
+            {
+                cameraEnabledProperty.SetValue(BarcodeView, false);
+                System.Diagnostics.Debug.WriteLine("Camera disabled successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"DisableCamera error: {ex.Message}");
+        }
     }
 
     // ==================== SAFE AREA HANDLING ====================
@@ -147,6 +169,11 @@ public partial class CellScanPage : ContentPage
             _completed = true;
             _tcs.TrySetResult(null);
         }
+
+        // Tắt camera trước khi đóng trang
+        DisableCamera();
+        
+        await Task.Delay(50); // Chờ một chút để camera tắt hoàn toàn
         await Navigation.PopModalAsync();
     }
 
@@ -158,8 +185,12 @@ public partial class CellScanPage : ContentPage
         if (string.IsNullOrWhiteSpace(value)) return;
 
         _completed = true;
-
         _tcs.TrySetResult(value.Trim());
+
+        // Tắt camera trước khi đóng trang
+        DisableCamera();
+
+        await Task.Delay(50); // Chờ một chút để camera tắt hoàn toàn
         await MainThread.InvokeOnMainThreadAsync(async () => await Navigation.PopModalAsync());
     }
 
@@ -171,8 +202,6 @@ public partial class CellScanPage : ContentPage
         {
             _currentScale = e.NewValue;
             ApplyZoom(_currentScale);
-
-            // Update custom thumb position immediately (no animation)
             UpdateCustomThumbPosition();
         }
         catch (Exception ex)
@@ -187,7 +216,6 @@ public partial class CellScanPage : ContentPage
         {
             if (CustomThumb == null || ZoomSlider.Parent is not Grid grid) return;
 
-            // Wait for grid to have valid width
             if (grid.Width <= 0) return;
 
             var sliderValue = ZoomSlider.Value;
@@ -195,17 +223,13 @@ public partial class CellScanPage : ContentPage
             var sliderMax = ZoomSlider.Maximum;
             var sliderRange = sliderMax - sliderMin;
 
-            // Calculate normalized position (0 to 1)
             var normalizedValue = (sliderValue - sliderMin) / sliderRange;
 
-            // Get available track width (grid width minus thumb width)
             var thumbWidth = CustomThumb.Width > 0 ? CustomThumb.Width : 31;
             var trackWidth = grid.Width - thumbWidth;
 
-            // Calculate thumb position
             var thumbPosition = normalizedValue * trackWidth;
 
-            // Update position directly (no animation for smooth dragging)
             CustomThumb.TranslationX = thumbPosition;
 
             System.Diagnostics.Debug.WriteLine($"Thumb Position: {thumbPosition:F2}, Slider Value: {sliderValue:F2}, Track Width: {trackWidth:F2}");
@@ -245,8 +269,6 @@ public partial class CellScanPage : ContentPage
     {
         try
         {
-            // Try to use RequestZoomFactor property if available
-            // If not available, use Scale as fallback
             var zoomProperty = BarcodeView.GetType().GetProperty("RequestZoomFactor");
             if (zoomProperty != null && zoomProperty.CanWrite)
             {
@@ -255,7 +277,6 @@ public partial class CellScanPage : ContentPage
             }
             else
             {
-                // Fallback to Scale
                 BarcodeView.AnchorX = 0.5;
                 BarcodeView.AnchorY = 0.5;
                 BarcodeView.Scale = zoomFactor;
@@ -276,14 +297,12 @@ public partial class CellScanPage : ContentPage
         {
             _isFlashOn = !_isFlashOn;
 
-            // Try to use TorchOn property if available
             var torchProperty = BarcodeView.GetType().GetProperty("TorchOn");
             if (torchProperty != null && torchProperty.CanWrite)
             {
                 torchProperty.SetValue(BarcodeView, _isFlashOn);
             }
 
-            // Update flash button background (change circle color)
             if (FlashCircle != null)
             {
                 FlashCircle.Fill = _isFlashOn ? Color.FromArgb("#F9C41C") : Colors.White;

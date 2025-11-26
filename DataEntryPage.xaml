@@ -42,17 +42,18 @@
 
         <!-- Scrollable Content Area (Giữa) -->
         <ScrollView Grid.Row="1"
-                    VerticalOptions="FillAndExpand">
+                    VerticalOptions="Fill">
             <VerticalStackLayout Spacing="0">
 
                 <!-- White Area Container cho input fields -->
-                <Frame Margin="10,0,10,0"
-                       Padding="10"
-                       CornerRadius="12"
-                       BackgroundColor="White"
-                       HasShadow="False"
-                       BorderColor="Transparent"
-                       HeightRequest="190">
+                <Border Margin="10,0,10,0"
+                        Padding="10"
+                        BackgroundColor="White"
+                        Stroke="Transparent"
+                        StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
 
                         <!-- Row 1: Số thứ tự + Số container -->
@@ -63,12 +64,14 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
-                                       Padding="0"
-                                       HasShadow="False"
-                                       BackgroundColor="White"
-                                       HeightRequest="42">
+                                <Border Stroke="#BFBFBF"
+                                        StrokeThickness="1"
+                                        Padding="0"
+                                        BackgroundColor="White"
+                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Entry x:Name="SttEntry"
                                            Keyboard="Numeric"
                                            Placeholder=""
@@ -76,7 +79,7 @@
                                            TextColor="Black"
                                            FontSize="14"
                                            Margin="12,0"/>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
 
                             <!-- Số container (camera icon ẩn) -->
@@ -85,19 +88,21 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
-                                       Padding="0"
-                                       HasShadow="False"
-                                       BackgroundColor="White"
-                                       HeightRequest="42">
+                                <Border Stroke="#BFBFBF"
+                                        StrokeThickness="1"
+                                        Padding="0"
+                                        BackgroundColor="White"
+                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Entry x:Name="ContainerEntry"
                                            Placeholder=""
                                            BackgroundColor="Transparent"
                                            TextColor="Black"
                                            FontSize="14"
                                            Margin="12,0"/>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
                         </Grid>
 
@@ -109,19 +114,21 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
-                                       Padding="0"
-                                       HasShadow="False"
-                                       BackgroundColor="White"
-                                       HeightRequest="42">
+                                <Border Stroke="#BFBFBF"
+                                        StrokeThickness="1"
+                                        Padding="0"
+                                        BackgroundColor="White"
+                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <DatePicker x:Name="DateEntry"
                                                 Format="dd/MM/yyyy"
                                                 BackgroundColor="Transparent"
                                                 TextColor="Black"
                                                 FontSize="14"
                                                 Margin="8,0"/>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
 
                             <!-- Số seal (camera icon ẩn) -->
@@ -130,33 +137,37 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
-                                       Padding="0"
-                                       HasShadow="False"
-                                       BackgroundColor="White"
-                                       HeightRequest="42">
+                                <Border Stroke="#BFBFBF"
+                                        StrokeThickness="1"
+                                        Padding="0"
+                                        BackgroundColor="White"
+                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Entry x:Name="SealEntry"
                                            Placeholder=""
                                            BackgroundColor="Transparent"
                                            TextColor="Black"
                                            FontSize="14"
                                            Margin="12,0"/>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
                         </Grid>
 
                     </Grid>
-                </Frame>
+                </Border>
 
                 <!-- White Area Container cho thông tin sản phẩm -->
-                <Frame Margin="10,10,10,0"
-                       Padding="10"
-                       CornerRadius="12"
-                       BackgroundColor="White"
-                       HasShadow="False"
-                       BorderColor="Transparent"
-                       HeightRequest="190">
+                <Border Margin="10,10,10,0"
+                        Padding="10"
+                        BackgroundColor="White"
+                        Stroke="Transparent"
+                        StrokeThickness="0"
+                        HeightRequest="190">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
 
                         <!-- Row 1: Tên khách hàng + Tên sản phẩm -->
@@ -167,12 +178,14 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
+                                <Border Stroke="#BFBFBF"
+                                       StrokeThickness="1"
                                        Padding="0"
-                                       HasShadow="False"
                                        BackgroundColor="White"
                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0"
                                                x:Name="CustomerLabel"
@@ -190,7 +203,7 @@
                                             <TapGestureRecognizer Tapped="OnCustomerPickerTapped"/>
                                         </Grid.GestureRecognizers>
                                     </Grid>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
 
                             <!-- Tên sản phẩm -->
@@ -199,12 +212,14 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
+                                <Border Stroke="#BFBFBF"
+                                       StrokeThickness="1"
                                        Padding="0"
-                                       HasShadow="False"
                                        BackgroundColor="White"
                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0"
                                                x:Name="ProductLabel"
@@ -222,7 +237,7 @@
                                             <TapGestureRecognizer Tapped="OnProductPickerTapped"/>
                                         </Grid.GestureRecognizers>
                                     </Grid>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
                         </Grid>
 
@@ -234,12 +249,14 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
+                                <Border Stroke="#BFBFBF"
+                                       StrokeThickness="1"
                                        Padding="0"
-                                       HasShadow="False"
                                        BackgroundColor="White"
                                        HeightRequest="42">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0"
                                                x:Name="ModelLabel"
@@ -257,7 +274,7 @@
                                             <TapGestureRecognizer Tapped="OnModelPickerTapped"/>
                                         </Grid.GestureRecognizers>
                                     </Grid>
-                                </Frame>
+                                </Border>
                             </VerticalStackLayout>
 
                             <!-- Người lập -->
@@ -266,33 +283,199 @@
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="Black"/>
-                                <Frame BorderColor="#BFBFBF"
-                                       CornerRadius="8"
+                                <Border Stroke="#BFBFBF"
+                                       StrokeThickness="1"
                                        Padding="0"
-                                       HasShadow="False"
                                        BackgroundColor="White"
                                        HeightRequest="42">
-                                    <Entry x:Name="CreatorEntry"
-                                           BackgroundColor="Transparent"
-                                           TextColor="Black"
-                                           FontSize="14"
-                                           Margin="12,0"/>
-                                </Frame>
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0"
+                                               x:Name="CreatorLabel"
+                                               Text="Chọn người lập"
+                                               TextColor="#9E9E9E"
+                                               FontSize="14"
+                                               VerticalOptions="Center"
+                                               Margin="12,0"/>
+                                        <Image Grid.Column="1"
+                                               Source="dropdown_icon.svg"
+                                               WidthRequest="20"
+                                               HeightRequest="20"
+                                               Margin="0,0,10,0"
+                                               VerticalOptions="Center"/>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnCreatorPickerTapped"/>
+                                        </Grid.GestureRecognizers>
+                                    </Grid>
+                                </Border>
                             </VerticalStackLayout>
                         </Grid>
 
                     </Grid>
-                </Frame>
+                </Border>
+
+                <!-- Ảnh chụp (3 mục) -->
+                <Border Margin="10,10,10,0"
+                        Padding="12"
+                        BackgroundColor="White"
+                        Stroke="Transparent"
+                        StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                        <Label Grid.Row="0"
+                               Text="Hình ảnh"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="Black"/>
+
+                        <!-- 4 ảnh trên 1 hàng với tỷ lệ 9:16 -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*,5,*,5,*,5,*" RowSpacing="8">
+                            <!-- Ảnh 1 -->
+                            <Border Grid.Column="0"
+                                    BackgroundColor="#F5F5F5"
+                                    Stroke="#E0E0E0"
+                                    StrokeThickness="1"
+                                    HeightRequest="160"
+                                    MinimumHeightRequest="160">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Grid>
+                                    <Image x:Name="Photo1Image"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill"/>
+                                    <VerticalStackLayout x:Name="Photo1Placeholder"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Spacing="4">
+                                        <Image Source="camera_placeholder.png"
+                                               WidthRequest="20"
+                                               HeightRequest="20"/>
+                                        <Label Text="Chụp ảnh"
+                                               FontSize="8"
+                                               TextColor="#9E9E9E"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPhoto1Tapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- Ảnh 2 -->
+                            <Border Grid.Column="2"
+                                    BackgroundColor="#F5F5F5"
+                                    Stroke="#E0E0E0"
+                                    StrokeThickness="1"
+                                    HeightRequest="160"
+                                    MinimumHeightRequest="160">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Grid>
+                                    <Image x:Name="Photo2Image"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill"/>
+                                    <VerticalStackLayout x:Name="Photo2Placeholder"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Spacing="4">
+                                        <Image Source="camera_placeholder.png"
+                                               WidthRequest="20"
+                                               HeightRequest="20"/>
+                                        <Label Text="Chụp ảnh"
+                                               FontSize="8"
+                                               TextColor="#9E9E9E"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPhoto2Tapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- Ảnh 3 -->
+                            <Border Grid.Column="4"
+                                    BackgroundColor="#F5F5F5"
+                                    Stroke="#E0E0E0"
+                                    StrokeThickness="1"
+                                    HeightRequest="160"
+                                    MinimumHeightRequest="160">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Grid>
+                                    <Image x:Name="Photo3Image"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill"/>
+                                    <VerticalStackLayout x:Name="Photo3Placeholder"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Spacing="4">
+                                        <Image Source="camera_placeholder.png"
+                                               WidthRequest="20"
+                                               HeightRequest="20"/>
+                                        <Label Text="Chụp ảnh"
+                                               FontSize="8"
+                                               TextColor="#9E9E9E"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPhoto3Tapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- Ảnh 4 -->
+                            <Border Grid.Column="6"
+                                    BackgroundColor="#F5F5F5"
+                                    Stroke="#E0E0E0"
+                                    StrokeThickness="1"
+                                    HeightRequest="160"
+                                    MinimumHeightRequest="160">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <Grid>
+                                    <Image x:Name="Photo4Image"
+                                           Aspect="AspectFill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill"/>
+                                    <VerticalStackLayout x:Name="Photo4Placeholder"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       Spacing="4">
+                                        <Image Source="camera_placeholder.png"
+                                               WidthRequest="20"
+                                               HeightRequest="20"/>
+                                        <Label Text="Chụp ảnh"
+                                               FontSize="8"
+                                               TextColor="#9E9E9E"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPhoto4Tapped"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
 
                 <!-- Bảng dữ liệu -->
-                <Frame x:Name="TableContainerFrame"
+                <Border x:Name="TableContainerFrame"
                        Margin="10,10,10,10"
                        Padding="10"
-                       CornerRadius="12"
                        BackgroundColor="White"
-                       HasShadow="False"
-                       BorderColor="Transparent"
+                       Stroke="Transparent"
+                       StrokeThickness="0"
                        VerticalOptions="Start">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
                     <Grid RowDefinitions="Auto,*" VerticalOptions="Start">
                         <Label Grid.Row="0"
                                Text="Bảng dữ liệu"
@@ -302,7 +485,7 @@
                                Margin="0,0,0,8"/>
 
                         <!-- Frozen Headers Grid Structure -->
-                        <Grid Grid.Row="1" VerticalOptions="FillAndExpand">
+                        <Grid Grid.Row="1" VerticalOptions="Fill">
                             <!-- Main scrollable data grid -->
                             <ScrollView x:Name="MainScrollView"
                                         Orientation="Both"
@@ -342,7 +525,7 @@
                                      MinimumHeightRequest="32"/>
                         </Grid>
                     </Grid>
-                </Frame>
+                </Border>
 
             </VerticalStackLayout>
         </ScrollView>
@@ -357,7 +540,7 @@
             <!-- Button Gradient (Đỏ - Cam) -->
             <Border StrokeThickness="0"
                     MinimumHeightRequest="60"
-                    HorizontalOptions="FillAndExpand"
+                    HorizontalOptions="Fill"
                     VerticalOptions="Center">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="30"/>

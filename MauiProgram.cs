@@ -3,21 +3,14 @@ using CommunityToolkit.Maui;
 using OfficeOpenXml;
 using ScanPackage;
 using BarcodeScanning;
+using Plugin.CloudFirestore;
 
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        // EPPlus 8+: dùng API mới - chọn 1 trong 3 kiểu dưới đây
-
-        // 1) Non-commercial cá nhân:
-        ExcelPackage.License.SetNonCommercialPersonal("Vo Nguyen Duc Tri");
-
-        // hoặc 2) Non-commercial tổ chức:
-        // ExcelPackage.License.SetNonCommercialOrganization("<Tên tổ chức>");
-
-        // hoặc 3) Commercial (nếu có key):
-        // ExcelPackage.License.SetCommercial("<LicenseKey>");
+        // EPPlus license context for older versions
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
         var builder = MauiApp.CreateBuilder();
         builder
@@ -33,7 +26,23 @@ public static class MauiProgram
 #if ANDROID
         // Register Android OCR service
         builder.Services.AddSingleton<IOcrService, AndroidOcrService>();
+        
+        // Initialize Firebase
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("=== INITIALIZING FIREBASE ===");
+            // Firebase auto-initializes when accessing CrossCloudFirestore.Current.Instance
+            var firestore = Plugin.CloudFirestore.CrossCloudFirestore.Current.Instance;
+            System.Diagnostics.Debug.WriteLine($"Firebase initialized successfully: {firestore != null}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Firebase initialization error: {ex.Message}");
+        }
 #endif
+
+        // Register CloudProductService
+        builder.Services.AddSingleton<CloudProductService>();
 
         return builder.Build();
     }

@@ -42,7 +42,7 @@
             <Image Source="logo_thilogi.svg"
                    WidthRequest="125"
                    HeightRequest="22"
-                   Margin="0,60,0,0"
+                   Margin="0,20,0,0"
                    HorizontalOptions="Center"/>
 
         </VerticalStackLayout>
