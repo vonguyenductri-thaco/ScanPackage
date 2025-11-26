@@ -54,11 +54,15 @@ public partial class MainPage : ContentPage
         });
     }
 
-    // Back button thoát app
     protected override bool OnBackButtonPressed()
     {
-        // Thoát ứng dụng
+#if ANDROID
+        var activity = Platform.CurrentActivity as AndroidX.AppCompat.App.AppCompatActivity;
+        activity?.MoveTaskToBack(true);
+#else
+        // Trên các platform khác
         Application.Current?.Quit();
+#endif
         return true;
     }
 
@@ -67,17 +71,13 @@ public partial class MainPage : ContentPage
         try
         {
 #if ANDROID
-            // Get safe area insets for Android
             var safeInsets = GetAndroidSafeAreaInsets();
 
-            // Áp dụng cho Header (notch/status bar ở trên)
             if (safeInsets.Top > 0)
             {
                 HeaderGrid.Padding = new Thickness(10, safeInsets.Top, 10, 0);
                 HeaderGrid.HeightRequest = safeInsets.Top + 44; // 22 (font) + 16 (margin) + 6 (buffer)
             }
-
-            // Áp dụng cho Footer (navigation bar ở dưới)
             if (safeInsets.Bottom > 0)
             {
                 FooterGrid.Padding = new Thickness(10, 20, 10, safeInsets.Bottom + 10);
@@ -102,7 +102,6 @@ public partial class MainPage : ContentPage
 
             var insets = activity.Window.DecorView.RootWindowInsets;
 
-            // Android 11+ (API 30+)
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.R)
             {
                 var windowInsets = insets.GetInsetsIgnoringVisibility(
@@ -119,7 +118,6 @@ public partial class MainPage : ContentPage
             }
             else
             {
-                // Android 10 and below (fallback)
                 var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
 
                 return new Thickness(
