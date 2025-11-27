@@ -899,7 +899,7 @@ public partial class DataEntryPage : ContentPage
                 TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = MauiTextAlignment.Center,
                 VerticalTextAlignment = MauiTextAlignment.Center,
-                Margin = 1,
+                Margin = new Thickness(0.3),
                 HeightRequest = 32,
                 WidthRequest = 120,
                 FontSize = 11
@@ -921,7 +921,7 @@ public partial class DataEntryPage : ContentPage
                 TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = MauiTextAlignment.Center,
                 VerticalTextAlignment = MauiTextAlignment.Center,
-                Margin = 1,
+                Margin = new Thickness(0.3),
                 HeightRequest = 35,
                 WidthRequest = 32,
                 FontSize = 11
@@ -946,7 +946,7 @@ public partial class DataEntryPage : ContentPage
                     FontSize = 12,
                     HeightRequest = 35,
                     WidthRequest = 120,
-                    Margin = 1,
+                    Margin = 0,
                     HorizontalTextAlignment = MauiTextAlignment.Center,
                     VerticalTextAlignment = MauiTextAlignment.Center,
                     TextColor = Color.FromArgb("#212121")
@@ -962,7 +962,7 @@ public partial class DataEntryPage : ContentPage
                     Stroke = Color.FromArgb("#E0E0E0"),
                     StrokeThickness = 1,
                     Padding = 0,
-                    Margin = new Thickness(0.5),
+                    Margin = new Thickness(0.3),
                     BackgroundColor = Colors.White
                 };
                 border.StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(2) };
@@ -1002,7 +1002,7 @@ public partial class DataEntryPage : ContentPage
                 TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = MauiTextAlignment.Center,
                 VerticalTextAlignment = MauiTextAlignment.Center,
-                Margin = 1,
+                Margin = new Thickness(0.3),
                 HeightRequest = 32,
                 FontSize = 11
             };
@@ -1030,7 +1030,7 @@ public partial class DataEntryPage : ContentPage
                 TextColor = Color.FromArgb("#212121"),
                 HorizontalTextAlignment = MauiTextAlignment.Center,
                 VerticalTextAlignment = MauiTextAlignment.Center,
-                Margin = 1,
+                Margin = new Thickness(0.3),
                 WidthRequest = 32,
                 FontSize = 11
             };
@@ -1965,9 +1965,9 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-            // Layout 2x2: 4 ?nh trong Excel
-            // M?i ?nh width t? A d?n 80% c?t C, t? l? 9:16
-
+            System.Diagnostics.Debug.WriteLine("=== BẮT ĐẦU CHÈN ẢNH VÀO EXCEL ===");
+            
+            // Layout 2x2: 4 ảnh trong Excel
             var photos = new[]
             {
                 _photo1Path,
@@ -1978,52 +1978,128 @@ public partial class DataEntryPage : ContentPage
 
             var positions = new[]
             {
-                new { StartCol = 1, EndCol = 3, StartRow = 35, EndRow = 54 }, // A35:C54 - ?nh 1 (h�ng 1, c?t 1)
-                new { StartCol = 4, EndCol = 6, StartRow = 35, EndRow = 54 }, // D35:F54 - ?nh 2 (h�ng 1, c?t 2)
-                new { StartCol = 1, EndCol = 3, StartRow = 55, EndRow = 75 }, // A55:C75 - ?nh 3 (h�ng 2, c?t 1)
-                new { StartCol = 4, EndCol = 6, StartRow = 55, EndRow = 75 }  // D55:F75 - ?nh 4 (h�ng 2, c?t 2)
+                new { StartCol = 0, StartRow = 34 }, // A35 - ảnh 1 (0-based: col=0, row=34)
+                new { StartCol = 3, StartRow = 34 }, // D35 - ảnh 2 
+                new { StartCol = 0, StartRow = 54 }, // A55 - ảnh 3 (0-based: row=54)
+                new { StartCol = 3, StartRow = 54 }  // D55 - ảnh 4
             };
 
-            // Ch�n t?t c? 4 ?nh
+            int photoCount = 0;
+            
+            // Chèn tất cả ảnh có sẵn
             for (int i = 0; i < photos.Length; i++)
             {
                 if (!string.IsNullOrEmpty(photos[i]) && File.Exists(photos[i]))
                 {
                     try
                     {
+                        System.Diagnostics.Debug.WriteLine($"Đang chèn ảnh {i + 1}: {photos[i]}");
+                        
                         var pos = positions[i];
                         
-                        // �?c ?nh t? file
-                        using var imageStream = File.OpenRead(photos[i]!);
+                        // Xử lý ảnh để sửa orientation trước khi chèn
+                        byte[] correctedImageBytes = await CorrectImageOrientation(photos[i]!);
+                        System.Diagnostics.Debug.WriteLine($"Đã xử lý orientation ảnh {i + 1}, size: {correctedImageBytes.Length} bytes");
                         
-                        // Th�m ?nh v�o worksheet
-                        var picture = worksheet.Drawings.AddPicture($"Photo{i + 1}", imageStream);
+                        // Tạo ảnh từ byte array - KHÔNG dùng using để tránh dispose sớm
+                        var imageStream = new MemoryStream(correctedImageBytes);
                         
-                        // �?t v? tr� ?nh theo position
-                        picture.From.Column = pos.StartCol - 1; // 0-based index
-                        picture.From.Row = pos.StartRow - 1;
+                        // Thêm ảnh vào worksheet với tên unique
+                        var pictureName = $"Photo_{i + 1}_{DateTime.Now.Ticks}";
+                        var picture = worksheet.Drawings.AddPicture(pictureName, imageStream);
                         
-                        // K�ch thu?c theo y�u c?u W:300px v?i t? l? 9:16
-                        int maxWidth = 300;  // pixels theo y�u c?u
-                        int maxHeight = (int)(maxWidth * 16.0 / 9.0); // 533 pixels (9:16 ratio ch�nh x�c)
+                        // Đặt vị trí ảnh
+                        picture.From.Column = pos.StartCol;
+                        picture.From.Row = pos.StartRow;
+                        
+                        // Kích thước cố định
+                        int maxWidth = 280;  // Giảm một chút để tránh overlap
+                        int maxHeight = (int)(maxWidth * 16.0 / 9.0);
                         
                         picture.SetSize(maxWidth, maxHeight);
                         
-                        // �?t ch? d? kh�ng resize khi thay d?i cell
+                        // Đặt chế độ không resize khi thay đổi cell
                         picture.EditAs = OfficeOpenXml.Drawing.eEditAs.Absolute;
                         
+                        photoCount++;
+                        System.Diagnostics.Debug.WriteLine($"Đã chèn thành công ảnh {i + 1} tại vị trí ({pos.StartCol}, {pos.StartRow})");
 
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-
+                        System.Diagnostics.Debug.WriteLine($"Lỗi khi chèn ảnh {i + 1}: {ex.Message}");
                     }
                 }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ảnh {i + 1} không tồn tại hoặc path rỗng: {photos[i]}");
+                }
             }
+            
+            System.Diagnostics.Debug.WriteLine($"=== HOÀN THÀNH CHÈN {photoCount} ẢNH VÀO EXCEL ===");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Lỗi tổng quát khi chèn ảnh: {ex.Message}");
+        }
+    }
+
+    private async Task<byte[]> CorrectImageOrientation(string imagePath)
+    {
+        try
+        {
+            // Đọc ảnh từ file
+            byte[] originalBytes = await File.ReadAllBytesAsync(imagePath);
+            
+#if ANDROID
+            // Sử dụng Android Bitmap để xử lý orientation
+            using var bitmap = await Android.Graphics.BitmapFactory.DecodeByteArrayAsync(originalBytes, 0, originalBytes.Length);
+            if (bitmap == null) return originalBytes;
+
+            // Đọc EXIF data để lấy orientation
+            var exif = new Android.Media.ExifInterface(imagePath);
+            var orientation = exif.GetAttributeInt(Android.Media.ExifInterface.TagOrientation, 1);
+
+            // Xác định góc xoay cần thiết
+            int rotationAngle = 0;
+            switch (orientation)
+            {
+                case 6: // ORIENTATION_ROTATE_90
+                    rotationAngle = 90;
+                    break;
+                case 3: // ORIENTATION_ROTATE_180
+                    rotationAngle = 180;
+                    break;
+                case 8: // ORIENTATION_ROTATE_270
+                    rotationAngle = 270;
+                    break;
+                default:
+                    // Không cần xoay (orientation = 1 là normal)
+                    return originalBytes;
+            }
+
+            // Tạo matrix để xoay ảnh
+            var matrix = new Android.Graphics.Matrix();
+            matrix.PostRotate(rotationAngle);
+
+            // Tạo bitmap mới đã được xoay
+            using var rotatedBitmap = Android.Graphics.Bitmap.CreateBitmap(
+                bitmap, 0, 0, bitmap.Width, bitmap.Height, matrix, true);
+
+            // Chuyển bitmap thành byte array
+            using var stream = new MemoryStream();
+            await rotatedBitmap.CompressAsync(Android.Graphics.Bitmap.CompressFormat.Jpeg!, 90, stream);
+            
+            return stream.ToArray();
+#else
+            // Trên các platform khác, trả về ảnh gốc
+            return originalBytes;
+#endif
         }
         catch (Exception)
         {
-
+            // Nếu có lỗi, trả về ảnh gốc
+            return await File.ReadAllBytesAsync(imagePath);
         }
     }
 }
