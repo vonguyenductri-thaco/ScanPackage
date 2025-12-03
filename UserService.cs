@@ -19,7 +19,7 @@ public class UserService
         try
         {
             _firestore = CrossCloudFirestore.Current.Instance;
-            
+
             if (_firestore == null)
             {
                 throw new Exception("CrossCloudFirestore.Current.Instance is null - Firebase not initialized");
@@ -54,16 +54,16 @@ public class UserService
                     // Manual parsing để handle lowercase field names
                     var rawData = document.Data;
                     var user = new UserData();
-                    
+
                     if (rawData.TryGetValue("msnv", out var msnvValue))
                         user.Msnv = msnvValue?.ToString() ?? "";
                     if (rawData.TryGetValue("name", out var nameValue))
                         user.Name = nameValue?.ToString() ?? "";
                     if (rawData.TryGetValue("position", out var positionValue))
                         user.Position = positionValue?.ToString() ?? "";
-                    
-                    if (!string.IsNullOrEmpty(user.Msnv) && 
-                        !string.IsNullOrEmpty(user.Name) && 
+
+                    if (!string.IsNullOrEmpty(user.Msnv) &&
+                        !string.IsNullOrEmpty(user.Name) &&
                         !string.IsNullOrEmpty(user.Position))
                     {
                         _users.Add(user);
@@ -92,11 +92,11 @@ public class UserService
     }
 
     /// <summary>
-    /// Get user display names (Name - Position)
+    /// Get user display names (Name - MSNV)
     /// </summary>
     public List<string> GetUserDisplayNames()
     {
-        return _users.Select(u => $"{u.Name} - {u.Position}").OrderBy(x => x).ToList();
+        return _users.Select(u => $"{u.Name} - {u.Msnv}").OrderBy(x => x).ToList();
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class UserService
     /// </summary>
     public UserData? GetUserByDisplayName(string displayName)
     {
-        return _users.FirstOrDefault(u => $"{u.Name} - {u.Position}" == displayName);
+        return _users.FirstOrDefault(u => $"{u.Name} - {u.Msnv}" == displayName);
     }
 
     /// <summary>

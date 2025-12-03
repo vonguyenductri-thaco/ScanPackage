@@ -24,7 +24,7 @@ public partial class DataEntryPage : ContentPage
 {
     private readonly int _rows;
     private readonly int _cols;
-    
+
     // Loading overlay helpers
     private void ShowLoading(string message = "Đang xử lý...")
     {
@@ -34,7 +34,7 @@ public partial class DataEntryPage : ContentPage
             {
                 var loadingMessage = this.FindByName<Label>("LoadingMessage");
                 var loadingOverlay = this.FindByName<ContentView>("LoadingOverlay");
-                
+
                 if (loadingMessage != null)
                     loadingMessage.Text = message;
                 if (loadingOverlay != null)
@@ -46,7 +46,7 @@ public partial class DataEntryPage : ContentPage
             }
         });
     }
-    
+
     private void HideLoading()
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -301,7 +301,7 @@ public partial class DataEntryPage : ContentPage
         if (sender is Picker picker && picker.SelectedItem is string selected)
         {
             _selectedCustomer = selected;
-            
+
             // Reset và load lại Product picker
             _selectedProduct = null;
             _selectedModel = null;
@@ -317,7 +317,7 @@ public partial class DataEntryPage : ContentPage
         if (sender is Picker picker && picker.SelectedItem is string selected)
         {
             _selectedProduct = selected;
-            
+
             // Reset và load lại Model picker
             _selectedModel = null;
             if (!string.IsNullOrEmpty(_selectedCustomer))
@@ -354,7 +354,7 @@ public partial class DataEntryPage : ContentPage
                 await ProductDataService.Instance.LoadDataAsync();
             }
             // CustomerPicker.ItemsSource = ProductDataService.Instance.GetCustomers(); // Removed - using Label instead
-            
+
             // Load Creator data
             if (!UserService.Instance.IsLoaded)
             {
@@ -587,7 +587,7 @@ public partial class DataEntryPage : ContentPage
                         if (user != null)
                         {
                             _selectedUser = user;
-                            var displayName = $"{user.Name} - {user.Position}";
+                            var displayName = $"{user.Name} - {user.Msnv}";
                             CreatorLabel.Text = displayName;
                             CreatorLabel.TextColor = Color.FromArgb("#212121");
 
@@ -603,7 +603,7 @@ public partial class DataEntryPage : ContentPage
                                 if (userByName != null)
                                 {
                                     _selectedUser = userByName;
-                                    var displayName = $"{userByName.Name} - {userByName.Position}";
+                                    var displayName = $"{userByName.Name} - {userByName.Msnv}";
                                     CreatorLabel.Text = displayName;
                                     CreatorLabel.TextColor = Color.FromArgb("#212121");
 
@@ -657,7 +657,7 @@ public partial class DataEntryPage : ContentPage
 
             using var package = new ExcelPackage(new FileInfo(excelFilePath));
             var checkSheet = package.Workbook.Worksheets["Phiếu kiểm tra"];
-            
+
             if (checkSheet?.Drawings == null)
             {
 
@@ -679,7 +679,7 @@ public partial class DataEntryPage : ContentPage
                         // Chỉ lấy ảnh trong vùng A35:F75 (vùng ảnh thực tế, bỏ qua logo)
                         var fromRow = picture.From.Row;
                         var fromCol = picture.From.Column;
-                        
+
                         // Kiểm tra ảnh có nằm trong vùng A35:F75 không
                         // Row 35 = index 34, Row 75 = index 74
                         // Column A = 0, Column F = 5
@@ -687,16 +687,16 @@ public partial class DataEntryPage : ContentPage
                         {
                             continue; // Bỏ qua ảnh ngoài vùng (như logo)
                         }
-                        
+
                         var imageBytes = picture.Image.ImageBytes;
                         if (imageBytes != null && imageBytes.Length > 0)
                         {
                             photoCount++;
                             var fileName = $"loaded_photo_{photoCount}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
                             var filePath = IOPath.Combine(tempFolder, fileName);
-                            
+
                             await File.WriteAllBytesAsync(filePath, imageBytes);
-                            
+
                             await MainThread.InvokeOnMainThreadAsync(() =>
                             {
                                 switch (photoCount)
@@ -727,7 +727,7 @@ public partial class DataEntryPage : ContentPage
                                         break;
                                 }
                             });
-                            
+
 
                         }
                     }
@@ -737,7 +737,7 @@ public partial class DataEntryPage : ContentPage
                     }
                 }
             }
-            
+
 
         }
         catch (Exception)
@@ -792,7 +792,7 @@ public partial class DataEntryPage : ContentPage
                     totalSkipped++;
                 }
 
-                seriesIndex++; 
+                seriesIndex++;
             }
 
             // 2) Đổ tiếp vào cột L: L13 đến L60 (tiếp tục index)
@@ -1508,7 +1508,8 @@ public partial class DataEntryPage : ContentPage
                 if (newUser != null && (_selectedUser == null || _selectedUser.Msnv != newUser.Msnv))
                 {
                     _selectedUser = newUser;
-                    CreatorLabel.Text = selected;
+                    var displayName = $"{newUser.Name} - {newUser.Msnv}";
+                    CreatorLabel.Text = displayName;
                     CreatorLabel.TextColor = Color.FromArgb("#212121");
                 }
             }
@@ -1608,7 +1609,7 @@ public partial class DataEntryPage : ContentPage
                 if (metadataChanged || productChanged)
                 {
                     path = IOPath.Combine(FileSystem.AppDataDirectory, baseFileName + ".xlsx");
-                    
+
                     if (File.Exists(_existingFilePath!))
                     {
                         File.Delete(_existingFilePath!);
@@ -1672,7 +1673,7 @@ public partial class DataEntryPage : ContentPage
                         if (templateSheet != null)
                         {
                             var newSheet = pkg.Workbook.Worksheets.Add("Phiếu kiểm tra", templateSheet);
-                            
+
                             // Điền thông tin vào các ô tương ứng
                             var customerCell = newSheet.Cells["D4"];
                             customerCell.Value = _selectedCustomer;  // Tên khách hàng 
@@ -1682,17 +1683,17 @@ public partial class DataEntryPage : ContentPage
                             productCell.Value = _selectedProduct;   // Tên Products
                             productCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             productCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                            
+
                             var modelCell = newSheet.Cells["D6"];
                             modelCell.Value = _selectedModel;     // Model
                             modelCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             modelCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                            
+
                             var dateCell = newSheet.Cells["D9"];
                             dateCell.Value = DateEntry.Date.ToString("dd/MM/yyyy"); // Ngày kiểm tra
                             dateCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             dateCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                            
+
                             var sttCell = newSheet.Cells["D8"];
                             sttCell.Value = sttPart;            // Số thứ tự
                             sttCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -1702,12 +1703,12 @@ public partial class DataEntryPage : ContentPage
                             contCell.Value = contPart;           // Số container
                             contCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             contCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                            
+
                             var sealCell = newSheet.Cells["L7"];
                             sealCell.Value = sealPart;           // Số seal
                             sealCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             sealCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-                            
+
                             var userCell = newSheet.Cells["L9"];
                             userCell.Value = _selectedUser?.Name; // Nhân viên kiểm tra
                             userCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
@@ -1966,12 +1967,12 @@ public partial class DataEntryPage : ContentPage
         try
         {
             System.Diagnostics.Debug.WriteLine("=== BẮT ĐẦU CHÈN ẢNH VÀO EXCEL ===");
-            
+
             // Layout 2x2: 4 ảnh trong Excel
             var photos = new[]
             {
                 _photo1Path,
-                _photo2Path, 
+                _photo2Path,
                 _photo3Path,
                 _photo4Path
             };
@@ -1985,7 +1986,7 @@ public partial class DataEntryPage : ContentPage
             };
 
             int photoCount = 0;
-            
+
             // Chèn tất cả ảnh có sẵn
             for (int i = 0; i < photos.Length; i++)
             {
@@ -1994,33 +1995,33 @@ public partial class DataEntryPage : ContentPage
                     try
                     {
                         System.Diagnostics.Debug.WriteLine($"Đang chèn ảnh {i + 1}: {photos[i]}");
-                        
+
                         var pos = positions[i];
-                        
+
                         // Xử lý ảnh để sửa orientation trước khi chèn
                         byte[] correctedImageBytes = await CorrectImageOrientation(photos[i]!);
                         System.Diagnostics.Debug.WriteLine($"Đã xử lý orientation ảnh {i + 1}, size: {correctedImageBytes.Length} bytes");
-                        
+
                         // Tạo ảnh từ byte array - KHÔNG dùng using để tránh dispose sớm
                         var imageStream = new MemoryStream(correctedImageBytes);
-                        
+
                         // Thêm ảnh vào worksheet với tên unique
                         var pictureName = $"Photo_{i + 1}_{DateTime.Now.Ticks}";
                         var picture = worksheet.Drawings.AddPicture(pictureName, imageStream);
-                        
+
                         // Đặt vị trí ảnh
                         picture.From.Column = pos.StartCol;
                         picture.From.Row = pos.StartRow;
-                        
+
                         // Kích thước cố định
-                        int maxWidth = 280;  // Giảm một chút để tránh overlap
+                        int maxWidth = 320;  // Giảm một chút để tránh overlap
                         int maxHeight = (int)(maxWidth * 16.0 / 9.0);
-                        
+
                         picture.SetSize(maxWidth, maxHeight);
-                        
+
                         // Đặt chế độ không resize khi thay đổi cell
                         picture.EditAs = OfficeOpenXml.Drawing.eEditAs.Absolute;
-                        
+
                         photoCount++;
                         System.Diagnostics.Debug.WriteLine($"Đã chèn thành công ảnh {i + 1} tại vị trí ({pos.StartCol}, {pos.StartRow})");
 
@@ -2035,7 +2036,7 @@ public partial class DataEntryPage : ContentPage
                     System.Diagnostics.Debug.WriteLine($"Ảnh {i + 1} không tồn tại hoặc path rỗng: {photos[i]}");
                 }
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"=== HOÀN THÀNH CHÈN {photoCount} ẢNH VÀO EXCEL ===");
         }
         catch (Exception ex)
@@ -2050,7 +2051,7 @@ public partial class DataEntryPage : ContentPage
         {
             // Đọc ảnh từ file
             byte[] originalBytes = await File.ReadAllBytesAsync(imagePath);
-            
+
 #if ANDROID
             // Sử dụng Android Bitmap để xử lý orientation
             using var bitmap = await Android.Graphics.BitmapFactory.DecodeByteArrayAsync(originalBytes, 0, originalBytes.Length);
@@ -2089,7 +2090,7 @@ public partial class DataEntryPage : ContentPage
             // Chuyển bitmap thành byte array
             using var stream = new MemoryStream();
             await rotatedBitmap.CompressAsync(Android.Graphics.Bitmap.CompressFormat.Jpeg!, 90, stream);
-            
+
             return stream.ToArray();
 #else
             // Trên các platform khác, trả về ảnh gốc

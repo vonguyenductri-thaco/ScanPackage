@@ -164,7 +164,7 @@
                         BackgroundColor="White"
                         Stroke="Transparent"
                         StrokeThickness="0"
-                        HeightRequest="190">
+                        HeightRequest="175">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="12"/>
                     </Border.StrokeShape>
@@ -294,7 +294,6 @@
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0"
                                                x:Name="CreatorLabel"
-                                               Text="Chọn người lập"
                                                TextColor="#9E9E9E"
                                         FontSize="14"
                                                VerticalOptions="Center"
@@ -335,136 +334,140 @@
                         <!-- 4 ảnh trên 1 hàng với tỷ lệ 9:16 -->
                         <Grid Grid.Row="1" ColumnDefinitions="*,5,*,5,*,5,*" RowSpacing="8">
                             <!-- Ảnh 1 -->
-                            <Border Grid.Column="0"
-                                    BackgroundColor="#F5F5F5"
-                                    Stroke="#E0E0E0"
-                                    StrokeThickness="1"
-                                    HeightRequest="160"
-                                    MinimumHeightRequest="160">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8"/>
-                                </Border.StrokeShape>
-                                <Grid>
-                                    <Image x:Name="Photo1Image"
-                                           Aspect="AspectFill"
-                                           HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"
-                                           IsVisible="False"/>
-                                    <VerticalStackLayout x:Name="Photo1Placeholder"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       Spacing="4">
-                                        <Image Source="camera_placeholder.png"
+                            <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                <Border BackgroundColor="#F5F5F5"
+                                        Stroke="#E0E0E0"
+                                        StrokeThickness="1"
+                                        HeightRequest="175"
+                                        MinimumHeightRequest="175">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+                                    <Grid>
+                                        <Image x:Name="Photo1Image"
+                                               Aspect="AspectFill"
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill"
+                                               IsVisible="False"/>
+                                        <Image x:Name="Photo1Placeholder"
+                                               Source="camera_placeholder.png"
                                                WidthRequest="20"
-                                               HeightRequest="20"/>
-                                        <Label Text="Container sau khi dọn dẹp"
-                                               FontSize="8"
-                                               TextColor="#9E9E9E"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnPhoto1Tapped"/>
-                                </Border.GestureRecognizers>
-                            </Border>
+                                               HeightRequest="20"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPhoto1Tapped"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <Label Text="Container sau khi dọn dẹp"
+                                       FontSize="12"
+                                       TextColor="Black"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
 
                             <!-- Ảnh 2 -->
-                            <Border Grid.Column="2"
-                                    BackgroundColor="#F5F5F5"
-                                    Stroke="#E0E0E0"
-                                    StrokeThickness="1"
-                                    HeightRequest="160"
-                                    MinimumHeightRequest="160">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8"/>
-                                </Border.StrokeShape>
-                                <Grid>
-                                    <Image x:Name="Photo2Image"
-                                           Aspect="AspectFill"
-                                           HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"
-                                           IsVisible="False"/>
-                                    <VerticalStackLayout x:Name="Photo2Placeholder"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       Spacing="4">
-                                        <Image Source="camera_placeholder.png"
+                            <VerticalStackLayout Grid.Column="2" Spacing="8">
+                                <Border BackgroundColor="#F5F5F5"
+                                        Stroke="#E0E0E0"
+                                        StrokeThickness="1"
+                                        HeightRequest="175"
+                                        MinimumHeightRequest="175">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+                                    <Grid>
+                                        <Image x:Name="Photo2Image"
+                                               Aspect="AspectFill"
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill"
+                                               IsVisible="False"/>
+                                        <Image x:Name="Photo2Placeholder"
+                                               Source="camera_placeholder.png"
                                                WidthRequest="20"
-                                               HeightRequest="20"/>
-                                        <Label Text="Mặt ngoài container"
-                                               FontSize="8"
-                                               TextColor="#9E9E9E"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnPhoto2Tapped"/>
-                                </Border.GestureRecognizers>
-                            </Border>
+                                               HeightRequest="20"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPhoto2Tapped"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <Label Text="Mặt ngoài container"
+                                       FontSize="12"
+                                       TextColor="Black"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
 
                             <!-- Ảnh 3 -->
-                            <Border Grid.Column="4"
-                                    BackgroundColor="#F5F5F5"
-                                    Stroke="#E0E0E0"
-                                    StrokeThickness="1"
-                                    HeightRequest="160"
-                                    MinimumHeightRequest="160">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8"/>
-                                </Border.StrokeShape>
-                                <Grid>
-                                    <Image x:Name="Photo3Image"
-                                           Aspect="AspectFill"
-                                           HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"
-                                           IsVisible="False"/>
-                                    <VerticalStackLayout x:Name="Photo3Placeholder"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       Spacing="4">
-                                        <Image Source="camera_placeholder.png"
+                            <VerticalStackLayout Grid.Column="4" Spacing="8">
+                                <Border BackgroundColor="#F5F5F5"
+                                        Stroke="#E0E0E0"
+                                        StrokeThickness="1"
+                                        HeightRequest="175"
+                                        MinimumHeightRequest="175">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+                                    <Grid>
+                                        <Image x:Name="Photo3Image"
+                                               Aspect="AspectFill"
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill"
+                                               IsVisible="False"/>
+                                        <Image x:Name="Photo3Placeholder"
+                                               Source="camera_placeholder.png"
                                                WidthRequest="20"
-                                               HeightRequest="20"/>
-                                        <Label Text="Container sau khi đóng hàng"
-                                               FontSize="8"
-                                               TextColor="#9E9E9E"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnPhoto3Tapped"/>
-                                </Border.GestureRecognizers>
-                            </Border>
+                                               HeightRequest="20"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPhoto3Tapped"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <Label Text="Container sau khi đóng hàng"
+                                       FontSize="12"
+                                       TextColor="Black"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
 
                             <!-- Ảnh 4 -->
-                            <Border Grid.Column="6"
-                                    BackgroundColor="#F5F5F5"
-                                    Stroke="#E0E0E0"
-                                    StrokeThickness="1"
-                                    HeightRequest="160"
-                                    MinimumHeightRequest="160">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8"/>
-                                </Border.StrokeShape>
-                                <Grid>
-                                    <Image x:Name="Photo4Image"
-                                           Aspect="AspectFill"
-                                           HorizontalOptions="Fill"
-                                           VerticalOptions="Fill"
-                                           IsVisible="False"/>
-                                    <VerticalStackLayout x:Name="Photo4Placeholder"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       Spacing="4">
-                                        <Image Source="camera_placeholder.png"
+                            <VerticalStackLayout Grid.Column="6" Spacing="8">
+                                <Border BackgroundColor="#F5F5F5"
+                                        Stroke="#E0E0E0"
+                                        StrokeThickness="1"
+                                        HeightRequest="175"
+                                        MinimumHeightRequest="175">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+                                    <Grid>
+                                        <Image x:Name="Photo4Image"
+                                               Aspect="AspectFill"
+                                               HorizontalOptions="Fill"
+                                               VerticalOptions="Fill"
+                                               IsVisible="False"/>
+                                        <Image x:Name="Photo4Placeholder"
+                                               Source="camera_placeholder.png"
                                                WidthRequest="20"
-                                               HeightRequest="20"/>
-                                        <Label Text="Seal"
-                                               FontSize="8"
-                                               TextColor="#9E9E9E"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnPhoto4Tapped"/>
-                                </Border.GestureRecognizers>
-                            </Border>
+                                               HeightRequest="20"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPhoto4Tapped"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <Label Text="Số Seal"
+                                       FontSize="12"
+                                       TextColor="Black"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
                         </Grid>
                     </Grid>
                 </Border>
@@ -559,7 +562,7 @@
                     <TapGestureRecognizer Tapped="OnExportClicked"/>
                 </Border.GestureRecognizers>
 
-                <Label Text="Hoàn thành &amp; Xuất Excel"
+                <Label Text="Lưu"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="White"
@@ -578,13 +581,13 @@
                 HorizontalOptions="Center" 
                 VerticalOptions="Center"
                 Spacing="20">
-                
+
                 <ActivityIndicator 
                     IsRunning="True"
                     Color="White"
                     WidthRequest="60"
                     HeightRequest="60"/>
-                
+
                 <Label 
                     x:Name="LoadingMessage"
                     Text="Đang xử lý..."
