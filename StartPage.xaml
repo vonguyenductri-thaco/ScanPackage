@@ -4,11 +4,11 @@
              x:Class="ScanPackage.StartPage"
              Title="Start up"
              BackgroundColor="White">
-    <Grid>
+    <Grid x:Name="RootGrid">
         <VerticalStackLayout VerticalOptions="Center" 
                            HorizontalOptions="Center" 
                            Spacing="30"
-                           Padding="40">
+                           Padding="40,40,40,40">
 
             <Image Source="Resources/Images/icon_app.svg" 
                    WidthRequest="120" 
