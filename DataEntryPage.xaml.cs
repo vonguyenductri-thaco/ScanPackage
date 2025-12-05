@@ -373,46 +373,80 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
+            // Kiểm tra quyền camera trước khi chụp
+            var cameraStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
+            {
+                cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+                if (cameraStatus != PermissionStatus.Granted)
+                {
+                    await DisplayAlert("Quyền camera", "Ứng dụng cần quyền camera để chụp ảnh. Vui lòng cấp quyền trong Cài đặt.", "OK");
+                    return;
+                }
+            }
+
+            // Kiểm tra quyền storage cho Android 11+
+            var storageStatus = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
+            if (storageStatus != PermissionStatus.Granted)
+            {
+                storageStatus = await Permissions.RequestAsync<Permissions.StorageWrite>();
+            }
+
             if (MediaPicker.Default.IsCaptureSupported)
             {
-                var photo = await MediaPicker.Default.CapturePhotoAsync();
+                var mediaPickerOptions = new MediaPickerOptions
+                {
+                    Title = $"Chụp ảnh {photoIndex}"
+                };
+
+                var photo = await MediaPicker.Default.CapturePhotoAsync(mediaPickerOptions);
                 if (photo != null)
                 {
+                    // Sử dụng AppDataDirectory thay vì external storage để tránh vấn đề scoped storage
                     var folder = FileSystem.AppDataDirectory;
                     var fileName = $"photo_{photoIndex}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
                     var targetPath = IOPath.Combine(folder, fileName);
+
+                    // Đảm bảo thư mục tồn tại
+                    Directory.CreateDirectory(folder);
 
                     using var sourceStream = await photo.OpenReadAsync();
                     using var targetStream = File.Create(targetPath);
                     await sourceStream.CopyToAsync(targetStream);
 
-                    switch (photoIndex)
+                    // Cập nhật UI
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        case 1:
-                            _photo1Path = targetPath;
-                            Photo1Image.IsVisible = true;
-                            Photo1Placeholder.IsVisible = false;
-                            Photo1Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 2:
-                            _photo2Path = targetPath;
-                            Photo2Image.IsVisible = true;
-                            Photo2Placeholder.IsVisible = false;
-                            Photo2Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 3:
-                            _photo3Path = targetPath;
-                            Photo3Image.IsVisible = true;
-                            Photo3Placeholder.IsVisible = false;
-                            Photo3Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 4:
-                            _photo4Path = targetPath;
-                            Photo4Image.IsVisible = true;
-                            Photo4Placeholder.IsVisible = false;
-                            Photo4Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                    }
+                        switch (photoIndex)
+                        {
+                            case 1:
+                                _photo1Path = targetPath;
+                                Photo1Image.IsVisible = true;
+                                Photo1Placeholder.IsVisible = false;
+                                Photo1Image.Source = ImageSource.FromFile(targetPath);
+                                break;
+                            case 2:
+                                _photo2Path = targetPath;
+                                Photo2Image.IsVisible = true;
+                                Photo2Placeholder.IsVisible = false;
+                                Photo2Image.Source = ImageSource.FromFile(targetPath);
+                                break;
+                            case 3:
+                                _photo3Path = targetPath;
+                                Photo3Image.IsVisible = true;
+                                Photo3Placeholder.IsVisible = false;
+                                Photo3Image.Source = ImageSource.FromFile(targetPath);
+                                break;
+                            case 4:
+                                _photo4Path = targetPath;
+                                Photo4Image.IsVisible = true;
+                                Photo4Placeholder.IsVisible = false;
+                                Photo4Image.Source = ImageSource.FromFile(targetPath);
+                                break;
+                        }
+                    });
+
+                    System.Diagnostics.Debug.WriteLine($"📸 Đã chụp ảnh {photoIndex}: {targetPath}");
                 }
             }
             else
@@ -420,9 +454,10 @@ public partial class DataEntryPage : ContentPage
                 await DisplayAlert("Lỗi", "Camera không được hỗ trợ trên thiết bị này.", "OK");
             }
         }
-        catch
+        catch (Exception ex)
         {
-            await DisplayAlert("Lỗi", "Không thể chụp ảnh.", "OK");
+            System.Diagnostics.Debug.WriteLine($"❌ Lỗi chụp ảnh {photoIndex}: {ex.Message}");
+            await DisplayAlert("Lỗi", $"Không thể chụp ảnh: {ex.Message}", "OK");
         }
     }
 
@@ -1954,11 +1989,37 @@ public partial class DataEntryPage : ContentPage
         try
         {
             await ProductDataService.Instance.LoadDataAsync();
-
             await UserService.Instance.LoadUsersAsync();
+            
+            // Kiểm tra quyền camera khi load app
+            await CheckAndRequestPermissions();
         }
         catch
         {
+        }
+    }
+
+    private async Task CheckAndRequestPermissions()
+    {
+        try
+        {
+            // Kiểm tra quyền camera
+            var cameraStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
+            {
+                System.Diagnostics.Debug.WriteLine(" Yêu cầu quyền camera...");
+            }
+
+            // Kiểm tra quyền storage (cho Android 11+)
+            var storageStatus = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
+            if (storageStatus != PermissionStatus.Granted)
+            {
+                System.Diagnostics.Debug.WriteLine(" Yêu cầu quyền storage...");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($" Lỗi kiểm tra quyền: {ex.Message}");
         }
     }
 
