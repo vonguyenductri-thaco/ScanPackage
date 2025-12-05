@@ -5,6 +5,8 @@
 		<TargetFrameworks>net9.0-android</TargetFrameworks>
 		<TargetPlatformVersion>35</TargetPlatformVersion>
 
+		<PublishTrimmed>true</PublishTrimmed>
+
 		<OutputType>Exe</OutputType>
 		<RootNamespace>ScanPackage</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -41,8 +43,8 @@
 		<NoWarn>NU1605</NoWarn>
 
 		<!-- Tắt AOT và linker để tránh lỗi runtime -->
-		<RunAOTCompilation>false</RunAOTCompilation>
-		<AndroidLinkMode>None</AndroidLinkMode>
+		<RunAOTCompilation>true</RunAOTCompilation>
+		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
 
 		<!-- Embed assemblies to apk for simpler deployment on Debug -->
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
@@ -63,11 +65,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-	  <ApplicationDisplayVersion>3.0</ApplicationDisplayVersion>
+	  <ApplicationDisplayVersion>4.0</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-	  <ApplicationDisplayVersion>3.0</ApplicationDisplayVersion>
+	  <ApplicationDisplayVersion>4.0</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<!-- Tài nguyên MAUI -->
