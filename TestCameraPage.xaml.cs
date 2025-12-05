@@ -146,9 +146,57 @@ public partial class TestCameraPage : ContentPage
                 Title = "Test Camera - Samsung A30"
             };
 
+            // Samsung A30 specific: Add delay before camera call
+#if ANDROID
+            if (Build.MODEL?.ToLower().Contains("a30") == true || Build.MODEL?.ToLower().Contains("sm-a305") == true)
+            {
+                LogDebug("Samsung A30 detected: Adding delay before camera");
+                await Task.Delay(500); // Give Samsung camera app time to initialize
+            }
+#endif
+
             // Step 4: Capture photo
             LogDebug("Step 4: Calling CapturePhotoAsync");
-            var photo = await MediaPicker.Default.CapturePhotoAsync(options);
+            
+            // Samsung A30 specific: Try alternative approach if needed
+            FileResult? photo = null;
+            try 
+            {
+                photo = await MediaPicker.Default.CapturePhotoAsync(options);
+                LogDebug("CapturePhotoAsync completed successfully");
+            }
+            catch (Exception cameraEx)
+            {
+                LogDebug($"CapturePhotoAsync failed: {cameraEx.Message}");
+                
+#if ANDROID
+                // Samsung A30 fallback: Try with different approach
+                if (Build.MODEL?.ToLower().Contains("a30") == true || Build.MODEL?.ToLower().Contains("sm-a305") == true)
+                {
+                    LogDebug("Samsung A30: Trying fallback camera approach");
+                    await Task.Delay(1000); // Longer delay for Samsung
+                    
+                    try 
+                    {
+                        // Try again with minimal options
+                        var fallbackOptions = new MediaPickerOptions();
+                        photo = await MediaPicker.Default.CapturePhotoAsync(fallbackOptions);
+                        LogDebug("Samsung A30 fallback successful");
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        LogDebug($"Samsung A30 fallback also failed: {fallbackEx.Message}");
+                        throw new Exception($"Samsung A30 camera error: {cameraEx.Message}. Fallback: {fallbackEx.Message}");
+                    }
+                }
+                else
+                {
+                    throw; // Re-throw original exception for non-Samsung devices
+                }
+#else
+                throw;
+#endif
+            }
             
             if (photo == null)
             {

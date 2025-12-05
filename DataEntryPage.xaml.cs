@@ -402,6 +402,15 @@ public partial class DataEntryPage : ContentPage
                 Title = $"Chụp ảnh {photoIndex}"
             };
 
+            // Samsung A30 specific: Add delay before camera call
+#if ANDROID
+            if (Android.OS.Build.MODEL?.ToLower().Contains("a30") == true || Android.OS.Build.MODEL?.ToLower().Contains("sm-a305") == true)
+            {
+                System.Diagnostics.Debug.WriteLine("[CapturePhoto] Samsung A30 detected: Adding delay before camera");
+                await Task.Delay(500); // Give Samsung camera app time to initialize
+            }
+#endif
+
             var photo = await MediaPicker.Default.CapturePhotoAsync(options);
             if (photo == null)
             {
