@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.TestSafeAreaPage"
+             Title="Test Safe Area"
+             BackgroundColor="LightBlue">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header để test Safe Area Top -->
+        <Grid Grid.Row="0" 
+              x:Name="HeaderGrid"
+              BackgroundColor="Red"
+              MinimumHeightRequest="60">
+            <Label Text="HEADER - Kiểm tra có bị che bởi status bar/notch không?"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+        <!-- Content để hiển thị thông tin Safe Area -->
+        <ScrollView Grid.Row="1" BackgroundColor="White">
+            <VerticalStackLayout Padding="20" Spacing="20">
+                
+                <Label Text="🔍 THÔNG TIN SAFE AREA"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+
+                <Label x:Name="SafeAreaInfoLabel"
+                       Text="Đang tải thông tin Safe Area..."
+                       FontSize="14"
+                       BackgroundColor="LightGray"
+                       Padding="10"/>
+
+                <Label Text="📱 THÔNG TIN THIẾT BỊ"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+
+                <Label x:Name="DeviceInfoLabel"
+                       Text="Đang tải thông tin thiết bị..."
+                       FontSize="14"
+                       BackgroundColor="LightGray"
+                       Padding="10"/>
+
+                <Label Text="🎯 HƯỚNG DẪN"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+
+                <Label Text="• Header (đỏ) không được che bởi status bar/notch&#10;• Footer (xanh) không được che bởi navigation bar&#10;• Nếu bị che = Safe Area chưa hoạt động&#10;• Kiểm tra Output window để xem debug log"
+                       FontSize="12"
+                       BackgroundColor="LightYellow"
+                       Padding="10"/>
+
+                <!-- Spacer để test scroll -->
+                <BoxView HeightRequest="500" Color="Transparent"/>
+                
+                <Label Text="🎉 NẾU BẠN NHÌN THẤY TEXT NÀY = SCROLL HOẠT ĐỘNG TỐT!"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="Green"
+                       HorizontalOptions="Center"/>
+
+                <!-- Test Camera Button -->
+                <Button Text="📷 Test Camera (Samsung A30)"
+                        BackgroundColor="Purple"
+                        TextColor="White"
+                        FontSize="16"
+                        CornerRadius="25"
+                        Margin="20,20,20,0"
+                        Clicked="OnTestCameraClicked"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Footer để test Safe Area Bottom -->
+        <Grid Grid.Row="2" 
+              x:Name="FooterGrid"
+              BackgroundColor="Blue"
+              MinimumHeightRequest="80">
+            <Label Text="FOOTER - Kiểm tra có bị che bởi navigation bar không?"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+    </Grid>
+</ContentPage>

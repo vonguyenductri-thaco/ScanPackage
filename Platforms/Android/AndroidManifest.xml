@@ -2,13 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-	<!-- 🔹 Quyền truy cập camera để quét barcode -->
+	<!-- 🔹 Quyền truy cập camera để quét barcode và chụp ảnh -->
 	<uses-permission android:name="android.permission.CAMERA" />
+	
+	<!-- 🔹 Quyền storage cho Android 10 và thấp hơn -->
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+	                 android:maxSdkVersion="29" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+	                 android:maxSdkVersion="32" />
+	
+	<!-- 🔹 Quyền media cho Android 13+ -->
+	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+	<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
 	<!-- (Giữ lại các quyền mặc định của MAUI) -->
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 
 	<application

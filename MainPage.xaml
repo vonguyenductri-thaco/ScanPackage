@@ -12,13 +12,29 @@
               x:Name="HeaderGrid"
               BackgroundColor="#F8F3F3"
               MinimumHeightRequest="50">
-            <Label Text="Danh sách tệp đã tạo"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   TextColor="Black"
-                   VerticalOptions="End"
-                   HorizontalOptions="Start"
-                   Margin="0,0,0,12"/>
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0"
+                       Text="Danh sách tệp đã tạo"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       VerticalOptions="End"
+                       HorizontalOptions="Start"
+                       Margin="0,0,0,12"/>
+                
+                <!-- Test Button (tạm thởi) -->
+                <Button Grid.Column="1"
+                        Text=" Test"
+                        FontSize="12"
+                        BackgroundColor="Orange"
+                        TextColor="White"
+                        CornerRadius="15"
+                        WidthRequest="60"
+                        HeightRequest="30"
+                        VerticalOptions="End"
+                        Margin="0,0,10,12"
+                        Clicked="OnTestSafeAreaClicked"/>
+            </Grid>
         </Grid>
 
         <!-- Area Component (White rounded container) -->

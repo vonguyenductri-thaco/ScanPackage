@@ -89,42 +89,175 @@ public static class SafeAreaHelper
         {
             var activity = Platform.CurrentActivity;
             if (activity?.Window?.DecorView?.RootWindowInsets == null)
-                return new Thickness(0);
+            {
+                System.Diagnostics.Debug.WriteLine("[SafeAreaHelper] Window or RootWindowInsets is null, using fallback");
+                return GetFallbackSafeAreaInsets();
+            }
 
             var insets = activity.Window.DecorView.RootWindowInsets;
+            var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
 
-            // Android 11+ (API 30+) - Phương pháp mới
+            System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] Device: {Android.OS.Build.Manufacturer} {Android.OS.Build.Model}, Android {Android.OS.Build.VERSION.Release} (API {(int)Android.OS.Build.VERSION.SdkInt})");
+
+        
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.R)
             {
-                var windowInsets = insets.GetInsetsIgnoringVisibility(
-                    WindowInsets.Type.SystemBars());
+                var windowInsets = insets.GetInsetsIgnoringVisibility(WindowInsets.Type.SystemBars());
+                var cutoutInsets = insets.GetInsetsIgnoringVisibility(WindowInsets.Type.DisplayCutout());
 
-                var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
+                
+                var combinedTop = Math.Max(windowInsets.Top, cutoutInsets.Top);
+                var combinedBottom = Math.Max(windowInsets.Bottom, cutoutInsets.Bottom);
 
-                return new Thickness(
+                var result = new Thickness(
                     windowInsets.Left / density,
-                    windowInsets.Top / density,
+                    combinedTop / density,
                     windowInsets.Right / density,
-                    windowInsets.Bottom / density
+                    combinedBottom / density
                 );
+
+                System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] API 30+ insets: {result.Left}, {result.Top}, {result.Right}, {result.Bottom}");
+                return result;
             }
             else
             {
-                // Android 10 và thấp hơn - Phương pháp cũ
-                var density = activity.Resources?.DisplayMetrics?.Density ?? 1;
-
-                return new Thickness(
+               
+                var baseResult = new Thickness(
                     insets.SystemWindowInsetLeft / density,
                     insets.SystemWindowInsetTop / density,
                     insets.SystemWindowInsetRight / density,
                     insets.SystemWindowInsetBottom / density
                 );
+
+               
+                var optimizedResult = OptimizeForSamsung(baseResult, activity);
+                
+                System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] API 28-29 insets: {optimizedResult.Left}, {optimizedResult.Top}, {optimizedResult.Right}, {optimizedResult.Bottom}");
+                return optimizedResult;
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] GetAndroidSafeAreaInsets error: {ex.Message}");
-            return new Thickness(0);
+            return GetFallbackSafeAreaInsets();
+        }
+    }
+
+    private static Thickness OptimizeForSamsung(Thickness baseInsets, Android.App.Activity activity)
+    {
+        try
+        {
+            var manufacturer = Android.OS.Build.Manufacturer?.ToLower() ?? "";
+            var model = Android.OS.Build.Model?.ToLower() ?? "";
+
+            if (!manufacturer.Contains("samsung"))
+                return baseInsets;
+
+            System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] Samsung device detected: {model}");
+
+            // Samsung A30 specific optimizations
+            if (model.Contains("a30") || model.Contains("sm-a305"))
+            {
+                // Samsung A30 có Infinity-U display (notch giọt nước)
+                // Status bar height thường là 24dp, nhưng với notch có thể cao hơn
+                var displayMetrics = activity.Resources?.DisplayMetrics;
+                var density = displayMetrics?.Density ?? 1;
+
+                // Nếu top inset quá nhỏ, có thể là do One UI không báo cáo đúng
+                if (baseInsets.Top < 30) // 30dp là minimum cho Samsung A30
+                {
+                    var adjustedTop = Math.Max(baseInsets.Top, 44); // Force minimum 44dp
+                    System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] Samsung A30: Adjusted top from {baseInsets.Top} to {adjustedTop}");
+                    
+                    return new Thickness(
+                        baseInsets.Left,
+                        adjustedTop,
+                        baseInsets.Right,
+                        Math.Max(baseInsets.Bottom, 24) // Ensure minimum bottom padding
+                    );
+                }
+            }
+
+            // General Samsung optimizations
+            // Samsung devices sometimes report incorrect bottom insets
+            if (baseInsets.Bottom == 0)
+            {
+                // Check if navigation bar is visible
+                var hasNavigationBar = HasNavigationBar(activity);
+                if (hasNavigationBar)
+                {
+                    var adjustedBottom = 48; // Standard navigation bar height
+                    System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] Samsung: Added navigation bar padding {adjustedBottom}");
+                    
+                    return new Thickness(
+                        baseInsets.Left,
+                        baseInsets.Top,
+                        baseInsets.Right,
+                        adjustedBottom
+                    );
+                }
+            }
+
+            return baseInsets;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] OptimizeForSamsung error: {ex.Message}");
+            return baseInsets;
+        }
+    }
+
+    private static bool HasNavigationBar(Android.App.Activity activity)
+    {
+        try
+        {
+            var resources = activity.Resources;
+            var resourceId = resources.GetIdentifier("config_showNavigationBar", "bool", "android");
+            
+            if (resourceId > 0)
+            {
+                return resources.GetBoolean(resourceId);
+            }
+
+            // Fallback: check if device has hardware keys
+            var hasMenuKey = Android.Views.ViewConfiguration.Get(activity).HasPermanentMenuKey;
+            var hasBackKey = Android.Views.KeyCharacterMap.DeviceHasKey(Android.Views.Keycode.Back);
+            
+            return !(hasMenuKey || hasBackKey);
+        }
+        catch
+        {
+            return true; // Assume has navigation bar if can't determine
+        }
+    }
+
+    private static Thickness GetFallbackSafeAreaInsets()
+    {
+        try
+        {
+            var manufacturer = Android.OS.Build.Manufacturer?.ToLower() ?? "";
+            var model = Android.OS.Build.Model?.ToLower() ?? "";
+
+            System.Diagnostics.Debug.WriteLine($"[SafeAreaHelper] Using fallback for {manufacturer} {model}");
+
+            // Samsung A30 fallback values
+            if (manufacturer.Contains("samsung") && (model.Contains("a30") || model.Contains("sm-a305")))
+            {
+                return new Thickness(0, 44, 0, 48); // Top: notch + status bar, Bottom: navigation bar
+            }
+
+            // General Samsung fallback
+            if (manufacturer.Contains("samsung"))
+            {
+                return new Thickness(0, 36, 0, 48);
+            }
+
+            // Generic fallback
+            return new Thickness(0, 24, 0, 48);
+        }
+        catch
+        {
+            return new Thickness(0, 24, 0, 48);
         }
     }
 #endif

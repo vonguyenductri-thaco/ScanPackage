@@ -450,6 +450,13 @@ public partial class MainPage : ContentPage
     {
         await Navigation.PushAsync(new SetupPage());
     }
+
+    // ==================== TEST SAFE AREA (TẠM THỜI) ====================
+
+    private async void OnTestSafeAreaClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new TestSafeAreaPage());
+    }
 }
 
 // ==================== FILE ITEM CLASS ====================

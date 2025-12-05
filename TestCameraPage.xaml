@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ScanPackage.TestCameraPage"
+             Title="Test Camera - Samsung A30"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <Label Text="📷 TEST CAMERA - SAMSUNG A30"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="DarkBlue"/>
+
+            <!-- Device Info -->
+            <Frame BackgroundColor="LightBlue" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📱 THÔNG TIN THIẾT BỊ"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label x:Name="DeviceInfoLabel"
+                           Text="Đang tải..."
+                           FontSize="14"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Permission Status -->
+            <Frame BackgroundColor="LightYellow" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔐 TRẠNG THÁI QUYỀN TRUY CẬP"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <Label x:Name="PermissionStatusLabel"
+                           Text="Đang kiểm tra..."
+                           FontSize="14"/>
+                    <Button Text="🔄 Kiểm tra lại Permissions"
+                            BackgroundColor="Orange"
+                            TextColor="White"
+                            Clicked="OnCheckPermissionsClicked"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Camera Test -->
+            <Frame BackgroundColor="LightGreen" Padding="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="📸 TEST CHỤP ẢNH"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    
+                    <Button Text="📷 Chụp ảnh test"
+                            BackgroundColor="Green"
+                            TextColor="White"
+                            FontSize="16"
+                            Clicked="OnCaptureTestPhotoClicked"/>
+
+                    <!-- Photo Preview -->
+                    <Frame BackgroundColor="Gray" 
+                           HeightRequest="200"
+                           WidthRequest="200"
+                           HorizontalOptions="Center">
+                        <Image x:Name="TestPhotoImage"
+                               Aspect="AspectFit"
+                               IsVisible="False"/>
+                        <Label x:Name="TestPhotoPlaceholder"
+                               Text="📷\nChưa có ảnh"
+                               FontSize="24"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </Frame>
+
+                    <Label x:Name="PhotoStatusLabel"
+                           Text="Nhấn nút 'Chụp ảnh test' để bắt đầu"
+                           FontSize="12"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Debug Log -->
+            <Frame BackgroundColor="LightGray" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🐛 DEBUG LOG"
+                           FontSize="16"
+                           FontAttributes="Bold"/>
+                    <ScrollView HeightRequest="200">
+                        <Label x:Name="DebugLogLabel"
+                               Text="Debug log sẽ hiển thị ở đây..."
+                               FontSize="12"
+                               FontFamily="Courier"
+                               BackgroundColor="Black"
+                               TextColor="LimeGreen"
+                               Padding="10"/>
+                    </ScrollView>
+                    <Button Text="🗑️ Xóa Log"
+                            BackgroundColor="Red"
+                            TextColor="White"
+                            Clicked="OnClearLogClicked"/>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

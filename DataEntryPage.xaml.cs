@@ -132,7 +132,7 @@ public partial class DataEntryPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            await Task.Delay(100);
+            await Task.Delay(300); 
             ApplySafeAreaInsets();
             UpdateDuplicateHighlighting();
             SetDynamicTableHeight();
@@ -202,22 +202,28 @@ public partial class DataEntryPage : ContentPage
         {
 #if ANDROID
             var safeInsets = GetAndroidSafeAreaInsets();
+            
+            // Debug logging
+            System.Diagnostics.Debug.WriteLine($"[DataEntryPage] Safe Area - Top: {safeInsets.Top}, Bottom: {safeInsets.Bottom}, Left: {safeInsets.Left}, Right: {safeInsets.Right}");
 
             if (safeInsets.Top > 0)
             {
                 HeaderGrid.Padding = new Thickness(10, safeInsets.Top, 10, 0);
                 HeaderGrid.HeightRequest = safeInsets.Top + 44;
+                System.Diagnostics.Debug.WriteLine($"[DataEntryPage] Applied Header padding: Top={safeInsets.Top}");
             }
 
             if (safeInsets.Bottom > 0)
             {
                 FooterGrid.Padding = new Thickness(10, 20, 10, safeInsets.Bottom + 10);
                 FooterGrid.HeightRequest = safeInsets.Bottom + 90;
+                System.Diagnostics.Debug.WriteLine($"[DataEntryPage] Applied Footer padding: Bottom={safeInsets.Bottom}");
             }
 #endif
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"[DataEntryPage] Safe Area error: {ex.Message}");
         }
     }
 
@@ -373,56 +379,149 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-            if (MediaPicker.Default.IsCaptureSupported)
+            // Kiểm tra permissions trước
+            var cameraPermission = await CheckAndRequestCameraPermission();
+            if (!cameraPermission)
             {
-                var photo = await MediaPicker.Default.CapturePhotoAsync();
-                if (photo != null)
+                await DisplayAlert("Lỗi", "Cần quyền truy cập camera để chụp ảnh.", "OK");
+                return;
+            }
+
+            // Kiểm tra hỗ trợ camera
+            if (!MediaPicker.Default.IsCaptureSupported)
+            {
+                await DisplayAlert("Lỗi", "Camera không được hỗ trợ trên thiết bị này.", "OK");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] Starting capture for photo {photoIndex}");
+
+            // Cấu hình MediaPicker cho Android 10
+            var options = new MediaPickerOptions
+            {
+                Title = $"Chụp ảnh {photoIndex}"
+            };
+
+            var photo = await MediaPicker.Default.CapturePhotoAsync(options);
+            if (photo == null)
+            {
+                System.Diagnostics.Debug.WriteLine("[CapturePhoto] User cancelled or photo is null");
+                return;
+            }
+
+            // Tạo đường dẫn file
+            var folder = FileSystem.AppDataDirectory;
+            var fileName = $"photo_{photoIndex}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+            var targetPath = IOPath.Combine(folder, fileName);
+
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] Saving to: {targetPath}");
+
+            // Copy file với error handling tốt hơn
+            using (var sourceStream = await photo.OpenReadAsync())
+            using (var targetStream = File.Create(targetPath))
+            {
+                await sourceStream.CopyToAsync(targetStream);
+            }
+
+            // Verify file was created
+            if (!File.Exists(targetPath))
+            {
+                throw new Exception("File không được tạo thành công");
+            }
+
+            var fileInfo = new FileInfo(targetPath);
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] File created: {fileInfo.Length} bytes");
+
+            // Update UI
+            UpdatePhotoUI(photoIndex, targetPath);
+
+            // Cleanup temp file
+            // photo.Dispose(); // FileResult doesn't have Dispose method
+        }
+        catch (PermissionException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] Permission error: {ex.Message}");
+            await DisplayAlert("Lỗi quyền truy cập", "Cần cấp quyền camera và storage để chụp ảnh.", "OK");
+        }
+        catch (FeatureNotSupportedException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] Feature not supported: {ex.Message}");
+            await DisplayAlert("Lỗi", "Tính năng camera không được hỗ trợ trên thiết bị này.", "OK");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CapturePhoto] Error: {ex.Message}");
+            await DisplayAlert("Lỗi", $"Không thể chụp ảnh:\n{ex.Message}", "OK");
+        }
+    }
+
+    private async Task<bool> CheckAndRequestCameraPermission()
+    {
+        try
+        {
+            // Kiểm tra camera permission
+            var cameraStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
+            {
+                cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+            }
+
+            // Kiểm tra storage permission cho Android 10 và thấp hơn
+#if ANDROID
+            if (Android.OS.Build.VERSION.SdkInt <= Android.OS.BuildVersionCodes.Q) // Android 10 và thấp hơn
+            {
+                var storageStatus = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
+                if (storageStatus != PermissionStatus.Granted)
                 {
-                    var folder = FileSystem.AppDataDirectory;
-                    var fileName = $"photo_{photoIndex}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
-                    var targetPath = IOPath.Combine(folder, fileName);
-
-                    using var sourceStream = await photo.OpenReadAsync();
-                    using var targetStream = File.Create(targetPath);
-                    await sourceStream.CopyToAsync(targetStream);
-
-                    switch (photoIndex)
+                    storageStatus = await Permissions.RequestAsync<Permissions.StorageWrite>();
+                    if (storageStatus != PermissionStatus.Granted)
                     {
-                        case 1:
-                            _photo1Path = targetPath;
-                            Photo1Image.IsVisible = true;
-                            Photo1Placeholder.IsVisible = false;
-                            Photo1Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 2:
-                            _photo2Path = targetPath;
-                            Photo2Image.IsVisible = true;
-                            Photo2Placeholder.IsVisible = false;
-                            Photo2Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 3:
-                            _photo3Path = targetPath;
-                            Photo3Image.IsVisible = true;
-                            Photo3Placeholder.IsVisible = false;
-                            Photo3Image.Source = ImageSource.FromFile(targetPath);
-                            break;
-                        case 4:
-                            _photo4Path = targetPath;
-                            Photo4Image.IsVisible = true;
-                            Photo4Placeholder.IsVisible = false;
-                            Photo4Image.Source = ImageSource.FromFile(targetPath);
-                            break;
+                        System.Diagnostics.Debug.WriteLine("[Permission] Storage write permission denied");
+                        return false;
                     }
                 }
             }
-            else
-            {
-                await DisplayAlert("Lỗi", "Camera không được hỗ trợ trên thiết bị này.", "OK");
-            }
+#endif
+
+            var result = cameraStatus == PermissionStatus.Granted;
+            System.Diagnostics.Debug.WriteLine($"[Permission] Camera permission: {cameraStatus}");
+            return result;
         }
-        catch
+        catch (Exception ex)
         {
-            await DisplayAlert("Lỗi", "Không thể chụp ảnh.", "OK");
+            System.Diagnostics.Debug.WriteLine($"[Permission] Error checking permissions: {ex.Message}");
+            return false;
+        }
+    }
+
+    private void UpdatePhotoUI(int photoIndex, string targetPath)
+    {
+        switch (photoIndex)
+        {
+            case 1:
+                _photo1Path = targetPath;
+                Photo1Image.IsVisible = true;
+                Photo1Placeholder.IsVisible = false;
+                Photo1Image.Source = ImageSource.FromFile(targetPath);
+                break;
+            case 2:
+                _photo2Path = targetPath;
+                Photo2Image.IsVisible = true;
+                Photo2Placeholder.IsVisible = false;
+                Photo2Image.Source = ImageSource.FromFile(targetPath);
+                break;
+            case 3:
+                _photo3Path = targetPath;
+                Photo3Image.IsVisible = true;
+                Photo3Placeholder.IsVisible = false;
+                Photo3Image.Source = ImageSource.FromFile(targetPath);
+                break;
+            case 4:
+                _photo4Path = targetPath;
+                Photo4Image.IsVisible = true;
+                Photo4Placeholder.IsVisible = false;
+                Photo4Image.Source = ImageSource.FromFile(targetPath);
+                break;
         }
     }
 
