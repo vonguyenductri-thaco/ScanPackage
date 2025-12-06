@@ -750,26 +750,11 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-
-
-
             int totalDataCells = _rows * _cols;
             int seriesIndex = 0;
-            int totalSeriesWithData = 0;
-            int totalFilled = 0;
-            int totalSkipped = 0;
-            int totalOverflow = 0;
 
-            // Đếm tổng số series có dữ liệu
-            for (int i = 0; i < totalDataCells; i++)
-            {
-                if (!string.IsNullOrWhiteSpace(GetSeriesValueByIndex(i)))
-                    totalSeriesWithData++;
-            }
-
-
-            // 1) Đổ vào cột H: H13 đến H60 (giữ nguyên vị trí theo index)
-            for (int row = 13; row <= 60 && seriesIndex < totalDataCells; row++)
+            // 1) Đổ vào cột H: H13 đến H75 (bao gồm cả Page 1 và Page 2)
+            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
 
@@ -784,19 +769,13 @@ public partial class DataEntryPage : ContentPage
                     okCell.Value = "OK";
                     okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-
-                    totalFilled++;
-                }
-                else
-                {
-                    totalSkipped++;
                 }
 
                 seriesIndex++;
             }
 
-            // 2) Đổ tiếp vào cột L: L13 đến L60 (tiếp tục index)
-            for (int row = 13; row <= 60 && seriesIndex < totalDataCells; row++)
+            // 2) Đổ tiếp vào cột L: L13 đến L75 (bao gồm cả Page 1 và Page 2)
+            for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
 
@@ -811,41 +790,14 @@ public partial class DataEntryPage : ContentPage
                     okCell.Value = "OK";
                     okCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     okCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-
-                    totalFilled++;
-                }
-                else
-                {
-                    totalSkipped++;
                 }
 
-                seriesIndex++; // QUAN TRỌNG: Vẫn tăng index dù ô trống
+                seriesIndex++;
             }
-
-            // Đếm số bị thừa (nếu còn dữ liệu sau khi hết L60)
-            if (seriesIndex < totalDataCells)
-            {
-                totalOverflow = totalDataCells - seriesIndex;
-                for (int i = seriesIndex; i < totalDataCells; i++)
-                {
-                    if (!string.IsNullOrWhiteSpace(GetSeriesValueByIndex(i)))
-                    {
-
-                    }
-                }
-            }
-
-
-
-
-
-
-
-
         }
-        catch
+        catch (Exception)
         {
-
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -1966,8 +1918,6 @@ public partial class DataEntryPage : ContentPage
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine("=== BẮT ĐẦU CHÈN ẢNH VÀO EXCEL ===");
-
             // Layout 2x2: 4 ảnh trong Excel
             var photos = new[]
             {
@@ -1994,13 +1944,10 @@ public partial class DataEntryPage : ContentPage
                 {
                     try
                     {
-                        System.Diagnostics.Debug.WriteLine($"Đang chèn ảnh {i + 1}: {photos[i]}");
-
                         var pos = positions[i];
 
                         // Xử lý ảnh để sửa orientation trước khi chèn
                         byte[] correctedImageBytes = await CorrectImageOrientation(photos[i]!);
-                        System.Diagnostics.Debug.WriteLine($"Đã xử lý orientation ảnh {i + 1}, size: {correctedImageBytes.Length} bytes");
 
                         // Tạo ảnh từ byte array - KHÔNG dùng using để tránh dispose sớm
                         var imageStream = new MemoryStream(correctedImageBytes);
@@ -2023,25 +1970,17 @@ public partial class DataEntryPage : ContentPage
                         picture.EditAs = OfficeOpenXml.Drawing.eEditAs.Absolute;
 
                         photoCount++;
-                        System.Diagnostics.Debug.WriteLine($"Đã chèn thành công ảnh {i + 1} tại vị trí ({pos.StartCol}, {pos.StartRow})");
-
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Lỗi khi chèn ảnh {i + 1}: {ex.Message}");
+                        // Xử lý lỗi im lặng
                     }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Ảnh {i + 1} không tồn tại hoặc path rỗng: {photos[i]}");
                 }
             }
-
-            System.Diagnostics.Debug.WriteLine($"=== HOÀN THÀNH CHÈN {photoCount} ẢNH VÀO EXCEL ===");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Lỗi tổng quát khi chèn ảnh: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 

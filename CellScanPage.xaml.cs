@@ -86,12 +86,11 @@ public partial class CellScanPage : ContentPage
             if (cameraEnabledProperty != null && cameraEnabledProperty.CanWrite)
             {
                 cameraEnabledProperty.SetValue(BarcodeView, false);
-                System.Diagnostics.Debug.WriteLine("Camera disabled successfully");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"DisableCamera error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -111,9 +110,9 @@ public partial class CellScanPage : ContentPage
             }
 #endif
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Safe area error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -154,9 +153,8 @@ public partial class CellScanPage : ContentPage
                 );
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"GetAndroidSafeAreaInsets error: {ex.Message}");
             return new Thickness(0);
         }
     }
@@ -204,9 +202,9 @@ public partial class CellScanPage : ContentPage
             ApplyZoom(_currentScale);
             UpdateCustomThumbPosition();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Zoom error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -231,12 +229,10 @@ public partial class CellScanPage : ContentPage
             var thumbPosition = normalizedValue * trackWidth;
 
             CustomThumb.TranslationX = thumbPosition;
-
-            System.Diagnostics.Debug.WriteLine($"Thumb Position: {thumbPosition:F2}, Slider Value: {sliderValue:F2}, Track Width: {trackWidth:F2}");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"UpdateCustomThumbPosition error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -259,9 +255,9 @@ public partial class CellScanPage : ContentPage
                 ZoomSlider.Value = _currentScale;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Pinch error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -273,19 +269,17 @@ public partial class CellScanPage : ContentPage
             if (zoomProperty != null && zoomProperty.CanWrite)
             {
                 zoomProperty.SetValue(BarcodeView, (float)zoomFactor);
-                System.Diagnostics.Debug.WriteLine($"Applied RequestZoomFactor: {zoomFactor:F2}");
             }
             else
             {
                 BarcodeView.AnchorX = 0.5;
                 BarcodeView.AnchorY = 0.5;
                 BarcodeView.Scale = zoomFactor;
-                System.Diagnostics.Debug.WriteLine($"Applied Scale: {zoomFactor:F2}");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"ApplyZoom error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 
@@ -308,9 +302,9 @@ public partial class CellScanPage : ContentPage
                 FlashCircle.Fill = _isFlashOn ? Color.FromArgb("#F9C41C") : Colors.White;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            System.Diagnostics.Debug.WriteLine($"Flash error: {ex.Message}");
+            // Xử lý lỗi im lặng
         }
     }
 }
