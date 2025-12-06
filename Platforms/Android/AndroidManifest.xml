@@ -2,19 +2,44 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-	<!-- 🔹 Quyền truy cập camera để quét barcode -->
+	<!-- 🔹 Quyền camera và storage cho Android 11+ -->
 	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+	                 android:maxSdkVersion="32" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+	                 android:maxSdkVersion="32" />
+	
+	<!-- Android 13+ (API 33+) - Scoped Storage -->
+	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+	<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+	
+	<!-- Camera feature -->
+	<uses-feature android:name="android.hardware.camera" 
+	              android:required="false" />
+	<uses-feature android:name="android.hardware.camera.autofocus" 
+	              android:required="false" />
 
 	<!-- (Giữ lại các quyền mặc định của MAUI) -->
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 
 	<application
 		android:allowBackup="true"
 		android:icon="@mipmap/appicon"
 		android:roundIcon="@mipmap/appicon_round"
-		android:supportsRtl="true">
+		android:supportsRtl="true"
+		android:requestLegacyExternalStorage="true">
+		
+		<!-- FileProvider for camera capture on Android 11+ -->
+		<provider
+			android:name="androidx.core.content.FileProvider"
+			android:authorities="${applicationId}.fileprovider"
+			android:exported="false"
+			android:grantUriPermissions="true">
+			<meta-data
+				android:name="android.support.FILE_PROVIDER_PATHS"
+				android:resource="@xml/file_paths" />
+		</provider>
 	</application>
 </manifest>

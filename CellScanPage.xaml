@@ -7,196 +7,191 @@
              BackgroundColor="Black">
 
     <Grid>
-        <BoxView Color="Black" />
+        <!-- Camera view full screen -->
+        <barcode:CameraView x:Name="BarcodeView"
+                            OnDetectionFinished="OnBarcodesDetected"
+                            CameraEnabled="True"
+                            CameraFacing="Back"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand">
+            <barcode:CameraView.GestureRecognizers>
+                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+            </barcode:CameraView.GestureRecognizers>
+        </barcode:CameraView>
 
-        <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+        <!-- Custom overlay with rounded cutout (25% opacity) -->
+        <GraphicsView x:Name="OverlayGraphics"
+                      VerticalOptions="FillAndExpand"
+                      HorizontalOptions="FillAndExpand"
+                      InputTransparent="True" />
 
-            <Grid Grid.Row="0"
-                  BackgroundColor="#CC000000"
-                  Padding="16,40,16,16"
-                  ColumnDefinitions="Auto,*,Auto">
+        <!-- Main Layout -->
+        <Grid RowDefinitions="Auto,*,Auto">
 
-                <Button Grid.Column="0"
-                        Text="←"
-                        FontSize="28"
-                        TextColor="White"
-                        BackgroundColor="Transparent"
-                        Padding="0"
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        Clicked="OnCloseClicked"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"/>
+            <!-- ==================== HEADER (giống DataEntryPage) ==================== -->
+            <Grid Grid.Row="0" 
+                  x:Name="HeaderGrid"
+                  BackgroundColor="Transparent"
+                  MinimumHeightRequest="50">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <!-- Back Button -->
+                    <Border Grid.Column="0"
+                            BackgroundColor="Transparent"
+                            Padding="4"
+                            StrokeThickness="0"
+                            VerticalOptions="End"
+                            Margin="0,15,23,11">
+                        <Image Source="back_icon.svg"
+                               MinimumWidthRequest="24"
+                               MinimumHeightRequest="24"
+                               Aspect="AspectFit"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCloseClicked"/>
+                        </Border.GestureRecognizers>
+                    </Border>
 
-                <Label Grid.Column="1"
-                       Text="Quét"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       TextColor="White"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Start"
-                       Margin="8,0,0,0"/>
+                    <!-- Title "Quét" -->
+                    <Label Grid.Column="1"
+                           Text="Quét"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           VerticalOptions="End"
+                           HorizontalOptions="Start"
+                           Margin="0,0,0,12"/>
 
-                <Button Grid.Column="2"
-                        x:Name="FlashButton"
-                        BackgroundColor="#40FFFFFF"
-                        CornerRadius="20"
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        Padding="8"
-                        Clicked="OnFlashClicked"
-                        HorizontalOptions="End"
-                        VerticalOptions="Center"
-                        ImageSource="flashlight.png"/>
+                    <!-- Flash Button - Circle with icon -->
+                    <Grid Grid.Column="2"
+                          WidthRequest="36"
+                          HeightRequest="36"
+                          VerticalOptions="End"
+                          HorizontalOptions="End"
+                          Margin="0,0,13,11">
+
+                        <Ellipse x:Name="FlashCircle"
+                                 Fill="White"
+                                 WidthRequest="36"
+                                 HeightRequest="36"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"/>
+
+                        <Image Source="flashlight.svg"
+                               WidthRequest="24"
+                               HeightRequest="24"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFlashClicked"/>
+                        </Grid.GestureRecognizers>
+                    </Grid>
+                </Grid>
             </Grid>
 
+            <!-- ==================== CAMERA VIEW WITH CROP OVERLAY ==================== -->
             <Grid Grid.Row="1"
-                  Padding="40"
-                  VerticalOptions="Center">
+                  VerticalOptions="FillAndExpand"
+                  HorizontalOptions="FillAndExpand">
 
+                <!-- Transparent crop area (scanning region) -->
                 <Frame BackgroundColor="Transparent"
                        BorderColor="Transparent"
-                       CornerRadius="16"
+                       CornerRadius="20"
                        Padding="0"
                        HasShadow="False"
-                       HeightRequest="200"
-                       WidthRequest="320"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       IsClippedToBounds="True">
-
-                    <barcode:CameraView x:Name="BarcodeView"
-                                        OnDetectionFinished="OnBarcodesDetected"
-                                        CameraEnabled="True"
-                                        CameraFacing="Back"
-                                        VerticalOptions="FillAndExpand"
-                                        HorizontalOptions="FillAndExpand">
-                        <barcode:CameraView.GestureRecognizers>
-                            <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
-                        </barcode:CameraView.GestureRecognizers>
-                    </barcode:CameraView>
-                </Frame>
-
-                <Frame BackgroundColor="Transparent"
-                       BorderColor="White"
-                       CornerRadius="16"
-                       Padding="0"
-                       HasShadow="False"
-                       HeightRequest="200"
-                       WidthRequest="320"
+                       WidthRequest="372"
+                       HeightRequest="220"
                        HorizontalOptions="Center"
                        VerticalOptions="Center"
                        InputTransparent="True">
 
-                    <Grid InputTransparent="True">
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="4"
-                                 HeightRequest="30"
-                                 HorizontalOptions="Start"
-                                 VerticalOptions="Start"
-                                 InputTransparent="True"/>
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="30"
-                                 HeightRequest="4"
-                                 HorizontalOptions="Start"
-                                 VerticalOptions="Start"
-                                 InputTransparent="True"/>
-
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="4"
-                                 HeightRequest="30"
-                                 HorizontalOptions="End"
-                                 VerticalOptions="Start"
-                                 InputTransparent="True"/>
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="30"
-                                 HeightRequest="4"
-                                 HorizontalOptions="End"
-                                 VerticalOptions="Start"
-                                 InputTransparent="True"/>
-
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="4"
-                                 HeightRequest="30"
-                                 HorizontalOptions="Start"
-                                 VerticalOptions="End"
-                                 InputTransparent="True"/>
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="30"
-                                 HeightRequest="4"
-                                 HorizontalOptions="Start"
-                                 VerticalOptions="End"
-                                 InputTransparent="True"/>
-
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="4"
-                                 HeightRequest="30"
-                                 HorizontalOptions="End"
-                                 VerticalOptions="End"
-                                 InputTransparent="True"/>
-                        <BoxView Color="#00FF00"
-                                 WidthRequest="30"
-                                 HeightRequest="4"
-                                 HorizontalOptions="End"
-                                 VerticalOptions="End"
-                                 InputTransparent="True"/>
-                    </Grid>
+                    <!-- White border frame for crop area -->
+                    <Border Stroke="White"
+                            StrokeThickness="3"
+                            BackgroundColor="Transparent"
+                            InputTransparent="True">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="20"/>
+                        </Border.StrokeShape>
+                    </Border>
                 </Frame>
-
-                <!-- Instruction Text -->
-                <Label Text="Đưa mã vạch vào khung"
-                       TextColor="White"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       BackgroundColor="#80000000"
-                       Padding="16,8"
-                       HorizontalOptions="Center"
-                       VerticalOptions="End"
-                       Margin="0,0,0,20"/>
             </Grid>
 
+            <!-- ==================== ZOOM SLIDER (BOTTOM) ==================== -->
             <Grid Grid.Row="2"
-                  BackgroundColor="#CC000000"
-                  Padding="24,20,24,40"
-                  ColumnDefinitions="Auto,*,Auto">
+                  BackgroundColor="Transparent"
+                  Padding="43,0,43,65"
+                  ColumnDefinitions="Auto,*,Auto"
+                  HeightRequest="90">
 
-                <Label Grid.Column="0"
-                       Text="−"
-                       FontSize="32"
-                       TextColor="White"
+                <!-- Minus Button (decorative only) -->
+                <Image Grid.Column="0"
+                       Source="minus.svg"
+                       WidthRequest="24"
+                       HeightRequest="24"
                        VerticalOptions="Center"
                        HorizontalOptions="Center"
-                       Margin="0,0,12,0"/>
+                       Margin="0,0,20,0"
+                       InputTransparent="True"/>
 
-                <Slider Grid.Column="1"
-                        x:Name="ZoomSlider"
-                        Minimum="1"
-                        Maximum="5"
-                        Value="1"
-                        MinimumTrackColor="#007AFF"
-                        MaximumTrackColor="#40FFFFFF"
-                        ThumbColor="White"
-                        VerticalOptions="Center"
-                        ValueChanged="OnZoomChanged"/>
+                <!-- Zoom Slider with custom design -->
+                <Grid Grid.Column="1" 
+                      VerticalOptions="Center">
 
-                <Label Grid.Column="2"
-                       Text="+"
-                       FontSize="32"
-                       TextColor="White"
+                    <!-- Track line -->
+                    <BoxView Color="#707070"
+                             HeightRequest="1"
+                             VerticalOptions="Center"
+                             HorizontalOptions="FillAndExpand"
+                             Margin="0"/>
+
+                    <!-- Slider (invisible track, only thumb visible) -->
+                    <Slider x:Name="ZoomSlider"
+                            Minimum="1"
+                            Maximum="5"
+                            Value="1"
+                            MinimumTrackColor="Transparent"
+                            MaximumTrackColor="Transparent"
+                            ThumbColor="Transparent"
+                            VerticalOptions="Center"
+                            ValueChanged="OnZoomChanged"
+                            Margin="-12,0,-12,0"/>
+
+                    <!-- Custom Thumb (2 circles) -->
+                    <Grid x:Name="CustomThumb"
+                          WidthRequest="31"
+                          HeightRequest="31"
+                          HorizontalOptions="Start"
+                          VerticalOptions="Center"
+                          InputTransparent="True">
+
+                        <!-- Outer circle (25% opacity) -->
+                        <Ellipse Fill="#40000000"
+                                 WidthRequest="31"
+                                 HeightRequest="31"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"/>
+
+                        <!-- Inner circle (white) -->
+                        <Ellipse Fill="White"
+                                 WidthRequest="25"
+                                 HeightRequest="25"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"/>
+                    </Grid>
+                </Grid>
+
+                <!-- Plus Button (decorative only) -->
+                <Image Grid.Column="2"
+                       Source="plus.svg"
+                       WidthRequest="24"
+                       HeightRequest="24"
                        VerticalOptions="Center"
                        HorizontalOptions="Center"
-                       Margin="12,0,0,0"/>
+                       Margin="20,0,0,0"
+                       InputTransparent="True"/>
             </Grid>
 
         </Grid>
     </Grid>
 </ContentPage>
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,34 @@
+<svg id="icon_app" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Mask" d="M64,0C14.222,0,0,14.222,0,64s14.258,64,64,64,64-14.222,64-64S113.742,0,64,0Z" transform="translate(0 0.263)"/>
+    </clipPath>
+    <linearGradient id="linear-gradient" y1="0.5" x2="1" y2="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#ec9123"/>
+      <stop offset="1" stop-color="#ed1c24"/>
+    </linearGradient>
+  </defs>
+  <g id="Mask_Group_1" data-name="Mask Group 1" transform="translate(0 -0.263)" clip-path="url(#clip-path)">
+    <rect id="Rectangle_7" data-name="Rectangle 7" width="128" height="128" transform="translate(0 0.263)" fill="url(#linear-gradient)"/>
+  </g>
+  <g id="Group_8" data-name="Group 8" transform="translate(18.413 18.15)">
+    <g id="Group_7" data-name="Group 7">
+      <g id="Group_5" data-name="Group 5">
+        <path id="Path_13" data-name="Path 13" d="M75.379,96.392A1.88,1.88,0,0,1,73.5,94.513V75.379A1.88,1.88,0,0,1,75.379,73.5H94.513a1.879,1.879,0,0,1,0,3.758H77.258V94.513A1.88,1.88,0,0,1,75.379,96.392Z" transform="translate(-73.5 -73.5)" fill="#fff"/>
+        <path id="Path_14" data-name="Path 14" d="M368.6,96.392a1.88,1.88,0,0,1-1.879-1.879V77.258H349.469a1.879,1.879,0,0,1,0-3.758H368.6a1.88,1.88,0,0,1,1.879,1.879V94.513A1.88,1.88,0,0,1,368.6,96.392Z" transform="translate(-278.927 -73.5)" fill="#fff"/>
+        <path id="Path_15" data-name="Path 15" d="M94.513,370.482H75.379A1.88,1.88,0,0,1,73.5,368.6V349.469a1.879,1.879,0,0,1,3.758,0v17.255H94.513a1.879,1.879,0,0,1,0,3.758Z" transform="translate(-73.5 -278.927)" fill="#fff"/>
+      </g>
+      <g id="Group_6" data-name="Group 6" transform="translate(15.757 16.882)">
+        <path id="Path_16" data-name="Path 16" d="M138.279,198.686a1.88,1.88,0,0,1-1.879-1.879V142.779a1.879,1.879,0,1,1,3.758,0v54.028A1.88,1.88,0,0,1,138.279,198.686Z" transform="translate(-136.4 -140.897)" fill="#fff"/>
+        <path id="Path_17" data-name="Path 17" d="M164.6,190.807a1.88,1.88,0,0,1-1.879-1.879v-46.15a1.879,1.879,0,0,1,3.758,0v46.15A1.88,1.88,0,0,1,164.6,190.807Z" transform="translate(-156.126 -140.897)" fill="#fff"/>
+        <path id="Path_18" data-name="Path 18" d="M204.4,190.807a1.88,1.88,0,0,1-1.879-1.879v-46.15a1.879,1.879,0,0,1,3.758,0v46.15A1.88,1.88,0,0,1,204.4,190.807Z" transform="translate(-185.956 -140.897)" fill="#fff"/>
+        <path id="Path_19" data-name="Path 19" d="M230.709,190.807a1.88,1.88,0,0,1-1.879-1.879v-46.15a1.879,1.879,0,1,1,3.758,0v46.15A1.88,1.88,0,0,1,230.709,190.807Z" transform="translate(-205.675 -140.897)" fill="#fff"/>
+        <path id="Path_20" data-name="Path 20" d="M270.509,184.5a1.88,1.88,0,0,1-1.879-1.879v-38.94a1.879,1.879,0,0,1,3.758,0v38.94A1.88,1.88,0,0,1,270.509,184.5Z" transform="translate(-235.505 -141.572)" fill="#fff"/>
+        <path id="Path_21" data-name="Path 21" d="M332.129,187.245a1.88,1.88,0,0,1-1.879-1.879V142.779a1.879,1.879,0,1,1,3.758,0v42.587A1.88,1.88,0,0,1,332.129,187.245Z" transform="translate(-281.688 -140.897)" fill="#fff"/>
+        <path id="Path_22" data-name="Path 22" d="M301.309,180.589a1.88,1.88,0,0,1-1.879-1.879V142.769a1.879,1.879,0,0,1,3.758,0V178.71A1.88,1.88,0,0,1,301.309,180.589Z" transform="translate(-258.589 -140.89)" fill="#fff"/>
+        <path id="Path_23" data-name="Path 23" d="M362.929,184.835a1.88,1.88,0,0,1-1.879-1.879V142.779a1.879,1.879,0,0,1,3.758,0v40.177A1.88,1.88,0,0,1,362.929,184.835Z" transform="translate(-304.772 -140.897)" fill="#fff"/>
+      </g>
+    </g>
+    <path id="Path_24" data-name="Path 24" d="M282.573,293.032a1.873,1.873,0,0,1-1.235-.463l-22.511-19.65a1.879,1.879,0,0,1-.18-2.65l8.031-9.2a1.879,1.879,0,0,1,2.65-.18l12.092,10.554,24.087-26.574a1.883,1.883,0,0,1,2.655-.13l9.049,8.2a1.878,1.878,0,0,1,.13,2.653l-33.376,36.823a1.874,1.874,0,0,1-1.393.616Zm-19.858-21.71,19.705,17.2L313.3,254.46l-6.263-5.679L282.969,275.33a1.878,1.878,0,0,1-2.628.153l-12.065-10.532-5.559,6.368Z" transform="translate(-211.918 -201.476)" fill="#fff"/>
+  </g>
+</svg>

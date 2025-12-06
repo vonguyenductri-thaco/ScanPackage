@@ -7,38 +7,44 @@
     <Grid>
         <VerticalStackLayout VerticalOptions="Center" 
                            HorizontalOptions="Center" 
-                           Spacing="24"
+                           Spacing="30"
                            Padding="40">
-            <Frame HasShadow="True"
-                   CornerRadius="20"
-                   Padding="20"
-                   BackgroundColor="#F5F5F5"
-                   HorizontalOptions="Center">
-                <Image Source="Resources/Images/dotnet_bot.png" 
-                       WidthRequest="120" 
-                       HeightRequest="120"/>
-            </Frame>
-            
-            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+
+            <Image Source="Resources/Images/icon_app.svg" 
+                   WidthRequest="120" 
+                   HeightRequest="120"
+                   HorizontalOptions="Center"/>
+
+            <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
                 <Label Text="Scan Package"
-                       FontSize="28"
+                       FontSize="18"
                        FontAttributes="Bold"
                        TextColor="#212121"
-                       HorizontalOptions="Center"/>
-                <Label Text="Ứng dụng quét và quản lý gói hàng"
-                       FontSize="14"
-                       TextColor="#666"
                        HorizontalOptions="Center"
-                       HorizontalTextAlignment="Center"/>
+                       FontFamily="SegoeUI"/>
+
+                <Label HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       FontSize="18"
+                       TextColor="#666"
+                       FontFamily="SegoeUI">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Ứng dụng quét mã vạch và" />
+                            <Span Text="&#10;" />
+                            <Span Text="quản lý gói hàng" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
             </VerticalStackLayout>
+
+            <!-- Logo THILOGI ở dưới cùng -->
+            <Image Source="logo_thilogi.svg"
+                   WidthRequest="125"
+                   HeightRequest="22"
+                   Margin="0,20,0,0"
+                   HorizontalOptions="Center"/>
+
         </VerticalStackLayout>
     </Grid>
 </ContentPage>
-
-
-
-
-
-
-
-

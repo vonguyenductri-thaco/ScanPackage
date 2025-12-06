@@ -2,136 +2,215 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:ScanPackage"
-             x:Class="ScanPackage.MainPage">
+             x:Class="ScanPackage.MainPage"
+             BackgroundColor="#F8F3F3">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="0">
-        
-        <!-- Header -->
+
+        <!-- Header Component - với Safe Area Top -->
         <Grid Grid.Row="0" 
-              BackgroundColor="#007AFF"
-              Padding="20,16"
-              RowDefinitions="Auto,Auto">
+              x:Name="HeaderGrid"
+              BackgroundColor="#F8F3F3"
+              MinimumHeightRequest="50">
             <Label Text="Danh sách tệp đã tạo"
-                   FontSize="24"
+                   FontSize="22"
                    FontAttributes="Bold"
-                   TextColor="White"
-                   Grid.Row="0"/>
-            <Label Text="Quản lý và chỉnh sửa các file đã tạo"
-                   FontSize="14"
-                   TextColor="#E3F2FD"
-                   Margin="0,4,0,0"
-                   Grid.Row="1"/>
+                   TextColor="Black"
+                   VerticalOptions="End"
+                   HorizontalOptions="Start"
+                   Margin="0,0,0,12"/>
         </Grid>
 
-        <!-- Danh sách file -->
-        <CollectionView Grid.Row="1"
-                        x:Name="FilesView"
-                        ItemsSource="{Binding Files}"
-                        SelectionMode="None"
-                        Margin="16,16,16,0"
-                        EmptyView="Chưa có tệp nào được tạo">
-            
-            <CollectionView.EmptyViewTemplate>
-                <DataTemplate>
-                    <VerticalStackLayout VerticalOptions="Center" 
-                                       HorizontalOptions="Center"
-                                       Spacing="16"
-                                       Margin="40">
-                        <Label Text="📄"
-                               FontSize="64"
-                               HorizontalOptions="Center"
-                               Opacity="0.3"/>
-                        <Label Text="Chưa có tệp nào"
-                               FontSize="18"
-                               TextColor="#999"
-                               HorizontalOptions="Center"/>
-                        <Label Text="Tạo tệp mới để bắt đầu"
-                               FontSize="14"
-                               TextColor="#999"
-                               HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.EmptyViewTemplate>
+        <!-- Area Component (White rounded container) -->
+        <Frame Grid.Row="1"
+               Margin="10,0,10,10"
+               Padding="0"
+               CornerRadius="12"
+               BackgroundColor="White"
+               HasShadow="False"
+               BorderColor="Transparent">
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="local:FileItem">
-                    <Frame Padding="16" 
-                           Margin="0,0,0,12"
-                           BorderColor="#E0E0E0"
-                           HasShadow="True"
-                           CornerRadius="12"
-                           BackgroundColor="White">
-                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
-                            <!-- File info -->
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="0">
-                                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                    <Label Text="{Binding FileName}" 
-                                           FontSize="16"
-                                           FontAttributes="Bold"
-                                           TextColor="#212121"/>
+            <CollectionView x:Name="FilesView"
+                            ItemsSource="{Binding Files}"
+                            SelectionMode="None"
+                            EmptyView="Chưa có tệp nào được tạo">
+
+                <CollectionView.EmptyViewTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout VerticalOptions="Center" 
+                                           HorizontalOptions="Center"
+                                           Spacing="16"
+                                           Margin="40">
+                            <Label Text="📄"
+                                   FontSize="64"
+                                   HorizontalOptions="Center"
+                                   Opacity="0.3"/>
+                            <Label Text="Chưa có tệp nào"
+                                   FontSize="18"
+                                   TextColor="#999"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Tạo tệp mới để bắt đầu"
+                                   FontSize="14"
+                                   TextColor="#999"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.EmptyViewTemplate>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="local:FileItem">
+                        <Grid RowDefinitions="80,Auto" Padding="0">
+
+                            <!-- File Item Box (80px height) -->
+                            <Grid Grid.Row="0" 
+                                  Padding="10,0"
+                                  ColumnDefinitions="*,Auto"
+                                  RowSpacing="6">
+
+                                <!-- File Info (Left side) -->
+                                <VerticalStackLayout Grid.Column="0" 
+                                                   VerticalOptions="Center"
+                                                   Spacing="6"
+                                                   Margin="0,0,16,0">
+                                    <!-- ScrollView ngang cho tên file dài -->
+                                    <ScrollView Orientation="Horizontal"
+                                                HorizontalScrollBarVisibility="Never"
+                                                HeightRequest="24">
+                                        <Label Text="{Binding FileName}" 
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="Black"
+                                               LineBreakMode="NoWrap"
+                                               VerticalOptions="Center"/>
+                                    </ScrollView>
                                     <Label Text="{Binding FileDate, StringFormat='Tạo: {0}'}"
-                                           FontSize="12"
-                                           TextColor="#999"/>
+                                           FontSize="11"
+                                           TextColor="Black"
+                                           Opacity="0.7"/>
                                 </VerticalStackLayout>
-                                <Label Grid.Column="1"
-                                       Text="📄"
-                                       FontSize="24"
-                                       VerticalOptions="Center"
-                                       Margin="8,0,0,0"/>
-                            </Grid>
-                            
-                            <!-- Action buttons -->
-                            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                <Button Grid.Column="0"
-                                        Text="Chỉnh sửa"
-                                        BackgroundColor="#007AFF"
-                                        TextColor="White"
-                                        FontSize="14"
-                                        FontAttributes="Bold"
-                                        CornerRadius="8"
-                                        Padding="12,8"
-                                        Clicked="OnEditClicked"
-                                        CommandParameter="{Binding .}"/>
-                                <Button Grid.Column="1"
-                                        Text="Chia sẻ"
-                                        BackgroundColor="#007AFF"
-                                        TextColor="White"
-                                        FontSize="14"
-                                        FontAttributes="Bold"
-                                        CornerRadius="8"
-                                        Padding="12,8"
-                                        Clicked="OnShareClicked"
-                                        CommandParameter="{Binding .}"/>
-                                <Button Grid.Column="2"
-                                        Text="Xóa"
-                                        BackgroundColor="#007AFF"
-                                        TextColor="White"
-                                        FontSize="14"
-                                        FontAttributes="Bold"
-                                        CornerRadius="8"
-                                        Padding="12,8"
-                                        Clicked="OnDeleteClicked"
-                                        CommandParameter="{Binding .}"/>
-                            </Grid>
-                        </Grid>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
 
-        <!-- Button tạo mới -->
+                                <!-- Icon Buttons (Right side) -->
+                                <HorizontalStackLayout Grid.Column="1"
+                                                     Spacing="12"
+                                                     VerticalOptions="Center">
+
+                                    <!-- Edit Icon Button -->
+                                    <Border BackgroundColor="Transparent"
+                                            Padding="4"
+                                            StrokeThickness="0"
+                                            BindingContext="{Binding .}">
+                                        <Image Source="edit_icon.svg"
+                                               MinimumWidthRequest="24"
+                                               MinimumHeightRequest="24"
+                                               Aspect="AspectFit"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnEditIconTapped"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+
+                                    <!-- Share Icon Button -->
+                                    <Border BackgroundColor="Transparent"
+                                            Padding="4"
+                                            StrokeThickness="0"
+                                            BindingContext="{Binding .}">
+                                        <Image Source="share_icon.svg"
+                                               MinimumWidthRequest="24"
+                                               MinimumHeightRequest="24"
+                                               Aspect="AspectFit"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnShareIconTapped"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+
+                                    <!-- Delete Icon Button -->
+                                    <Border BackgroundColor="Transparent"
+                                            Padding="4"
+                                            StrokeThickness="0"
+                                            BindingContext="{Binding .}">
+                                        <Image Source="delete_icon.svg"
+                                               MinimumWidthRequest="24"
+                                               MinimumHeightRequest="24"
+                                               Aspect="AspectFit"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnDeleteIconTapped"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </HorizontalStackLayout>
+                            </Grid>
+
+                            <!-- Separator Line (20% opacity) -->
+                            <BoxView Grid.Row="1"
+                                     HeightRequest="1"
+                                     BackgroundColor="#707070"
+                                     Opacity="0.2"
+                                     Margin="10,0"
+                                     HorizontalOptions="FillAndExpand"/>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Frame>
+
+        <!-- White Footer Component - với Safe Area Bottom -->
         <Grid Grid.Row="2" 
-              Padding="16,12,16,16"
-              BackgroundColor="White">
-            <Button Text="Tạo mới"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    Clicked="OnCreateClicked"
-                    BackgroundColor="#007AFF"
-                    TextColor="White"
-                    CornerRadius="12"
-                    HeightRequest="56"/>
+              x:Name="FooterGrid"
+              BackgroundColor="White"
+              Padding="10,20,10,20"
+              MinimumHeightRequest="100">
+
+            <!-- Button Gradient (Cam - Đỏ: trái sang phải) -->
+            <Border StrokeThickness="0"
+                    MinimumHeightRequest="60"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="30"/>
+                </Border.StrokeShape>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                        <GradientStop Color="#F7941D" Offset="0.0" />
+                        <GradientStop Color="#ED1C24" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCreateClicked"/>
+                </Border.GestureRecognizers>
+
+                <Label Text="Tạo mới"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       InputTransparent="True"/>
+            </Border>
         </Grid>
+
+        <!-- Loading Overlay -->
+        <ContentView x:Name="LoadingOverlay"
+                     Grid.RowSpan="3"
+                     IsVisible="False"
+                     BackgroundColor="#80000000">
+            <VerticalStackLayout 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                Spacing="20">
+                
+                <ActivityIndicator 
+                    IsRunning="True"
+                    Color="White"
+                    WidthRequest="60"
+                    HeightRequest="60"/>
+                
+                <Label 
+                    x:Name="LoadingMessage"
+                    Text="Đang tải file..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </ContentView>
 
     </Grid>
 </ContentPage>
