@@ -788,7 +788,7 @@ public partial class DataEntryPage : ContentPage
             int totalDataCells = _rows * _cols;
             int seriesIndex = 0;
 
-            // 1) Đổ vào cột H: H13 đến H75 (bao gồm cả Page 1 và Page 2)
+            // 1) Đổ hết cột H: H13 đến H75 (điền hết cột H trước)
             for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
@@ -809,7 +809,7 @@ public partial class DataEntryPage : ContentPage
                 seriesIndex++;
             }
 
-            // 2) Đổ tiếp vào cột L: L13 đến L75 (bao gồm cả Page 1 và Page 2)
+            // 2) Đổ hết cột L: L13 đến L75 (sau khi điền hết cột H)
             for (int row = 13; row <= 75 && seriesIndex < totalDataCells; row++)
             {
                 string seriesValue = GetSeriesValueByIndex(seriesIndex);
