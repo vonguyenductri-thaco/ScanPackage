@@ -65,11 +65,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-	  <ApplicationDisplayVersion>4.0</ApplicationDisplayVersion>
+	  <ApplicationDisplayVersion>5.0</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-	  <ApplicationDisplayVersion>4.0</ApplicationDisplayVersion>
+	  <ApplicationDisplayVersion>5.0</ApplicationDisplayVersion>
 	</PropertyGroup>
 
 	<!-- Tài nguyên MAUI -->

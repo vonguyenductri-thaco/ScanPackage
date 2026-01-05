@@ -26,7 +26,7 @@ public static class MauiProgram
 #if ANDROID
         // Register Android OCR service
         builder.Services.AddSingleton<IOcrService, AndroidOcrService>();
-        
+
         // Initialize Firebase
         try
         {
