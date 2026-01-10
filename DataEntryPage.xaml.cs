@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using IOPath = System.IO.Path;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
@@ -715,10 +716,10 @@ public partial class DataEntryPage : ContentPage
                         var fromRow = picture.From.Row;
                         var fromCol = picture.From.Column;
 
-                        // Kiểm tra ảnh có nằm trong vùng A35:F75 không
-                        // Row 35 = index 34, Row 75 = index 74
+                        // Kiểm tra ảnh có nằm trong vùng A33:F75 không
+                        // Row 33 = index 32, Row 75 = index 74
                         // Column A = 0, Column F = 5
-                        if (fromRow < 34 || fromRow > 74 || fromCol < 0 || fromCol > 5)
+                        if (fromRow < 32 || fromRow > 74 || fromCol < 0 || fromCol > 5)
                         {
                             continue; // Bỏ qua ảnh ngoài vùng (như logo)
                         }
@@ -781,6 +782,13 @@ public partial class DataEntryPage : ContentPage
         }
     }
 
+    private string SanitizeExcelValue(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return "";
+        var cleaned = new string(value.Where(c => !char.IsControl(c)).ToArray());
+        return cleaned.Trim();
+    }
+
     private void FillSeriesToCheckSheet(ExcelWorksheet checkSheet)
     {
         try
@@ -796,7 +804,8 @@ public partial class DataEntryPage : ContentPage
                 if (!string.IsNullOrWhiteSpace(seriesValue))
                 {
                     var cell = checkSheet.Cells[$"H{row}"];
-                    cell.Value = seriesValue;
+                    cell.Style.Numberformat.Format = "@";
+                    cell.Value = SanitizeExcelValue(seriesValue);
                     cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
@@ -817,7 +826,8 @@ public partial class DataEntryPage : ContentPage
                 if (!string.IsNullOrWhiteSpace(seriesValue))
                 {
                     var cell = checkSheet.Cells[$"L{row}"];
-                    cell.Value = seriesValue;
+                    cell.Style.Numberformat.Format = "@";
+                    cell.Value = SanitizeExcelValue(seriesValue);
                     cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                     cell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
@@ -1642,7 +1652,8 @@ public partial class DataEntryPage : ContentPage
                     for (int c = 0; c < _cols; c++)
                     {
                         var dataCell = ws.Cells[r + 2, c + 2];
-                        dataCell.Value = _cellValues[r, c] ?? "";
+                        dataCell.Style.Numberformat.Format = "@";
+                        dataCell.Value = SanitizeExcelValue(_cellValues[r, c]);
                         dataCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                         dataCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
                     }
@@ -1663,41 +1674,50 @@ public partial class DataEntryPage : ContentPage
 
                             // Điền thông tin vào các ô tương ứng
                             var customerCell = newSheet.Cells["D4"];
-                            customerCell.Value = _selectedCustomer;  // Tên khách hàng 
+                            customerCell.Style.Numberformat.Format = "@";
+                            customerCell.Value = SanitizeExcelValue(_selectedCustomer);  // Tên khách hàng 
                             customerCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             customerCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                            
                             var productCell = newSheet.Cells["D5"];
-                            productCell.Value = _selectedProduct;   // Tên Products
+                            productCell.Style.Numberformat.Format = "@";
+                            productCell.Value = SanitizeExcelValue(_selectedProduct);   // Tên Products
                             productCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             productCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var modelCell = newSheet.Cells["D6"];
-                            modelCell.Value = _selectedModel;     // Model
+                            modelCell.Style.Numberformat.Format = "@";
+                            modelCell.Value = SanitizeExcelValue(_selectedModel);     // Model
                             modelCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             modelCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var dateCell = newSheet.Cells["D9"];
+                            dateCell.Style.Numberformat.Format = "@";
                             dateCell.Value = DateEntry.Date.ToString("dd/MM/yyyy"); // Ngày kiểm tra
                             dateCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             dateCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var sttCell = newSheet.Cells["D8"];
-                            sttCell.Value = sttPart;            // Số thứ tự
+                            sttCell.Style.Numberformat.Format = "@";
+                            sttCell.Value = SanitizeExcelValue(sttPart);            // Số thứ tự
                             sttCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             sttCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var contCell = newSheet.Cells["L5"];
-                            contCell.Value = contPart;           // Số container
+                            contCell.Style.Numberformat.Format = "@";
+                            contCell.Value = SanitizeExcelValue(contPart);           // Số container
                             contCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             contCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var sealCell = newSheet.Cells["L7"];
-                            sealCell.Value = sealPart;           // Số seal
+                            sealCell.Style.Numberformat.Format = "@";
+                            sealCell.Value = SanitizeExcelValue(sealPart);           // Số seal
                             sealCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             sealCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
                             var userCell = newSheet.Cells["L9"];
-                            userCell.Value = _selectedUser?.Name; // Nhân viên kiểm tra
+                            userCell.Style.Numberformat.Format = "@";
+                            userCell.Value = SanitizeExcelValue(_selectedUser?.Name); // Nhân viên kiểm tra
                             userCell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                             userCell.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
@@ -1990,10 +2010,10 @@ public partial class DataEntryPage : ContentPage
 
             var positions = new[]
             {
-                new { StartCol = 0, StartRow = 34 }, // A35 - ảnh 1 (0-based: col=0, row=34)
-                new { StartCol = 3, StartRow = 34 }, // D35 - ảnh 2 
-                new { StartCol = 0, StartRow = 54 }, // A55 - ảnh 3 (0-based: row=54)
-                new { StartCol = 3, StartRow = 54 }  // D55 - ảnh 4
+                new { StartCol = 0, StartRow = 32 }, // A33 - ảnh 1 (0-based: col=0, row=32)
+                new { StartCol = 3, StartRow = 32 }, // D33 - ảnh 2 
+                new { StartCol = 0, StartRow = 52 }, // A53 - ảnh 3 (0-based: row=52)
+                new { StartCol = 3, StartRow = 52 }  // D53 - ảnh 4
             };
 
             int photoCount = 0;
