@@ -716,10 +716,10 @@ public partial class DataEntryPage : ContentPage
                         var fromRow = picture.From.Row;
                         var fromCol = picture.From.Column;
 
-                        // Kiểm tra ảnh có nằm trong vùng A35:F75 không
-                        // Row 35 = index 34, Row 75 = index 74
+                        // Kiểm tra ảnh có nằm trong vùng A33:F75 không
+                        // Row 33 = index 32, Row 75 = index 74
                         // Column A = 0, Column F = 5
-                        if (fromRow < 34 || fromRow > 74 || fromCol < 0 || fromCol > 5)
+                        if (fromRow < 32 || fromRow > 74 || fromCol < 0 || fromCol > 5)
                         {
                             continue; // Bỏ qua ảnh ngoài vùng (như logo)
                         }
@@ -2010,10 +2010,10 @@ public partial class DataEntryPage : ContentPage
 
             var positions = new[]
             {
-                new { StartCol = 0, StartRow = 34 }, // A35 - ảnh 1 (0-based: col=0, row=34)
-                new { StartCol = 3, StartRow = 34 }, // D35 - ảnh 2 
-                new { StartCol = 0, StartRow = 54 }, // A55 - ảnh 3 (0-based: row=54)
-                new { StartCol = 3, StartRow = 54 }  // D55 - ảnh 4
+                new { StartCol = 0, StartRow = 32 }, // A33 - ảnh 1 (0-based: col=0, row=32)
+                new { StartCol = 3, StartRow = 32 }, // D33 - ảnh 2 
+                new { StartCol = 0, StartRow = 52 }, // A53 - ảnh 3 (0-based: row=52)
+                new { StartCol = 3, StartRow = 52 }  // D53 - ảnh 4
             };
 
             int photoCount = 0;
